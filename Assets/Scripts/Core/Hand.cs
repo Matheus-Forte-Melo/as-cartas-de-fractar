@@ -10,17 +10,16 @@ namespace Blackjack.Core
         public void Add(Card c) => Cards.Add(c);
         public void Clear() => Cards.Clear();
 
-        // Regra simples: Ás vale 11, mas vira 1 se estourar
         public int Value
         {
             get
             {
-                int sum = Cards.Sum(c => (int)c.Rank);
-                int aces = Cards.Count(c => c.Rank == Rank.Ace);
+                int sum = Cards.Sum(c => c.Value);
+                int aces = Cards.Count(c => c.IsAce);
 
                 while (sum > 21 && aces > 0)
                 {
-                    sum -= 10; // 11 -> 1
+                    sum -= 10; // 11 → 1
                     aces--;
                 }
 
