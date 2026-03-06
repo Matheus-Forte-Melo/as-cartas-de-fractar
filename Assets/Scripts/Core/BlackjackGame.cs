@@ -1,21 +1,23 @@
+using UnityEngine;
+
 namespace Blackjack.Core
 {
     public enum GameState
     {
         PlayerTurn,
-        DealerTurn,
+        EnemyTurn,
         PlayerBust,
-        DealerBust,
+        EnemyBust,
         PlayerWin,
-        DealerWin,
+        EnemyWin,
         Push
     }
 
     public class BlackjackGame
     {
         public Deck Deck { get; }
-        public Hand Player { get; } = new();
-        public Hand Dealer { get; } = new();
+        public Duelist Player { get; } = new();
+        public Duelist Enemy { get; } = new();
 
         public GameState State { get; private set; } = GameState.PlayerTurn;
 
@@ -26,50 +28,70 @@ namespace Blackjack.Core
 
         public void NewGame()
         {
-            Player.Clear();
-            Dealer.Clear();
+
+            Debug.Log("Vida Player: " + Player.Health);
+            Debug.Log("Vida Inimigo: " + Enemy.Health);
+
+            Player.Hand.Clear();
+            Enemy.Hand.Clear();
             Deck.Reset();
 
-            Player.Add(Deck.Draw());
-            Dealer.Add(Deck.Draw());
-            Player.Add(Deck.Draw());
-            Dealer.Add(Deck.Draw());
+            Player.Hand.Add(Deck.Draw());
+            Enemy.Hand.Add(Deck.Draw());
+            Player.Hand.Add(Deck.Draw());
+            Enemy.Hand.Add(Deck.Draw());
 
             State = GameState.PlayerTurn;
 
-            if (Player.Value == 21 && Dealer.Value == 21) State = GameState.Push;
-            else if (Player.Value == 21) State = GameState.PlayerWin;
-            else if (Dealer.Value == 21) State = GameState.DealerWin;
+            if (Player.Hand.Value == 21 && Enemy.Hand.Value == 21) State = GameState.Push;
+            else if (Player.Hand.Value == 21) State = GameState.PlayerWin;
+            else if (Enemy.Hand.Value == 21) State = GameState.EnemyWin;
         }
 
         public void Hit()
         {
+            // Retorna caso o turno não for do jogador
             if (State != GameState.PlayerTurn) return;
 
-            Player.Add(Deck.Draw());
+            Player.Hand.Add(Deck.Draw());
 
-            if (Player.Value > 21) State = GameState.PlayerBust;
-            else if (Player.Value == 21) Stand();
+            if (Player.Hand.Value > 21) {
+                State = GameState.PlayerBust;
+            } 
+            else if (Player.Hand.Value == 21) {
+                Stand();
+            }
         }
 
         public void Stand()
         {
+            // Retorna caso o turno não for do jogador
             if (State != GameState.PlayerTurn) return;
 
-            State = GameState.DealerTurn;
-            DealerPlay();
+            State = GameState.EnemyTurn;
+            EnemyPlay();
         }
 
-        private void DealerPlay()
+        private void EnemyPlay()
         {
-            while (Dealer.Value < 17)
-                Dealer.Add(Deck.Draw());
+            while (Enemy.Hand.Value < 17) {
+                Enemy.Hand.Add(Deck.Draw());
+            }
 
-            if (Dealer.Value > 21) { State = GameState.DealerBust; return; }
+            if (Enemy.Hand.Value > 21) { 
+                State = GameState.EnemyBust; 
+                Enemy.Health = Enemy.Health - ((21 - Enemy.Hand.Value) * 10);
+                return; 
+            }
 
-            if (Player.Value > Dealer.Value) State = GameState.PlayerWin;
-            else if (Player.Value < Dealer.Value) State = GameState.DealerWin;
-            else State = GameState.Push;
+            if (Player.Hand.Value > Enemy.Hand.Value) {
+                State = GameState.PlayerWin;
+                Enemy.Health = Enemy.Health - ((21 - Enemy.Hand.Value) * 10);
+            } else if (Player.Hand.Value < Enemy.Hand.Value) {
+                State = GameState.EnemyWin;
+            } else {
+                State = GameState.Push;
+            }
         }
     }
 }

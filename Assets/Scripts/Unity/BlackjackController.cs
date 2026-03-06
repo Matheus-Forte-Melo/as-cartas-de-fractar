@@ -9,7 +9,7 @@ public class BlackjackController : MonoBehaviour
     [Header("UI")]
     public TMP_Text txtStatus;
     public TMP_Text txtPlayer;
-    public TMP_Text txtDealer;
+    public TMP_Text txtEnemy;
 
     public Button btnHit;
     public Button btnStand;
@@ -66,8 +66,8 @@ public class BlackjackController : MonoBehaviour
     {
         bool hideDealerFirst = _game.State == GameState.PlayerTurn;
 
-        txtPlayer.text = $"Jogador: {_game.Player}";
-        txtDealer.text = DealerText(hideDealerFirst);
+        txtPlayer.text = $"Jogador: {_game.Player.Hand}";
+        txtEnemy.text = EnemyText(hideDealerFirst);
         txtStatus.text = StatusText(_game.State);
 
         bool playerCanAct = _game.State == GameState.PlayerTurn;
@@ -75,18 +75,18 @@ public class BlackjackController : MonoBehaviour
         btnStand.interactable = playerCanAct;
     }
 
-    private string DealerText(bool hideFirst)
+    private string EnemyText(bool hideFirst)
     {
         if (!hideFirst)
-            return $"Dealer: {_game.Dealer}";
+            return $"Inimigo: {_game.Enemy.Hand}";
 
-        if (_game.Dealer.Cards.Count == 0)
-            return "Dealer: -";
+        if (_game.Enemy.Hand.Cards.Count == 0)
+            return "Inimigo: -";
 
-        if (_game.Dealer.Cards.Count == 1)
-            return "Dealer: [?]";
+        if (_game.Enemy.Hand.Cards.Count == 1)
+            return "Inimigo: [?]";
 
-        return $"Dealer: [?], {_game.Dealer.Cards[1]}";
+        return $"Inimigo: [?], {_game.Enemy.Hand.Cards[1]}";
     }
 
     private string StatusText(GameState state)
@@ -94,11 +94,11 @@ public class BlackjackController : MonoBehaviour
         return state switch
         {
             GameState.PlayerTurn => "Seu turno: Golpe (compra) ou Stand (passa)",
-            GameState.DealerTurn => "Mesa está jogando...",
+            GameState.EnemyTurn => "Inimigo está jogando...",
             GameState.PlayerBust => "Você estourou! Mesa ganhou.",
-            GameState.DealerBust => "Mesa estourou! Você ganhou.",
+            GameState.EnemyBust => "Inimigo estourou! Você ganhou.",
             GameState.PlayerWin => "Você ganhou!",
-            GameState.DealerWin => "Mesa ganhou!",
+            GameState.EnemyWin => "Inimigo ganhou!",
             GameState.Push => "Empate.",
             _ => "..."
         };
