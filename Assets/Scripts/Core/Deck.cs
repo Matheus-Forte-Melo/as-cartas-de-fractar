@@ -7,19 +7,19 @@ namespace Blackjack.Core
     {
         private readonly List<Card> _cards = new();
         private readonly Random _rng = new();
+        private readonly DeckConfig _config;
 
-        public Deck()
+        public Deck(DeckConfig config)
         {
+            _config = config;
             Reset();
         }
 
         public void Reset()
         {
             _cards.Clear();
-            foreach (Suit s in Enum.GetValues(typeof(Suit)))
-            foreach (Rank r in Enum.GetValues(typeof(Rank)))
-                _cards.Add(new Card(s, r));
-
+            foreach (var def in _config.Cards)
+                _cards.Add(new Card(def.Equation, def.IsAce));
             Shuffle();
         }
 
@@ -35,7 +35,7 @@ namespace Blackjack.Core
         public Card Draw()
         {
             if (_cards.Count == 0) Reset();
-            var c = _cards[^1];
+            var c = _cards[_cards.Count - 1];
             _cards.RemoveAt(_cards.Count - 1);
             return c;
         }

@@ -1,27 +1,31 @@
+using System;
+
 namespace Blackjack.Core
 {
-    public enum Suit { Clubs, Diamonds, Hearts, Spades }
-
-    public enum Rank
+    public class Card
     {
-        Two = 2, Three = 3, Four = 4, Five = 5, Six = 6, Seven = 7, Eight = 8, Nine = 9, Ten = 10,
-        Jack = 10, Queen = 10, King = 10, Ace = 11
-    }
+        public string Equation { get; private set; }
+        public int Value { get; private set; }
+        public bool IsAce { get; }
 
-    public readonly struct Card
-    {
-        public readonly Suit Suit;
-        public readonly Rank Rank;
+        /// <summary>
+        /// Disparado quando a equação muda — hook para futuras CardView (prefabs).
+        /// </summary>
+        public event Action OnChanged;
 
-        public Card(Suit suit, Rank rank)
+        public Card(string equation, bool isAce = false)
         {
-            Suit = suit;
-            Rank = rank;
+            IsAce = isAce;
+            SetEquation(equation);
         }
 
-        public override string ToString()
+        public void SetEquation(string equation)
         {
-            return $"{Rank} of {Suit}";
+            Equation = equation ?? "";
+            Value = ExpressionEvaluator.Evaluate(Equation);
+            OnChanged?.Invoke();
         }
+
+        public override string ToString() => Equation;
     }
 }

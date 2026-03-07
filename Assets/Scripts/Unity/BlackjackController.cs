@@ -1,3 +1,4 @@
+using System.IO;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,17 +19,30 @@ public class BlackjackController : MonoBehaviour
 
     private void Awake()
     {
-        _game = new BlackjackGame();
+        var config = LoadDeckConfig();
+        _game = new BlackjackGame(config);
 
         btnHit.onClick.AddListener(OnHit);
         btnStand.onClick.AddListener(OnStand);
         btnNewGame.onClick.AddListener(OnNewGame);
     }
 
-    private void Start()
+    private DeckConfig LoadDeckConfig()
     {
-        OnNewGame();
+        try
+        {
+            string path = Path.Combine(Application.streamingAssetsPath, "config_cards.json");
+            string json = File.ReadAllText(path, System.Text.Encoding.UTF8);
+            return DeckConfig.Load(json);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning($"[BlackjackController] Falha ao carregar config: {ex.Message}. Usando deck padrão.");
+            return DeckConfig.CreateDefault();
+        }
     }
+
+    private void Start() => OnNewGame();
 
     private void OnNewGame()
     {
@@ -50,12 +64,10 @@ public class BlackjackController : MonoBehaviour
 
     private void RefreshUI()
     {
-        // Dealer: esconder a 1ª carta enquanto é a vez do jogador
         bool hideDealerFirst = _game.State == GameState.PlayerTurn;
 
-        txtPlayer.text = $"Player ({_game.Player.Value}): {_game.Player}";
+        txtPlayer.text = $"Jogador: {_game.Player}";
         txtDealer.text = DealerText(hideDealerFirst);
-
         txtStatus.text = StatusText(_game.State);
 
         bool playerCanAct = _game.State == GameState.PlayerTurn;
@@ -66,30 +78,28 @@ public class BlackjackController : MonoBehaviour
     private string DealerText(bool hideFirst)
     {
         if (!hideFirst)
-            return $"Dealer ({_game.Dealer.Value}): {_game.Dealer}";
+            return $"Dealer: {_game.Dealer}";
 
         if (_game.Dealer.Cards.Count == 0)
             return "Dealer: -";
 
-        // mostra só a segunda carta
         if (_game.Dealer.Cards.Count == 1)
-            return "Dealer: [Hidden]";
+            return "Dealer: [?]";
 
-        var shown = _game.Dealer.Cards[1].ToString();
-        return $"Dealer (?): [Hidden], {shown}";
+        return $"Dealer: [?], {_game.Dealer.Cards[1]}";
     }
 
     private string StatusText(GameState state)
     {
         return state switch
         {
-            GameState.PlayerTurn => "Your turn: Hit or Stand",
-            GameState.DealerTurn => "Dealer is playing...",
-            GameState.PlayerBust => "You busted! Dealer wins.",
-            GameState.DealerBust => "Dealer busted! You win.",
-            GameState.PlayerWin => "You win!",
-            GameState.DealerWin => "Dealer wins!",
-            GameState.Push => "Push (tie).",
+            GameState.PlayerTurn => "Seu turno: Golpe (compra) ou Stand (passa)",
+            GameState.DealerTurn => "Mesa está jogando...",
+            GameState.PlayerBust => "Você estourou! Mesa ganhou.",
+            GameState.DealerBust => "Mesa estourou! Você ganhou.",
+            GameState.PlayerWin => "Você ganhou!",
+            GameState.DealerWin => "Mesa ganhou!",
+            GameState.Push => "Empate.",
             _ => "..."
         };
     }
