@@ -8,7 +8,7 @@ public class BlackjackController : MonoBehaviour
 {
     [Header("UI - Cartas")]
     public CardHandDisplay playerHand;
-    public CardHandDisplay dealerHand;
+    public CardHandDisplay enemyHand;
 
     [Header("UI - Status")]
     public TMP_Text txtStatus;
@@ -58,7 +58,7 @@ public class BlackjackController : MonoBehaviour
     private void OnNewGame()
     {
         playerHand.Clear();
-        dealerHand.Clear();
+        enemyHand.Clear();
         _game.NewGame();
         RefreshUI();
     }
@@ -77,10 +77,10 @@ public class BlackjackController : MonoBehaviour
 
     private void RefreshUI()
     {
-        bool hideDealerFirst = _game.State == GameState.PlayerTurn;
+        bool hideEnemyFirst = _game.State == GameState.PlayerTurn;
 
-        playerHand.SyncCards(_game.Player);
-        dealerHand.SyncCards(_game.Dealer, hideDealerFirst);
+        playerHand.SyncCards(_game.Player.Hand);
+        enemyHand.SyncCards(_game.Enemy.Hand, hideEnemyFirst);
         txtStatus.text = StatusText(_game.State);
 
         bool playerCanAct = _game.State == GameState.PlayerTurn;
@@ -92,12 +92,12 @@ public class BlackjackController : MonoBehaviour
     {
         return state switch
         {
-            GameState.PlayerTurn => "Seu turno: Hit (compra) ou Stand (passa)",
-            GameState.DealerTurn => "Mesa está jogando...",
+            GameState.PlayerTurn => "Seu turno: Golpe (compra) ou Stand (passa)",
+            GameState.EnemyTurn => "Inimigo está jogando...",
             GameState.PlayerBust => "Você estourou! Mesa ganhou.",
-            GameState.DealerBust => "Mesa estourou! Você ganhou.",
+            GameState.EnemyBust => "Inimigo estourou! Você ganhou.",
             GameState.PlayerWin => "Você ganhou!",
-            GameState.DealerWin => "Mesa ganhou!",
+            GameState.EnemyWin => "Inimigo ganhou!",
             GameState.Push => "Empate.",
             _ => "..."
         };
