@@ -6,22 +6,17 @@ using Blackjack.Core;
 
 public class BlackjackController : MonoBehaviour
 {
-    [Header("UI")]
-    
-    // Textos
-    public TMP_Text txtStatus;
-    public TMP_Text txtPlayer;
-    public TMP_Text txtDealer;
+    [Header("UI - Cartas")]
+    public CardHandDisplay playerHand;
+    public CardHandDisplay dealerHand;
 
-    // Botoões
+    [Header("UI - Status")]
+    public TMP_Text txtStatus;
+
+    [Header("UI - Botões")]
     public Button btnHit;
     public Button btnStand;
     public Button btnNewGame;
-
-    // Textos dos botões
-    public TMP_Text txtButtonHit;
-    public TMP_Text txtButtonStand;
-    public TMP_Text txtButtonNewGame;
 
     private BlackjackGame _game;
 
@@ -34,15 +29,13 @@ public class BlackjackController : MonoBehaviour
         btnStand.onClick.AddListener(OnStand);
         btnNewGame.onClick.AddListener(OnNewGame);
 
-        // Setando os botões
-        txtButtonHit = btnHit.GetComponentInChildren<TMP_Text>();
-        txtButtonStand = btnStand.GetComponentInChildren<TMP_Text>();
-        txtButtonNewGame = btnNewGame.GetComponentInChildren<TMP_Text>();
+        var txtButtonHit = btnHit.GetComponentInChildren<TMP_Text>();
+        var txtButtonStand = btnStand.GetComponentInChildren<TMP_Text>();
+        var txtButtonNewGame = btnNewGame.GetComponentInChildren<TMP_Text>();
 
         txtButtonHit.text = "Hit";
         txtButtonStand.text = "Stand";
         txtButtonNewGame.text = "Novo Jogo";
-
     }
 
     private DeckConfig LoadDeckConfig()
@@ -64,6 +57,8 @@ public class BlackjackController : MonoBehaviour
 
     private void OnNewGame()
     {
+        playerHand.Clear();
+        dealerHand.Clear();
         _game.NewGame();
         RefreshUI();
     }
@@ -84,8 +79,8 @@ public class BlackjackController : MonoBehaviour
     {
         bool hideDealerFirst = _game.State == GameState.PlayerTurn;
 
-        txtPlayer.text = $"Jogador: {_game.Player}";
-        txtDealer.text = DealerText(hideDealerFirst);
+        playerHand.SyncCards(_game.Player);
+        dealerHand.SyncCards(_game.Dealer, hideDealerFirst);
         txtStatus.text = StatusText(_game.State);
 
         bool playerCanAct = _game.State == GameState.PlayerTurn;
@@ -93,25 +88,11 @@ public class BlackjackController : MonoBehaviour
         btnStand.interactable = playerCanAct;
     }
 
-    private string DealerText(bool hideFirst)
-    {
-        if (!hideFirst)
-            return $"Dealer: {_game.Dealer}";
-
-        if (_game.Dealer.Cards.Count == 0)
-            return "Dealer: -";
-
-        if (_game.Dealer.Cards.Count == 1)
-            return "Dealer: [?]";
-
-        return $"Dealer: [?], {_game.Dealer.Cards[1]}";
-    }
-
     private string StatusText(GameState state)
     {
         return state switch
         {
-            GameState.PlayerTurn => "Seu turno: Golpe (compra) ou Stand (passa)",
+            GameState.PlayerTurn => "Seu turno: Hit (compra) ou Stand (passa)",
             GameState.DealerTurn => "Mesa está jogando...",
             GameState.PlayerBust => "Você estourou! Mesa ganhou.",
             GameState.DealerBust => "Mesa estourou! Você ganhou.",
