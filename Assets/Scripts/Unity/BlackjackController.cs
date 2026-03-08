@@ -10,6 +10,10 @@ public class BlackjackController : MonoBehaviour
     public CardHandDisplay playerHand;
     public CardHandDisplay enemyHand;
 
+    [Header("UI - Vida")]
+    public TMP_Text txtPlayerHealth;
+    public TMP_Text txtEnemyHealth;
+
     [Header("UI - Status")]
     public TMP_Text txtStatus;
 
@@ -29,6 +33,7 @@ public class BlackjackController : MonoBehaviour
         btnStand.onClick.AddListener(OnStand);
         btnNewGame.onClick.AddListener(OnNewGame);
 
+        // Setando os textos dos botões
         var txtButtonHit = btnHit.GetComponentInChildren<TMP_Text>();
         var txtButtonStand = btnStand.GetComponentInChildren<TMP_Text>();
         var txtButtonNewGame = btnNewGame.GetComponentInChildren<TMP_Text>();
@@ -86,6 +91,13 @@ public class BlackjackController : MonoBehaviour
         bool playerCanAct = _game.State == GameState.PlayerTurn;
         btnHit.interactable = playerCanAct;
         btnStand.interactable = playerCanAct;
+
+        // Refresh da vida (poderia estar em new game essa lógica)
+        int playerHealth = _game.Player.Health;
+        int enemyHealth = _game.Enemy.Health;
+
+        txtPlayerHealth.text = $"Vida: {_game.Player.Health}";
+        txtEnemyHealth.text = $"Vida: {_game.Enemy.Health}";
     }
 
     private string StatusText(GameState state)
@@ -94,7 +106,7 @@ public class BlackjackController : MonoBehaviour
         {
             GameState.PlayerTurn => "Seu turno: Golpe (compra) ou Stand (passa)",
             GameState.EnemyTurn => "Inimigo está jogando...",
-            GameState.PlayerBust => "Você estourou! Mesa ganhou.",
+            GameState.PlayerBust => "Você estourou! Inimigo ganhou.",
             GameState.EnemyBust => "Inimigo estourou! Você ganhou.",
             GameState.PlayerWin => "Você ganhou!",
             GameState.EnemyWin => "Inimigo ganhou!",

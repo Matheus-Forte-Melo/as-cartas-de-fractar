@@ -885,7 +885,7 @@ GameObject:
   - component: {fileID: 1574711476}
   - component: {fileID: 1574711478}
   m_Layer: 0
-  m_Name: DealerHandArea
+  m_Name: EnemyHandArea
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1649,7 +1649,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BlackjackController
   playerHand: {fileID: 1681259730}
-  dealerHand: {fileID: 1574711478}
+  enemyHand: {fileID: 1574711478}
+  txtPlayerHealth: {fileID: 0}
+  txtEnemyHealth: {fileID: 0}
   txtStatus: {fileID: 1831064503}
   btnHit: {fileID: 1683415213}
   btnStand: {fileID: 746605601}
