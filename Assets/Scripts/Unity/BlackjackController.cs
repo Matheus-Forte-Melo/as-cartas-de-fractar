@@ -7,13 +7,21 @@ using Blackjack.Core;
 public class BlackjackController : MonoBehaviour
 {
     [Header("UI")]
+    
+    // Textos
     public TMP_Text txtStatus;
     public TMP_Text txtPlayer;
     public TMP_Text txtDealer;
 
+    // Botoões
     public Button btnHit;
     public Button btnStand;
     public Button btnNewGame;
+
+    // Textos dos botões
+    public TMP_Text txtButtonHit;
+    public TMP_Text txtButtonStand;
+    public TMP_Text txtButtonNewGame;
 
     private BlackjackGame _game;
 
@@ -25,6 +33,16 @@ public class BlackjackController : MonoBehaviour
         btnHit.onClick.AddListener(OnHit);
         btnStand.onClick.AddListener(OnStand);
         btnNewGame.onClick.AddListener(OnNewGame);
+
+        // Setando os botões
+        txtButtonHit = btnHit.GetComponentInChildren<TMP_Text>();
+        txtButtonStand = btnStand.GetComponentInChildren<TMP_Text>();
+        txtButtonNewGame = btnNewGame.GetComponentInChildren<TMP_Text>();
+
+        txtButtonHit.text = "Hit";
+        txtButtonStand.text = "Stand";
+        txtButtonNewGame.text = "Novo Jogo";
+
     }
 
     private DeckConfig LoadDeckConfig()
