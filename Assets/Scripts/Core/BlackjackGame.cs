@@ -57,6 +57,7 @@ namespace Blackjack.Core
 
             if (Player.Hand.Value > 21) {
                 State = GameState.PlayerBust;
+                Player.receiveDamageByHandDiff(21);
             } 
             else if (Player.Hand.Value == 21) {
                 Stand();
@@ -82,7 +83,7 @@ namespace Blackjack.Core
             // Se o valor da mão do inimigo for maior que 21, o inimigo perde e a vida do jogador é reduzida pela diferença entre 21 e o valor da mão do inimigo
             if (Enemy.Hand.Value > 21) { 
                 State = GameState.EnemyBust; 
-                Enemy.Health = Enemy.Health - ((21 - Enemy.Hand.Value) * 10);
+                Enemy.receiveDamageByHandDiff(21);
                 return; 
             }
 
@@ -90,9 +91,10 @@ namespace Blackjack.Core
             // e em caso de empate, o jogo termina em empate
             if (Player.Hand.Value > Enemy.Hand.Value) {
                 State = GameState.PlayerWin;
-                Enemy.Health = Enemy.Health - ((21 - Enemy.Hand.Value) * 10);
+                Enemy.receiveDamageByHandDiff(21);
             } else if (Player.Hand.Value < Enemy.Hand.Value) {
                 State = GameState.EnemyWin;
+                Player.receiveDamageByHandDiff(21);
             } else {
                 State = GameState.Push;
             }
