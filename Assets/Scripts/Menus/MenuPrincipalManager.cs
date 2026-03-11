@@ -6,16 +6,25 @@ using UnityEngine.SceneManagement;
 public class MenuPrincipalManager : MonoBehaviour
 {
     [SerializeField] private string nomeDoLevelDeJogo;
-    [SerializeField] private string IrParaOpcoes;
     [SerializeField] private string IrParaCreditos;
-    public void jogar()
+    [SerializeField] private GameObject painelMenuInicial;
+    [SerializeField] private GameObject painelOpcoes;
+
+    public void Jogar()
     {
         SceneManager.LoadScene(nomeDoLevelDeJogo);
     }
 
     public void AbrirOpcoes()
     {
-        SceneManager.LoadScene(IrParaOpcoes);
+        painelMenuInicial.SetActive(false);
+        painelOpcoes.SetActive(true);
+    }
+
+    public void FecharOpcoes()
+    {
+        painelMenuInicial.SetActive(true);
+        painelOpcoes.SetActive(false);
     }
 
     public void AbrirCreditos()
