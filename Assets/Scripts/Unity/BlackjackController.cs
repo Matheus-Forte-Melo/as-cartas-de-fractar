@@ -1,9 +1,13 @@
+using System.Collections;
 using System.IO;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Blackjack.Core;
 
+// Serve como intermediário entre UI Unity (do jogador) e Código (da lógica do 21 e do inimigo).
+// Define ações para os botões e exibe feedback na tela conforme estado
+// Gerenciado pelo BlackJackGame.
 public class BlackjackController : MonoBehaviour
 {
     [Header("UI - Cartas")]
@@ -23,6 +27,7 @@ public class BlackjackController : MonoBehaviour
     public Button btnNewGame;
 
     private BlackjackGame _game;
+    private bool _enemyFirstCardHidden;
 
     private void Awake()
     {
@@ -31,16 +36,11 @@ public class BlackjackController : MonoBehaviour
 
         btnHit.onClick.AddListener(OnHit);
         btnStand.onClick.AddListener(OnStand);
-        btnNewGame.onClick.AddListener(OnNewGame);
+        btnNewGame.onClick.AddListener(OnNewRound);
 
-        // Setando os textos dos botões
-        var txtButtonHit = btnHit.GetComponentInChildren<TMP_Text>();
-        var txtButtonStand = btnStand.GetComponentInChildren<TMP_Text>();
-        var txtButtonNewGame = btnNewGame.GetComponentInChildren<TMP_Text>();
-
-        txtButtonHit.text = "Hit";
-        txtButtonStand.text = "Stand";
-        txtButtonNewGame.text = "Novo Jogo";
+        btnHit.GetComponentInChildren<TMP_Text>().text = "Hit";
+        btnStand.GetComponentInChildren<TMP_Text>().text = "Stand";
+        btnNewGame.GetComponentInChildren<TMP_Text>().text = "Novo Jogo";
     }
 
     private DeckConfig LoadDeckConfig()
@@ -58,59 +58,146 @@ public class BlackjackController : MonoBehaviour
         }
     }
 
-    private void Start() => OnNewGame();
+    private void Start() => OnNewRound();
 
-    private void OnNewGame()
+    private void OnNewRound()
     {
+        StopAllCoroutines();
         playerHand.Clear();
         enemyHand.Clear();
-        _game.NewGame();
+        _enemyFirstCardHidden = true; // Nao me parece certo isso estar aqui invez de estar dentro de um claase Enemy
+        _game.NewRound();
         RefreshUI();
     }
 
     private void OnHit()
     {
-        _game.Hit();
+        // Pode acionar o estado PlayerBust, Comparing e EnemyTurn
+        _game.PlayerHit();
+        SyncCards();
+
+        if (_game.State == GameState.PlayerBust)
+        {
+            RefreshUI();
+            return;
+        }
+
+        if (_game.State == GameState.Comparing)
+        {
+            SetPlayerActionsEnabled(false);
+            StartCoroutine(CompareHandsRoutine());
+            return;
+        }
+
+        if (_game.State == GameState.EnemyTurn)
+        {
+            SetPlayerActionsEnabled(false);
+            StartCoroutine(EnemyTurnRoutine());
+            return;
+        }
+
         RefreshUI();
     }
 
     private void OnStand()
     {
-        _game.Stand();
+        // Pode acionar o estado EnemyTurn e Comparing
+        _game.PlayerStand();
+
+        if (_game.State == GameState.Comparing)
+        {
+            SetPlayerActionsEnabled(false);
+            StartCoroutine(CompareHandsRoutine());
+            return;
+        }
+
+        if (_game.State == GameState.EnemyTurn)
+        {
+            SetPlayerActionsEnabled(false);
+            StartCoroutine(EnemyTurnRoutine());
+            return;
+        }
+
+        RefreshUI();
+    }
+
+    private IEnumerator EnemyTurnRoutine()
+    {
+        while (_game.State == GameState.EnemyTurn)
+        {
+            txtStatus.text = "Inimigo está jogando...";
+            yield return new WaitForSeconds(Random.Range(1.0f, 1.5f));
+
+            // Pode setar o game state para EnemyBust ou Comparing
+            bool hit = _game.EnemyAct();
+            SyncCards();
+
+            txtStatus.text = hit ? "Inimigo comprou uma carta." : "Inimigo passou a vez.";
+            yield return new WaitForSeconds(Random.Range(0.8f, 1.0f));
+
+            if (_game.State == GameState.EnemyBust)
+            {
+                RefreshUI();
+                yield break;
+            }
+
+            if (_game.State == GameState.Comparing)
+            {
+                yield return CompareHandsRoutine();
+                yield break;
+            }
+        }
+
+        RefreshUI();
+    }
+
+    private IEnumerator CompareHandsRoutine()
+    {
+        txtStatus.text = "Comparando mãos...";
+        yield return new WaitForSeconds(0.5f);
+
+        _enemyFirstCardHidden = false;
+        _game.ResolveComparison();
         RefreshUI();
     }
 
     private void RefreshUI()
     {
-        bool hideEnemyFirst = _game.State == GameState.PlayerTurn;
+        if (_game.IsRoundOver || _game.State == GameState.Comparing)
+            _enemyFirstCardHidden = false;
 
-        playerHand.SyncCards(_game.Player.Hand);
-        enemyHand.SyncCards(_game.Enemy.Hand, hideEnemyFirst);
+        SyncCards();
         txtStatus.text = StatusText(_game.State);
-
-        bool playerCanAct = _game.State == GameState.PlayerTurn;
-        btnHit.interactable = playerCanAct;
-        btnStand.interactable = playerCanAct;
-
-        // Refresh da vida (poderia estar em new game essa lógica)
-        int playerHealth = _game.Player.Health;
-        int enemyHealth = _game.Enemy.Health;
+        SetPlayerActionsEnabled(_game.State == GameState.PlayerTurn);
 
         txtPlayerHealth.text = $"Vida: {_game.Player.Health}";
         txtEnemyHealth.text = $"Vida: {_game.Enemy.Health}";
+    }
+
+    private void SyncCards()
+    {
+        playerHand.SyncCards(_game.Player.Hand);
+        enemyHand.SyncCards(_game.Enemy.Hand, _enemyFirstCardHidden);
+    }
+
+    private void SetPlayerActionsEnabled(bool enabled)
+    {
+        btnHit.interactable = enabled;
+        btnStand.interactable = enabled;
     }
 
     private string StatusText(GameState state)
     {
         return state switch
         {
-            GameState.PlayerTurn => "Seu turno: Golpe (compra) ou Stand (passa)",
-            GameState.EnemyTurn => "Inimigo está jogando...",
-            GameState.PlayerBust => "Você estourou! Inimigo ganhou.",
-            GameState.EnemyBust => "Inimigo estourou! Você ganhou.",
-            GameState.PlayerWin => "Você ganhou!",
-            GameState.EnemyWin => "Inimigo ganhou!",
-            GameState.Push => "Empate.",
+            GameState.PlayerTurn => "Seu turno — escolha: Hit ou Stand",
+            GameState.EnemyTurn  => "Inimigo está jogando...",
+            GameState.PlayerBust => "Você estourou! Inimigo vence.",
+            GameState.EnemyBust  => "Inimigo estourou! Você vence.",
+            GameState.Comparing  => "Comparando mãos...",
+            GameState.PlayerWin  => "Você venceu!",
+            GameState.EnemyWin   => "Inimigo venceu!",
+            GameState.Push       => "Empate.",
             _ => "..."
         };
     }
