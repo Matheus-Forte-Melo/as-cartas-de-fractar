@@ -4,14 +4,12 @@ namespace Blackjack.Core
 {
     public class Duelist
     {
-        private int _health;
+        private int _health; // poderia setar getter e setter tipo {get; set;}
         public Hand Hand { get; }
 
-        public Duelist() : this(new Hand()) { }
-
-        public Duelist(Hand hand)
+        public Duelist()
         {
-            Hand = hand;
+            Hand = new Hand();
             _health = 100;
         }
 
@@ -21,31 +19,14 @@ namespace Blackjack.Core
             set { _health = value; }    
         }
 
-        // Dá dano baseado na diferença entre o primeiro valor contra o segundo valor
-        public void receiveDamageByHandDiff(int limit, float multiplier = 10) 
+        public void ReceiveDamageByHandDiff(int limit, double multiplier = 10.0)
         {
-            int handValue = Hand.Value;
-            int damagePoints = 0;
+            // Retorna o modulo do valor, assim a ordem não importa
+            int diff = Math.Abs(Hand.Value - limit);  
+            if (diff == 0) diff = 1;
 
-            // Caso ambos os valores forem iguais, então seta 
-            if (limit == handValue) {
-                damagePoints = 10; 
-                return;
-            }
-
-            // Calculando os pontos de dano
-            if (limit > handValue) {
-                damagePoints = limit - handValue;
-            } else {
-                damagePoints = handValue - limit;
-            }
-
-
-            Health = Health - (int)Math.Round(damagePoints * multiplier);
+            Health -= (int) Math.Round(diff * multiplier);
         }
-
-        // Ou poderiamos fazer "public int Health { get; (private ou public, só deixar nada) set; }"
-        // com o parenteses ali poderiamos fazer um campo somente leitura
 
     }
 }
