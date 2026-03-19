@@ -202,3 +202,31 @@ Tema escuro e místico, runas e símbolos matemáticos, luzes azuis/cianas. Mesa
 | Detecção de colisão | 📋 Planejado |
 | Sistema de pontuação / batalha | 📋 Planejado |
 | Implementar inimigos | 📋 Planejado |
+
+---
+
+## 11. Registro de ações técnicas
+
+### 2026-03-17
+
+- Refatorado `Assets/Scripts/Core/Duelist.cs`: removido campo privado `_health` e simplificado para auto-property `Health`; adicionado `HasStood` para estado de turno.
+- Criado `Assets/Scripts/Core/Enemy.cs`: nova classe `Enemy : Duelist` com `StandThreshold`, `IsFirstCardHidden` e método `ShouldHit(int handLimit)`.
+- Refatorado `Assets/Scripts/Core/BlackjackGame.cs`: removidas flags locais de "stand" e migrada lógica para `Player.HasStood` / `Enemy.HasStood`; `Enemy` agora é tipado como classe própria e decisão de compra usa `Enemy.ShouldHit(...)`.
+- Refatorado `Assets/Scripts/Unity/BlackjackController.cs`: removido estado local `_enemyFirstCardHidden` e migrado para `_game.Enemy.IsFirstCardHidden`.
+- Verificação pós-refatoração: sem erros de lint nos arquivos alterados.
+
+### 2026-03-17 — Mapa procedural estilo Slay the Spire (protótipo isolado)
+
+- Criados scripts isolados da gameplay principal em `Assets/Scripts/Map/`:
+  - `MapNode.cs` com `Row`, `Col`, `WorldPosition`, `Children` e tipo `CombateNormal`.
+  - `MapGenerator.cs` (`MonoBehaviour`) com grafo em `Dictionary<(int row, int col), MapNode>`.
+- Implementada geração determinística com `Random.InitState(seed)` para grade padrão `7x15` com `6` caminhos, cada caminho com deslocamento por linha em `-1/0/+1` com clamp de coluna.
+- Instanciação apenas de nós visitados por ao menos um caminho e deduplicação de conexões via `HashSet` para impedir arestas repetidas.
+- Visualização implementada com:
+  - raízes `Nodes` e `Connections`;
+  - uma instância visual por nó;
+  - `LineRenderer` por conexão;
+  - centralização na origem com `colSpacing` e `rowSpacing`;
+  - jitter determinístico `±0.15` em X/Y.
+- Adicionado `[ContextMenu("Regenerate Map")]` para limpar e recriar o mapa em edição.
+- Criada cena separada `Assets/Scenes/MapPrototype.unity` com `MapGenerator` configurado para o protótipo (sem integração com o loop de gameplay atual).
