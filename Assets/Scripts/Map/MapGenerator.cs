@@ -128,7 +128,7 @@
 
                     // Lembrando -> Um índice de path representa a linha e o valor desse índice a coluna demarcada
                     int nextRow = row + 1;
-                    int nextCol = path[nextColIdx];
+                    int nextCol = path[nextRow];
 
                     MapNode nextNode = GetOrCreateNode(nextRow, nextCol);
                     var edge = (row, col, nextRow, nextCol);
@@ -151,9 +151,13 @@
             }
 
             Vector2 worldPosition = CalculateWorldPosition(row, col);
-            var created = new MapNode(row, col, worldPosition);
+            createdNode = CreateNode(row, col, worldPosition);
             _graph[key] = created;
             return created;
+        }
+
+        private MapNode CreateNode(int row, int col, Vector2 worldPosition) {
+            return new MapNode();
         }
 
         // Calcula a posição do nó no mundo.
