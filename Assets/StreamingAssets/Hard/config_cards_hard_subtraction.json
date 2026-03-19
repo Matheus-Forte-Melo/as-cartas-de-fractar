@@ -1,0 +1,68 @@
+{
+  "groups": [
+    {
+      "label": "HardSubtraction1",
+      "cards": [
+        { "equation": "10 - 9" },
+        { "equation": "11 - 9" },
+        { "equation": "12 - 9" },
+        { "equation": "13 - 9" },
+        { "equation": "14 - 9" },
+        { "equation": "15 - 9" },
+        { "equation": "16 - 9" },
+        { "equation": "17 - 9" },
+        { "equation": "18 - 9" },
+        { "equation": "19 - 9" },
+        { "equation": "20 - 9", "ace": false }
+      ]
+    },
+    {
+      "label": "HardSubtraction2",
+      "cards": [
+        { "equation": "12 - 11" },
+        { "equation": "13 - 11" },
+        { "equation": "14 - 11" },
+        { "equation": "15 - 11" },
+        { "equation": "16 - 11" },
+        { "equation": "17 - 11" },
+        { "equation": "18 - 11" },
+        { "equation": "19 - 11" },
+        { "equation": "20 - 11" },
+        { "equation": "21 - 11" },
+        { "equation": "22 - 11", "ace": false }
+      ]
+    },
+    {
+      "label": "HardSubtraction3",
+      "cards": [
+        { "equation": "14 - 13" },
+        { "equation": "15 - 13" },
+        { "equation": "16 - 13" },
+        { "equation": "17 - 13" },
+        { "equation": "18 - 13" },
+        { "equation": "19 - 13" },
+        { "equation": "20 - 13" },
+        { "equation": "21 - 13" },
+        { "equation": "22 - 13" },
+        { "equation": "23 - 13" },
+        { "equation": "24 - 13", "ace": false }
+      ]
+    },
+    {
+      "label": "HardSubtraction4",
+      "cards": [
+        { "equation": "16 - 15" },
+        { "equation": "17 - 15" },
+        { "equation": "18 - 15" },
+        { "equation": "19 - 15" },
+        { "equation": "20 - 15" },
+        { "equation": "21 - 15" },
+        { "equation": "22 - 15" },
+        { "equation": "23 - 15" },
+        { "equation": "24 - 15" },
+        { "equation": "25 - 15" },
+        { "equation": "26 - 15", "ace": false }
+      ]
+    }
+  ]
+}

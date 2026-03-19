@@ -1,0 +1,68 @@
+{
+  "groups": [
+    {
+      "label": "HardDivision1",
+      "cards": [
+        { "equation": "11 / 11" },
+        { "equation": "22 / 11" },
+        { "equation": "33 / 11" },
+        { "equation": "44 / 11" },
+        { "equation": "55 / 11" },
+        { "equation": "66 / 11" },
+        { "equation": "77 / 11" },
+        { "equation": "88 / 11" },
+        { "equation": "99 / 11" },
+        { "equation": "110 / 11" },
+        { "equation": "121 / 11", "ace": false }
+      ]
+    },
+    {
+      "label": "HardDivision2",
+      "cards": [
+        { "equation": "12 / 12" },
+        { "equation": "24 / 12" },
+        { "equation": "36 / 12" },
+        { "equation": "48 / 12" },
+        { "equation": "60 / 12" },
+        { "equation": "72 / 12" },
+        { "equation": "84 / 12" },
+        { "equation": "96 / 12" },
+        { "equation": "108 / 12" },
+        { "equation": "120 / 12" },
+        { "equation": "132 / 12", "ace": false }
+      ]
+    },
+    {
+      "label": "HardDivision3",
+      "cards": [
+        { "equation": "13 / 13" },
+        { "equation": "26 / 13" },
+        { "equation": "39 / 13" },
+        { "equation": "52 / 13" },
+        { "equation": "65 / 13" },
+        { "equation": "78 / 13" },
+        { "equation": "91 / 13" },
+        { "equation": "104 / 13" },
+        { "equation": "117 / 13" },
+        { "equation": "130 / 13" },
+        { "equation": "143 / 13", "ace": false }
+      ]
+    },
+    {
+      "label": "HardDivision4",
+      "cards": [
+        { "equation": "14 / 14" },
+        { "equation": "28 / 14" },
+        { "equation": "42 / 14" },
+        { "equation": "56 / 14" },
+        { "equation": "70 / 14" },
+        { "equation": "84 / 14" },
+        { "equation": "98 / 14" },
+        { "equation": "112 / 14" },
+        { "equation": "126 / 14" },
+        { "equation": "140 / 14" },
+        { "equation": "154 / 14", "ace": false }
+      ]
+    }
+  ]
+}
