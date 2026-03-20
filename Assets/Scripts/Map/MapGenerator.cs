@@ -44,7 +44,7 @@ public class MapGenerator : MonoBehaviour
     {
         if (Application.isPlaying && _graph.Count == 0)
             RegenerateMap();
-    }m
+    }
 
     private void OnEnable()
     {
@@ -97,6 +97,8 @@ public class MapGenerator : MonoBehaviour
     }
 
     // Gera o "Wireframe" que será utilizado para construir os caminhos
+    // TODO: Forçar um last row no centro sempre (fazer cols sempre numero impar fodase, ou achar um jeito do ultimo node sempre estar visualmente no meio)
+    // Fazer o começo ser selecionável. Fazer nodes bloqueados para acesso serem visualmente distintos (mais opacidade). Ver de fazer os estados globais
     private List<List<int>> GeneratePaths()
     {
         var paths = new List<List<int>>(pathCount);

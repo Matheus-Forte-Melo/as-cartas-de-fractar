@@ -112,7 +112,7 @@ public class MapVisualizer : MonoBehaviour
 
         var labelObject = new GameObject("TypeLabel");
         labelObject.transform.SetParent(nodeTransform, false);
-        labelObject.transform.localPosition = new Vector3(0f, 0.35f, 0f);
+        labelObject.transform.localPosition = new Vector3(0f, 1.05f, 0f);
 
         var textMesh = labelObject.AddComponent<TextMesh>();
         textMesh.text = type.ToString().Replace('_', ' ');
