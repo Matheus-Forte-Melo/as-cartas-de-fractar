@@ -27,7 +27,6 @@ public class BlackjackController : MonoBehaviour
     public Button btnNewGame;
 
     private BlackjackGame _game;
-    private bool _enemyFirstCardHidden;
 
     private void Awake()
     {
@@ -65,7 +64,6 @@ public class BlackjackController : MonoBehaviour
         StopAllCoroutines();
         playerHand.Clear();
         enemyHand.Clear();
-        _enemyFirstCardHidden = true; // Nao me parece certo isso estar aqui invez de estar dentro de um claase Enemy
         _game.NewRound();
         RefreshUI();
     }
@@ -156,7 +154,7 @@ public class BlackjackController : MonoBehaviour
         txtStatus.text = "Comparando mãos...";
         yield return new WaitForSeconds(0.5f);
 
-        _enemyFirstCardHidden = false;
+        _game.Enemy.IsFirstCardHidden = false;
         _game.ResolveComparison();
         RefreshUI();
     }
@@ -164,7 +162,7 @@ public class BlackjackController : MonoBehaviour
     private void RefreshUI()
     {
         if (_game.IsRoundOver || _game.State == GameState.Comparing)
-            _enemyFirstCardHidden = false;
+            _game.Enemy.IsFirstCardHidden = false;
 
         SyncCards();
         txtStatus.text = StatusText(_game.State);
@@ -177,7 +175,7 @@ public class BlackjackController : MonoBehaviour
     private void SyncCards()
     {
         playerHand.SyncCards(_game.Player.Hand);
-        enemyHand.SyncCards(_game.Enemy.Hand, _enemyFirstCardHidden);
+        enemyHand.SyncCards(_game.Enemy.Hand, _game.Enemy.IsFirstCardHidden);
     }
 
     private void SetPlayerActionsEnabled(bool enabled)

@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace Blackjack.Core
 {
     public enum GameState
@@ -20,23 +18,11 @@ namespace Blackjack.Core
     {
         public Deck Deck { get; }
         public Duelist Player { get; } = new();
-        public Duelist Enemy { get; } = new();
+        public Enemy Enemy { get; } = new();
 
         public GameState State { get; private set; } = GameState.PlayerTurn;
 
-        // Assim fica mt amarrado nessa classe
-        // Eventualmente refatorar isso aqui para estar no duelist
-        private bool _playerStood;
-        private bool _enemyStood;
-
-        
         private const int HandLimit = 21;
-        // Eventualmente deixar todos esses valores configuraveis para o
-        // duelista inimigo, passar diversos parâmetros que
-        // costumizam a forma como a "IA" joga. Mas antes teria que
-        // Ter uma classe Enemy que herda de Duelist para que eu possa
-        // Implementar sem foder a classe Duelist que é o player.
-        private const int EnemyStandThreshold = 17;
 
         public BlackjackGame(DeckConfig config)
         {
@@ -54,8 +40,9 @@ namespace Blackjack.Core
             Player.Hand.Add(Deck.Draw());
             Enemy.Hand.Add(Deck.Draw());
 
-            _playerStood = false;
-            _enemyStood = false;
+            Player.HasStood = false;
+            Enemy.HasStood = false;
+            Enemy.IsFirstCardHidden = true;
             State = GameState.PlayerTurn;
 
             bool playerNatural = Player.Hand.Value == HandLimit;
@@ -71,7 +58,7 @@ namespace Blackjack.Core
             if (State != GameState.PlayerTurn) return;
 
             Player.Hand.Add(Deck.Draw());
-            _enemyStood = false;
+            Enemy.HasStood = false;
 
             if (Player.Hand.Value > HandLimit)
             {
@@ -93,9 +80,9 @@ namespace Blackjack.Core
         {
             if (State != GameState.PlayerTurn) return;
 
-            _playerStood = true;
+            Player.HasStood = true;
 
-            if (_enemyStood)
+            if (Enemy.HasStood)
             {
                 State = GameState.Comparing;
                 return;
@@ -109,12 +96,12 @@ namespace Blackjack.Core
         {
             if (State != GameState.EnemyTurn) return false;
 
-            bool hit = Enemy.Hand.Value < EnemyStandThreshold;
+            bool hit = Enemy.ShouldHit(HandLimit);
 
             if (hit)
             {
                 Enemy.Hand.Add(Deck.Draw());
-                _playerStood = false;
+                Player.HasStood = false;
 
                 if (Enemy.Hand.Value > HandLimit)
                 {
@@ -127,9 +114,9 @@ namespace Blackjack.Core
             }
             else
             {
-                _enemyStood = true;
+                Enemy.HasStood = true;
 
-                if (_playerStood)
+                if (Player.HasStood)
                 {
                     State = GameState.Comparing;
                     return false;
