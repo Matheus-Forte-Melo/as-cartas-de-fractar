@@ -67,5 +67,5 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "as-cartas-de-fractar.slnx"
+    "dotnet.defaultSolution": "as_cartas_de_fractar.sln"
 }
