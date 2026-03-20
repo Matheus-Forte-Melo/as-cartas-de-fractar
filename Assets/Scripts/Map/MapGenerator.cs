@@ -44,7 +44,7 @@ public class MapGenerator : MonoBehaviour
     {
         if (Application.isPlaying && _graph.Count == 0)
             RegenerateMap();
-    }m
+    }
 
     private void OnEnable()
     {
@@ -60,17 +60,21 @@ public class MapGenerator : MonoBehaviour
     public void GenerateMap()
     {
         ValidateSettings();
-        Random.InitState(seed);
-
-        // Limpa antes de desenhar novamente na tela.
-        _graph.Clear();
-        _connections.Clear();
+        Random.InitState(seed); // Inicializa uma sequencia dado a seed passada.
+        ClearGraph();
 
         List<List<int>> paths = GeneratePaths();
         BuildGraph(paths);
         AssignNodeTypes();
     }
 
+    private void ClearGraph()
+    {
+        _graph.Clear();
+        _connections.Clear();
+    }
+
+    // Busca os tipo de fase e disponibilza para o unityt por meio do TypeWeights.
     private void SyncTypeWeights()
     {
         var enumValues = (MapNodeType[])System.Enum.GetValues(typeof(MapNodeType));
@@ -96,7 +100,7 @@ public class MapGenerator : MonoBehaviour
         jitter = Mathf.Max(0f, jitter);
     }
 
-    // Gera o "Wireframe" que será utilizado para construir os caminhos
+    // Gera o "Wireframe" que será utilizado para desenhar os caminhos em tela
     private List<List<int>> GeneratePaths()
     {
         var paths = new List<List<int>>(pathCount);
@@ -120,6 +124,7 @@ public class MapGenerator : MonoBehaviour
         return paths;
     }
 
+    // Usa o "Wireframe" paths para desenhar o grafo em tela
     private void BuildGraph(List<List<int>> paths)
     {
         foreach (List<int> path in paths)
@@ -197,18 +202,16 @@ public class MapGenerator : MonoBehaviour
             node.Type = PickRandomType();
     }
 
+    // Weighted Random
     private MapNodeType PickRandomType()
     {
-        float totalWeight = 0f;
-        foreach (var w in typeWeights)
-            totalWeight += Mathf.Max(0f, w.weight);
-
-        if (totalWeight <= 0f)
+        float totalWeight = CalculateTotalWeight();
+        if (totalWeight <= 0f) 
             return default;
 
         float roll = Random.value * totalWeight;
         float cumulative = 0f;
-
+        
         foreach (var w in typeWeights)
         {
             cumulative += Mathf.Max(0f, w.weight);
@@ -217,5 +220,16 @@ public class MapGenerator : MonoBehaviour
         }
 
         return typeWeights[typeWeights.Count - 1].type;
+    }
+
+    private float CalculateTotalWeight()
+    {
+        float totalWeight = 0f;
+        foreach (var w in typeWeights)
+        {
+            totalWeight += Mathf.Max(0f, w.weight);
+        }
+
+        return totalWeight;
     }
 }
