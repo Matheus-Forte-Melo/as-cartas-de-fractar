@@ -1,9 +1,9 @@
 ﻿{
   "groups": [
     {
-      "label": "Mixed",
+      "label": "Bosta",
       "cards": [
-        { "equation": "1 + 1" },
+        { "equation": "1 + 1" }, 
         { "equation": "6 / 2" },
         { "equation": "2²" },
         { "equation": "√25" },
@@ -19,7 +19,7 @@
       ]
     },
     {
-      "label": "Addition",
+      "label": "Bosta2",
       "cards": [
         { "equation": "1 + 1" },
         { "equation": "1 + 2" },
@@ -37,7 +37,7 @@
       ]
     },
     {
-      "label": "Subtraction",
+      "label": "BOsta3",
       "cards": [
         { "equation": "5 - 3" },
         { "equation": "7 - 4" },

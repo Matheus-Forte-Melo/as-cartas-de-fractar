@@ -3,6 +3,12 @@
 
 ---
 
+## Regras para o assistente de código
+
+- **NUNCA remover comentários do usuário** ao refatorar, mover ou reescrever código. Comentários escritos pelo usuário devem ser preservados integralmente, inclusive ao fazer split de arquivos ou mover métodos entre classes. A única exceção é quando o próprio comentário se refere a algo que foi removido ou refatorado (ex: "TODO: refatorar X" após X ter sido refatorado).
+
+---
+
 ## 2. Gameplay
 
 Jogo de cartas com estratégia matemática e elementos roguelite. Inspirado em Slay The Spire, Balatro e o Blackjack da DLC do Resident Evil 7.
@@ -202,3 +208,47 @@ Tema escuro e místico, runas e símbolos matemáticos, luzes azuis/cianas. Mesa
 | Detecção de colisão | 📋 Planejado |
 | Sistema de pontuação / batalha | 📋 Planejado |
 | Implementar inimigos | 📋 Planejado |
+
+---
+
+## 11. Registro de ações técnicas
+
+### 2026-03-17
+
+- Refatorado `Assets/Scripts/Core/Duelist.cs`: removido campo privado `_health` e simplificado para auto-property `Health`; adicionado `HasStood` para estado de turno.
+- Criado `Assets/Scripts/Core/Enemy.cs`: nova classe `Enemy : Duelist` com `StandThreshold`, `IsFirstCardHidden` e método `ShouldHit(int handLimit)`.
+- Refatorado `Assets/Scripts/Core/BlackjackGame.cs`: removidas flags locais de "stand" e migrada lógica para `Player.HasStood` / `Enemy.HasStood`; `Enemy` agora é tipado como classe própria e decisão de compra usa `Enemy.ShouldHit(...)`.
+- Refatorado `Assets/Scripts/Unity/BlackjackController.cs`: removido estado local `_enemyFirstCardHidden` e migrado para `_game.Enemy.IsFirstCardHidden`.
+- Verificação pós-refatoração: sem erros de lint nos arquivos alterados.
+
+### 2026-03-17 — Mapa procedural estilo Slay the Spire (protótipo isolado)
+
+- Criados scripts isolados da gameplay principal em `Assets/Scripts/Map/`:
+  - `MapNode.cs` com `Row`, `Col`, `WorldPosition`, `Children` e tipo `CombateNormal`.
+  - `MapGenerator.cs` (`MonoBehaviour`) com grafo em `Dictionary<(int row, int col), MapNode>`.
+- Implementada geração determinística com `Random.InitState(seed)` para grade padrão `7x15` com `6` caminhos, cada caminho com deslocamento por linha em `-1/0/+1` com clamp de coluna.
+- Instanciação apenas de nós visitados por ao menos um caminho e deduplicação de conexões via `HashSet` para impedir arestas repetidas.
+- Visualização implementada com:
+  - raízes `Nodes` e `Connections`;
+  - uma instância visual por nó;
+  - `LineRenderer` por conexão;
+  - centralização na origem com `colSpacing` e `rowSpacing`;
+  - jitter determinístico `±0.15` em X/Y.
+- Adicionado `[ContextMenu("Regenerate Map")]` para limpar e recriar o mapa em edição.
+- Criada cena separada `Assets/Scenes/MapPrototype.unity` com `MapGenerator` configurado para o protótipo (sem integração com o loop de gameplay atual).
+
+### 2026-03-17 — Distribuição de tipos, ícones/bordas e split do MapGenerator
+
+- Separado `MapGenerator` em dois componentes ortogonais:
+  - `MapGenerator.cs` — geração de grafo (paths, nós, conexões, atribuição de tipo).
+  - `MapVisualizer.cs` — visualização (spawn de nós/conexões, labels, materiais, cleanup).
+- Adicionado sistema de distribuição de `MapNodeType` por peso percentual:
+  - classe `NodeTypeWeight` com `type` + `weight`, serializada no Inspector.
+  - `OnValidate` sincroniza a lista automaticamente com os valores do enum `MapNodeType` (adiciona novos, remove obsoletos, preserva pesos do usuário).
+  - Na geração, tipos são sorteados via weighted random com pesos normalizados.
+- Preparado sistema de ícones por tipo e bordas por dificuldade (future-proof):
+  - `NodeTypeVisual` (`MapNodeType` + `Sprite icon`) auto-populado via `OnValidate`.
+  - `DifficultyBorder` (`CombatEquationDifficulty` + `Sprite border`) auto-populado via `OnValidate`.
+  - Ambos no `MapVisualizer`, prontos para atribuição visual quando os sprites forem criados.
+- Corrigidos bugs: `GetOrCreateNode` com variáveis quebradas, `CreateNode` sem args, `AttachTypeLabel` referenciando enum removido `CombateNormal`.
+- Cena `MapPrototype.unity` atualizada com ambos os componentes no mesmo GameObject.
