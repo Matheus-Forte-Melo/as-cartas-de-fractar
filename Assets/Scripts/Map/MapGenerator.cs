@@ -19,6 +19,12 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private int pathCount = 6;
     [SerializeField] private int seed = 39102;
 
+    public int Seed // getter setter de seed. poderia ser {get; set;}
+    {
+        get => seed;
+        set => seed = value;
+    }
+
     [Header("Layout")]
     [SerializeField] private float colSpacing = 1.5f;
     [SerializeField] private float rowSpacing = 1.2f;
@@ -32,6 +38,7 @@ public class MapGenerator : MonoBehaviour
 
     public IReadOnlyDictionary<(int row, int col), MapNode> Graph => _graph;
     public IEnumerable<(int fromRow, int fromCol, int toRow, int toCol)> Connections => _connections;
+    public HashSet<(int fromRow, int fromCol, int toRow, int toCol)> ConnectionSet => _connections;
 
     [ContextMenu("Regenerate Map")]
     public void RegenerateMap()
@@ -40,10 +47,19 @@ public class MapGenerator : MonoBehaviour
         GetComponent<MapVisualizer>()?.Visualize();
     }
 
-    private void Start()
+    public void GenerateWithSeed(int newSeed)
     {
-        if (Application.isPlaying && _graph.Count == 0)
-            RegenerateMap();
+        seed = newSeed;
+        RegenerateMap();
+    }
+
+    private void Awake()
+    {
+        if (!Application.isPlaying) return;
+
+        SaveData save = SaveManager.Load();
+        seed = save.currentSeed;
+        RegenerateMap();
     }
 
     private void OnEnable()

@@ -235,7 +235,7 @@ Tema escuro e místico, runas e símbolos matemáticos, luzes azuis/cianas. Mesa
   - centralização na origem com `colSpacing` e `rowSpacing`;
   - jitter determinístico `±0.15` em X/Y.
 - Adicionado `[ContextMenu("Regenerate Map")]` para limpar e recriar o mapa em edição.
-- Criada cena separada `Assets/Scenes/MapPrototype.unity` com `MapGenerator` configurado para o protótipo (sem integração com o loop de gameplay atual).
+- Criada cena separada `Assets/Scenes/Map.unity` com `MapGenerator` configurado para o protótipo (sem integração com o loop de gameplay atual).
 
 ### 2026-03-17 — Distribuição de tipos, ícones/bordas e split do MapGenerator
 
@@ -251,4 +251,17 @@ Tema escuro e místico, runas e símbolos matemáticos, luzes azuis/cianas. Mesa
   - `DifficultyBorder` (`CombatEquationDifficulty` + `Sprite border`) auto-populado via `OnValidate`.
   - Ambos no `MapVisualizer`, prontos para atribuição visual quando os sprites forem criados.
 - Corrigidos bugs: `GetOrCreateNode` com variáveis quebradas, `CreateNode` sem args, `AttachTypeLabel` referenciando enum removido `CombateNormal`.
-- Cena `MapPrototype.unity` atualizada com ambos os componentes no mesmo GameObject.
+- Cena `Map.unity` atualizada com ambos os componentes no mesmo GameObject.
+
+### 2026-03-23 — Ciclo de Roguelite: save system, navegação no mapa, transição de cenas
+
+- Renomeada cena `MapPrototype.unity` → `Map.unity`. Adicionadas cenas `Map` e `Core` ao `EditorBuildSettings.asset`.
+- Criado sistema de save em JSON (`Application.persistentDataPath/save.json`):
+  - `SaveData.cs` — dados persistidos: `currentRun`, `playerRow`/`playerCol`, `coins`, `currentSeed`, `playerHealth`, `seedHistory`.
+  - `SeedHistoryEntry.cs` — registro de seed por run (estrutura pronta para futura UI de replay).
+  - `SaveManager.cs` — classe estática com `Load()`, `Save()`, `Delete()`. Cria defaults seguros no primeiro load (run=1, pos=(-1,-1), seed aleatória, health=100).
+- Criado `RunState.cs` — classe estática para transporte de dados voláteis entre cenas (`CurrentNodeType`, `LastBattleResult`).
+- `MapGenerator.cs` — inicialização movida para `Awake()` em play mode; seed carregada do `SaveData`; adicionados `Seed` property, `GenerateWithSeed()`, `ConnectionSet`.
+- `BlackjackController.cs` — carregamento de deck por tipo de node via mapeamento de prefixos (`combat_add_cards.json`, etc.) com fallback para `config_cards.json`; vida do player carregada do save; detecção de fim de batalha (health ≤ 0) com lógica de morte/reset de run ou vitória; transição automática de volta à cena Map.
+- Criado `NodeInteraction.cs` — seleção de nodes no mapa via clique (com threshold para distinguir de drag); acessibilidade: pos (-1,-1) habilita qualquer node da row 0, senão apenas nodes conectados; ao selecionar, salva posição e carrega cena Core; exibe mensagem de transição ao retornar do Core.
+- `MapVisualizer.cs` — adicionado `ApplyAccessibility()` que reduz opacidade (alpha ~0.3) de nodes e conexões inacessíveis; destaque visual do node atual do jogador.

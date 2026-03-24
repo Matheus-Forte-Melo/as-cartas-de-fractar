@@ -1,7 +1,9 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Blackjack.Core;
 
@@ -27,11 +29,25 @@ public class BlackjackController : MonoBehaviour
     public Button btnNewGame;
 
     private BlackjackGame _game;
+    private bool _battleOver;
+
+    private static readonly Dictionary<MapNodeType, string> DeckPrefixes = new()
+    {
+        { MapNodeType.Combat_Add, "combat_add" },
+        { MapNodeType.Combat_Sub, "combat_sub" },
+        { MapNodeType.Combat_Multi, "combat_multi" },
+        { MapNodeType.Combat_Div, "combat_div" },
+    };
+
+    private const string DefaultDeckFile = "config_cards.json";
 
     private void Awake()
     {
         var config = LoadDeckConfig();
         _game = new BlackjackGame(config);
+
+        SaveData save = SaveManager.Load();
+        _game.Player.Health = save.playerHealth;
 
         btnHit.onClick.AddListener(OnHit);
         btnStand.onClick.AddListener(OnStand);
@@ -39,14 +55,25 @@ public class BlackjackController : MonoBehaviour
 
         btnHit.GetComponentInChildren<TMP_Text>().text = "Hit";
         btnStand.GetComponentInChildren<TMP_Text>().text = "Stand";
-        btnNewGame.GetComponentInChildren<TMP_Text>().text = "Novo Jogo";
+        btnNewGame.GetComponentInChildren<TMP_Text>().text = "Nova Rodada";
+        btnNewGame.interactable = false;
     }
 
     private DeckConfig LoadDeckConfig()
     {
+        string filename = DefaultDeckFile;
+
+        if (DeckPrefixes.TryGetValue(RunState.CurrentNodeType, out string prefix))
+        {
+            string candidate = $"{prefix}_cards.json";
+            string candidatePath = Path.Combine(Application.streamingAssetsPath, candidate);
+            if (File.Exists(candidatePath))
+                filename = candidate;
+        }
+
         try
         {
-            string path = Path.Combine(Application.streamingAssetsPath, "config_cards.json");
+            string path = Path.Combine(Application.streamingAssetsPath, filename);
             string json = File.ReadAllText(path, System.Text.Encoding.UTF8);
             return DeckConfig.Load(json);
         }
@@ -61,7 +88,10 @@ public class BlackjackController : MonoBehaviour
 
     private void OnNewRound()
     {
+        if (_battleOver) return;
+
         StopAllCoroutines();
+        btnNewGame.interactable = false;
         playerHand.Clear();
         enemyHand.Clear();
         _game.NewRound();
@@ -166,10 +196,75 @@ public class BlackjackController : MonoBehaviour
 
         SyncCards();
         txtStatus.text = StatusText(_game.State);
-        SetPlayerActionsEnabled(_game.State == GameState.PlayerTurn);
 
         txtPlayerHealth.text = $"Vida: {_game.Player.Health}";
         txtEnemyHealth.text = $"Vida: {_game.Enemy.Health}";
+
+        if (_game.IsRoundOver)
+        {
+            CheckBattleEnd();
+            return;
+        }
+
+        SetPlayerActionsEnabled(_game.State == GameState.PlayerTurn);
+    }
+
+    private void CheckBattleEnd()
+    {
+        if (_game.Enemy.Health <= 0)
+        {
+            _battleOver = true;
+            SetPlayerActionsEnabled(false);
+            btnNewGame.interactable = false;
+            StartCoroutine(EndBattleRoutine(playerWon: true));
+            return;
+        }
+
+        if (_game.Player.Health <= 0)
+        {
+            _battleOver = true;
+            SetPlayerActionsEnabled(false);
+            btnNewGame.interactable = false;
+            StartCoroutine(EndBattleRoutine(playerWon: false));
+            return;
+        }
+
+        SetPlayerActionsEnabled(false);
+        btnNewGame.interactable = true;
+    }
+
+    private IEnumerator EndBattleRoutine(bool playerWon)
+    {
+        if (playerWon)
+        {
+            txtStatus.text = "Inimigo derrotado! Retornando ao mapa...";
+            RunState.LastBattleResult = BattleResult.Won;
+
+            SaveData save = SaveManager.Load();
+            save.playerHealth = _game.Player.Health;
+            SaveManager.Save(save);
+        }
+        else
+        {
+            txtStatus.text = "Você foi derrotado... Reiniciando run...";
+            RunState.LastBattleResult = BattleResult.Lost;
+
+            SaveData save = SaveManager.Load();
+            save.currentRun++;
+            save.currentSeed = Random.Range(int.MinValue, int.MaxValue);
+            save.seedHistory.Add(new SeedHistoryEntry
+            {
+                run = save.currentRun,
+                seed = save.currentSeed
+            });
+            save.playerRow = -1;
+            save.playerCol = -1;
+            save.playerHealth = 100;
+            SaveManager.Save(save);
+        }
+
+        yield return new WaitForSeconds(2f);
+        SceneManager.LoadScene("Map");
     }
 
     private void SyncCards()

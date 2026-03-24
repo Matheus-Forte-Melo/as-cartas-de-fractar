@@ -29,6 +29,10 @@ public class MapVisualizer : MonoBehaviour
     [SerializeField] private float lineWidth = 0.08f;
     [SerializeField] private Color lineColor = Color.white;
 
+    [Header("Accessibility")]
+    [SerializeField] private float inaccessibleAlpha = 0.3f;
+    [SerializeField] private Color currentNodeHighlight = new(0.4f, 1f, 0.4f, 1f);
+
     [Header("Icons by Type")]
     [SerializeField] private List<NodeTypeVisual> nodeVisuals = new();
 
@@ -40,7 +44,9 @@ public class MapVisualizer : MonoBehaviour
     private Transform _connectionsRoot;
     private Material _generatedLineMaterial;
     private Material _generatedNodeMaterial;
+    private Material _dimmedNodeMaterial;
     private readonly Dictionary<(int row, int col), Transform> _nodeViews = new();
+    private readonly Dictionary<(int fromRow, int fromCol, int toRow, int toCol), LineRenderer> _connectionViews = new();
 
     private void OnValidate()
     {
@@ -56,9 +62,83 @@ public class MapVisualizer : MonoBehaviour
         ClearGeneratedObjects();
         EnsureRoots();
         _nodeViews.Clear();
+        _connectionViews.Clear();
 
         SpawnNodes();
         SpawnConnections();
+    }
+
+    public void ApplyAccessibility(HashSet<(int row, int col)> accessibleKeys, int playerRow, int playerCol)
+    {
+        if (!Application.isPlaying) return;
+
+        foreach (var kvp in _nodeViews)
+        {
+            var key = kvp.Key;
+            Transform view = kvp.Value;
+            bool isAccessible = accessibleKeys.Contains(key);
+            bool isCurrentNode = key.row == playerRow && key.col == playerCol;
+
+            float alpha = isAccessible || isCurrentNode ? 1f : inaccessibleAlpha;
+            ApplyNodeAlpha(view, alpha, isCurrentNode);
+        }
+
+        foreach (var kvp in _connectionViews)
+        {
+            var edge = kvp.Key;
+            LineRenderer lr = kvp.Value;
+
+            bool isAccessible = edge.fromRow == playerRow && edge.fromCol == playerCol
+                                && accessibleKeys.Contains((edge.toRow, edge.toCol));
+
+            float alpha = isAccessible ? 1f : inaccessibleAlpha;
+            Color startCol = lr.startColor;
+            Color endCol = lr.endColor;
+            startCol.a = alpha;
+            endCol.a = alpha;
+            lr.startColor = startCol;
+            lr.endColor = endCol;
+        }
+    }
+
+    private void ApplyNodeAlpha(Transform nodeView, float alpha, bool highlight)
+    {
+        var renderers = nodeView.GetComponentsInChildren<Renderer>();
+        foreach (var r in renderers)
+        {
+            if (r is LineRenderer) continue;
+
+            Material mat = Application.isPlaying ? r.material : r.sharedMaterial;
+            Color c = highlight ? currentNodeHighlight : mat.color;
+            c.a = alpha;
+            mat.color = c;
+
+            if (alpha < 1f)
+                SetMaterialTransparent(mat);
+        }
+
+        var textMeshes = nodeView.GetComponentsInChildren<TextMesh>();
+        foreach (var tm in textMeshes)
+        {
+            Color c = tm.color;
+            c.a = alpha;
+            tm.color = c;
+        }
+    }
+
+    private void SetMaterialTransparent(Material mat)
+    {
+        if (mat.HasProperty("_Mode"))
+        {
+            mat.SetFloat("_Mode", 3);
+            mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            mat.SetInt("_ZWrite", 0);
+            mat.DisableKeyword("_ALPHATEST_ON");
+            mat.EnableKeyword("_ALPHABLEND_ON");
+            mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+            mat.renderQueue = 3000;
+        }
     }
 
     private void SyncNodeVisuals()
@@ -183,6 +263,8 @@ public class MapVisualizer : MonoBehaviour
             lr.numCapVertices = 4;
             lr.numCornerVertices = 2;
             lr.sortingOrder = -1;
+
+            _connectionViews[(edge.fromRow, edge.fromCol, edge.toRow, edge.toCol)] = lr;
         }
     }
 
@@ -231,6 +313,12 @@ public class MapVisualizer : MonoBehaviour
         {
             SafeDestroy(_generatedNodeMaterial);
             _generatedNodeMaterial = null;
+        }
+
+        if (_dimmedNodeMaterial != null)
+        {
+            SafeDestroy(_dimmedNodeMaterial);
+            _dimmedNodeMaterial = null;
         }
     }
 

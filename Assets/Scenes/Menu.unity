@@ -2373,7 +2373,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecac224a48cc0c3499093bf81dd6bd2f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MenuPrincipalManager
-  nomeDoLevelDeJogo: Core
+  nomeDoLevelDeJogo: Map
   IrParaCreditos: Creditos
   painelMenuInicial: {fileID: 1314851331}
   painelOpcoes: {fileID: 1608042631}
