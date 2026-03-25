@@ -59,7 +59,7 @@
         { "equation": "1 + 5" },
         { "equation": "1 + 6" },
         { "equation": "1 + 7" },
-        { "equation": "2 + 6 + 1" },
+        { "equation": "3 + 6" },
         { "equation": "1 + 9" },
         { "equation": "5 + 6", "ace": false }
       ]
