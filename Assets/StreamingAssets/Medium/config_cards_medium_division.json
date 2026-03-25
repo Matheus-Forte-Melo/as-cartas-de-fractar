@@ -1,57 +1,9 @@
 {
   "groups": [
     {
-      "label": "MediumDivision1",
+      "label": "MediumDivision6",
       "cards": [
-        { "equation": "2 / 2" },
-        { "equation": "6 / 3" },
-        { "equation": "9 / 3" },
-        { "equation": "12 / 3" },
-        { "equation": "15 / 3" },
-        { "equation": "18 / 3" },
-        { "equation": "21 / 3" },
-        { "equation": "24 / 3" },
-        { "equation": "27 / 3" },
-        { "equation": "30 / 3" },
-        { "equation": "22 / 2", "ace": false }
-      ]
-    },
-    {
-      "label": "MediumDivision2",
-      "cards": [
-        { "equation": "3 / 3" },
-        { "equation": "8 / 4" },
-        { "equation": "12 / 4" },
-        { "equation": "16 / 4" },
-        { "equation": "20 / 4" },
-        { "equation": "24 / 4" },
-        { "equation": "28 / 4" },
-        { "equation": "32 / 4" },
-        { "equation": "36 / 4" },
-        { "equation": "40 / 4" },
-        { "equation": "33 / 3", "ace": false }
-      ]
-    },
-    {
-      "label": "MediumDivision3",
-      "cards": [
-        { "equation": "4 / 4" },
-        { "equation": "10 / 5" },
-        { "equation": "15 / 5" },
-        { "equation": "20 / 5" },
-        { "equation": "25 / 5" },
-        { "equation": "30 / 5" },
-        { "equation": "35 / 5" },
-        { "equation": "40 / 5" },
-        { "equation": "45 / 5" },
-        { "equation": "50 / 5" },
-        { "equation": "44 / 4", "ace": false }
-      ]
-    },
-    {
-      "label": "MediumDivision4",
-      "cards": [
-        { "equation": "5 / 5" },
+        { "equation": "6 / 6" },
         { "equation": "12 / 6" },
         { "equation": "18 / 6" },
         { "equation": "24 / 6" },
@@ -61,7 +13,55 @@
         { "equation": "48 / 6" },
         { "equation": "54 / 6" },
         { "equation": "60 / 6" },
-        { "equation": "55 / 5", "ace": false }
+        { "equation": "66 / 6", "ace": false }
+      ]
+    },
+    {
+      "label": "MediumDivision7",
+      "cards": [
+        { "equation": "7 / 7" },
+        { "equation": "14 / 7" },
+        { "equation": "21 / 7" },
+        { "equation": "28 / 7" },
+        { "equation": "35 / 7" },
+        { "equation": "42 / 7" },
+        { "equation": "49 / 7" },
+        { "equation": "56 / 7" },
+        { "equation": "63 / 7" },
+        { "equation": "70 / 7" },
+        { "equation": "77 / 7", "ace": false }
+      ]
+    },
+    {
+      "label": "MediumDivision8",
+      "cards": [
+        { "equation": "8 / 8" },
+        { "equation": "16 / 8" },
+        { "equation": "24 / 8" },
+        { "equation": "32 / 8" },
+        { "equation": "40 / 8" },
+        { "equation": "48 / 8" },
+        { "equation": "56 / 8" },
+        { "equation": "64 / 8" },
+        { "equation": "72 / 8" },
+        { "equation": "80 / 8" },
+        { "equation": "88 / 8", "ace": false }
+      ]
+    },
+    {
+      "label": "MediumDivision9",
+      "cards": [
+        { "equation": "9 / 9" },
+        { "equation": "18 / 9" },
+        { "equation": "27 / 9" },
+        { "equation": "36 / 9" },
+        { "equation": "45 / 9" },
+        { "equation": "54 / 9" },
+        { "equation": "63 / 9" },
+        { "equation": "72 / 9" },
+        { "equation": "81 / 9" },
+        { "equation": "90 / 9" },
+        { "equation": "99 / 9", "ace": false }
       ]
     }
   ]
