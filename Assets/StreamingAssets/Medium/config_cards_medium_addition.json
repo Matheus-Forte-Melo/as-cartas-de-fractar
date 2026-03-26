@@ -1,7 +1,7 @@
 {
   "groups": [
     {
-      "label": "EasyAddition1",
+      "label": "MediumAddition1",
       "cards": [
         { "equation": "0 + 1" },
         { "equation": "1 + 1" },
@@ -17,7 +17,7 @@
       ]
     },
     {
-      "label": "EasyAddition2",
+      "label": "MediumAddition2",
       "cards": [
         { "equation": "1 + 0" },
         { "equation": "0 + 2" },
@@ -33,7 +33,7 @@
       ]
     },
     {
-      "label": "EasyAddition3",
+      "label": "MediumAddition3",
       "cards": [
         { "equation": "0 + 1" },
         { "equation": "1 + 1" },
@@ -49,7 +49,7 @@
       ]
     },
     {
-      "label": "EasyAddition4",
+      "label": "MediumAddition4",
       "cards": [
         { "equation": "1 + 0" },
         { "equation": "2 + 0" },
