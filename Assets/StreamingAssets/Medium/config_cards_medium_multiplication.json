@@ -51,17 +51,17 @@
     {
       "label": "MediumMultiplication4",
       "cards": [
-        { "equation": "1 * 1" },
-        { "equation": "2 * 1" },
-        { "equation": "1 * 3" },
-        { "equation": "2 * 2" },
-        { "equation": "5 * 1" },
-        { "equation": "2 * 3" },
-        { "equation": "7 * 1" },
-        { "equation": "4 * 2" },
-        { "equation": "3 * 3" },
-        { "equation": "5 * 2" },
-        { "equation": "11 * 1", "ace": false }
+        { "equation": "4 * 0.25" },
+        { "equation": "10 * 0.2" },
+        { "equation": "1.5 * 2" },
+        { "equation": "16 * 0.25" },
+        { "equation": "25 * 0.2" },
+        { "equation": "50 * 0.12" },
+        { "equation": "25 * 0.28" },
+        { "equation": "5 * 1.6" },
+        { "equation": "45 * 0.2" },
+        { "equation": "100 * 0.1" },
+        { "equation": "25 * 0.44", "ace": false }
       ]
     }
   ]
