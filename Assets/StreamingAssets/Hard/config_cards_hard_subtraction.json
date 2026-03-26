@@ -3,65 +3,65 @@
     {
       "label": "HardSubtraction1",
       "cards": [
-        { "equation": "10 - 9" },
-        { "equation": "11 - 9" },
-        { "equation": "12 - 9" },
-        { "equation": "13 - 9" },
-        { "equation": "14 - 9" },
-        { "equation": "15 - 9" },
-        { "equation": "16 - 9" },
-        { "equation": "17 - 9" },
-        { "equation": "18 - 9" },
-        { "equation": "19 - 9" },
-        { "equation": "20 - 9", "ace": false }
+        { "equation": "12.5 - 11.5" },
+        { "equation": "88.88 - 86.88" },
+        { "equation": "72.3 - 69.3" },
+        { "equation": "52.08 - 48.08" },
+        { "equation": "22.5 - 17.5" },
+        { "equation": "89.89 - 83.89" },
+        { "equation": "73.9 - 66.9" },
+        { "equation": "46.46 - 38.46" },
+        { "equation": "48.48 - 39.48" },
+        { "equation": "36.7 - 26.7" },
+        { "equation": "70.8 - 59.8", "ace": false }
       ]
     },
     {
       "label": "HardSubtraction2",
       "cards": [
-        { "equation": "12 - 11" },
-        { "equation": "13 - 11" },
-        { "equation": "14 - 11" },
-        { "equation": "15 - 11" },
-        { "equation": "16 - 11" },
-        { "equation": "17 - 11" },
-        { "equation": "18 - 11" },
-        { "equation": "19 - 11" },
-        { "equation": "20 - 11" },
-        { "equation": "21 - 11" },
-        { "equation": "22 - 11", "ace": false }
+        { "equation": "56.07 - 55.07" },
+        { "equation": "29.07 - 27.07" },
+        { "equation": "18.4 - 15.4" },
+        { "equation": "36.44 - 32.44" },
+        { "equation": "64.64 - 59.64" },
+        { "equation": "24.7 - 18.7" },
+        { "equation": "44.44 - 37.44" },
+        { "equation": "69.36 - 61.36" },
+        { "equation": "76.8 - 67.8" },
+        { "equation": "68.75 - 58.75" },
+        { "equation": "76.63 - 65.63", "ace": false }
       ]
     },
     {
       "label": "HardSubtraction3",
       "cards": [
-        { "equation": "14 - 13" },
-        { "equation": "15 - 13" },
-        { "equation": "16 - 13" },
-        { "equation": "17 - 13" },
-        { "equation": "18 - 13" },
-        { "equation": "19 - 13" },
-        { "equation": "20 - 13" },
-        { "equation": "21 - 13" },
-        { "equation": "22 - 13" },
-        { "equation": "23 - 13" },
-        { "equation": "24 - 13", "ace": false }
+        { "equation": "78.33 - 77.33" },
+        { "equation": "91.01 - 89.01" },
+        { "equation": "33.21 - 30.21" },
+        { "equation": "92.03 - 88.03" },
+        { "equation": "31.19 - 26.19" },
+        { "equation": "51.51 - 45.51" },
+        { "equation": "68.27 - 61.27" },
+        { "equation": "75.7 - 67.7" },
+        { "equation": "83.6 - 74.6" },
+        { "equation": "50.5 - 40.5" },
+        { "equation": "39.12 - 28.12", "ace": false }
       ]
     },
     {
       "label": "HardSubtraction4",
       "cards": [
-        { "equation": "16 - 15" },
-        { "equation": "17 - 15" },
-        { "equation": "18 - 15" },
-        { "equation": "19 - 15" },
-        { "equation": "20 - 15" },
-        { "equation": "21 - 15" },
-        { "equation": "22 - 15" },
-        { "equation": "23 - 15" },
-        { "equation": "24 - 15" },
-        { "equation": "25 - 15" },
-        { "equation": "26 - 15", "ace": false }
+        { "equation": "60.2 - 59.2" },
+        { "equation": "48.9 - 46.9" },
+        { "equation": "70.1 - 67.1" },
+        { "equation": "19.8 - 15.8" },
+        { "equation": "76.2 - 71.2" },
+        { "equation": "59.9 - 53.9" },
+        { "equation": "32.16 - 25.16" },
+        { "equation": "82.5 - 74.5" },
+        { "equation": "99.08 - 90.08" },
+        { "equation": "38.13 - 28.13" },
+        { "equation": "99.1 - 88.1", "ace": false }
       ]
     }
   ]
