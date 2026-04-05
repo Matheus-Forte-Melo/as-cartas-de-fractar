@@ -5,6 +5,8 @@
 
 ## Regras para o assistente de código
 
+- **Ler e respeitar este `context.md`** em tarefas de gameplay, combate, mapa, save, UI de batalha e convenções do projeto. É a fonte de verdade do GDD e do registo técnico; não contradizer §2 (Gameplay) e §8 (Interface) sem actualizar o documento.
+- **Actualizar este ficheiro** quando o comportamento implementado divergir do texto (regras de dano, fluxo rodada/turno, HUD, balance inicial, etc.) ou quando adicionares sistemas documentáveis: ajustar a secção de Gameplay/HUD e acrescentar entrada em **§11 Registro de ações técnicas** com data e ficheiros tocados.
 - **NUNCA remover comentários do usuário** ao refatorar, mover ou reescrever código. Comentários escritos pelo usuário devem ser preservados integralmente, inclusive ao fazer split de arquivos ou mover métodos entre classes. A única exceção é quando o próprio comentário se refere a algo que foi removido ou refatorado (ex: "TODO: refatorar X" após X ter sido refatorado).
 
 ---
@@ -39,7 +41,13 @@ Cada batalha aborda um tema matemático. No início do duelo, a mesa distribui d
 
 O duelista mais próximo do limite ao final do turno vence a rodada e causa dano equivalente à diferença entre o total inimigo e o limite. O processo continua até a vida de um dos dois se esgotar.
 
-> **O total da mão não é exibido.** O jogador calcula sozinho — esse é o núcleo pedagógico do jogo.
+> **O total da mão não é exibido** durante a jogabilidade ativa da rodada — o jogador calcula sozinho (núcleo pedagógico). **Excepção:** no **resumo de fim de rodada** (UI pós-mão) os totais reais das mãos são mostrados, com diferença e dano aplicado.
+
+### Glossário de fluxo (batalha / rodada / turno)
+
+- **Batalha** — confronto até um duelista chegar a HP ≤ 0.
+- **Rodada** — desde o deal inicial até resultado terminal (bust, comparação, empate).
+- **Turno** — acção do jogador (Hit/Stand) ou decisão do inimigo (comprar/passar) dentro da rodada; vários turnos por rodada.
 
 ### 2.3 Sistema de Habilidades `[BAIXA PRIORIDADE]`
 
@@ -158,13 +166,15 @@ Instrumentos clássicos (cordas, piano, sopros). Batalhas: acelerada. Exploraç�
 
 Tema escuro e místico, runas e símbolos matemáticos, luzes azuis/cianas. Mesa de duelo circular como elemento central.
 
+- **Canvas (cenas Menu / Map / Core):** `CanvasScaler` em **Constant Pixel Size** (`Scale Factor` 1) — tamanhos de UI em **pixels de ecrã** fixos; desenhar e testar com **Game View 1920×1080**. O build usa **1920×1080** por defeito (`defaultIsNativeResolution` desligado em `ProjectSettings`).
 - **Cartas do jogador:** exibidas na parte inferior da mesa. Equações mostradas sem resultado.
 - **Cartas do inimigo:** parte superior. Uma carta pode iniciar virada.
-- **Pontuação:** o total da mão **não é exibido** — o jogador calcula sozinho.
+- **Pontuação:** o total da mão **não é exibido** durante a jogada ativa — o jogador calcula sozinho (ver **§2.2** e excepção do **resumo de fim de rodada**).
+- **`txtRoundLabel` (topo):** **“Rodada N”** + linha de baixo com **fase** (`TurnPhaseLabel`). **`txtBattleCenter` (centro):** **feed** + **resumo** curto (`font` ~**22**). **`txtPlayerHandValue` / `txtEnemyHandValue`:** **só no resumo de fim de rodada**; texto **`Valor da mão: N`** (totais de `RoundDamageOutcome`); **vazios** durante o turno. **Posição:** junto às áreas de mão — jogador: mesma âncora Y ~**0,22** que `PlayerHandArea`, pivot inferior, **+86** px; inimigo: âncora Y ~**0,8** como `EnemyHandArea`, pivot superior, **−82** px (`font` ~**17**). **Áreas de cartas:** inimigo ~**0,8** em Y, jogador ~**0,22**.
 - **Limite (21):** exibido centralmente, adjacente ao cristal fractal.
-- **Vida do jogador:** barra horizontal abaixo da mesa.
-- **Vida do inimigo:** barra horizontal acima da mesa.
-- **Botões de ação:** "Comprar Carta", "Jogar Habilidade", "Passar Turno" — parte inferior da tela.
+- **Vida do jogador:** texto TMP ancorado no **canto inferior direito** do canvas.
+- **Vida do inimigo:** texto TMP ancorado no **canto superior esquerdo** do canvas.
+- **Botões de acção (combate Core):** **Hit** e **Stand** na base, mais próximos (âncora Y ~0,1; **X ≈ ±58** em 1920×1080).
 - **Painel de habilidades:** canto inferior esquerdo.
 - **Moedas atemporais:** canto inferior direito.
 
@@ -215,9 +225,9 @@ Tema escuro e místico, runas e símbolos matemáticos, luzes azuis/cianas. Mesa
 
 ### 2026-03-17
 
-- Refatorado `Assets/Scripts/Core/Duelist.cs`: removido campo privado `_health` e simplificado para auto-property `Health`; adicionado `HasStood` para estado de turno.
-- Criado `Assets/Scripts/Core/Enemy.cs`: nova classe `Enemy : Duelist` com `StandThreshold`, `IsFirstCardHidden` e método `ShouldHit(int handLimit)`.
-- Refatorado `Assets/Scripts/Core/BlackjackGame.cs`: removidas flags locais de "stand" e migrada lógica para `Player.HasStood` / `Enemy.HasStood`; `Enemy` agora é tipado como classe própria e decisão de compra usa `Enemy.ShouldHit(...)`.
+- Refatorado `Assets/Scripts/Core/Blackjack/Core/Duelist.cs` (antes `Core/Duelist.cs`): removido campo privado `_health` e simplificado para auto-property `Health`; adicionado `HasStood` para estado de turno.
+- Criado `Assets/Scripts/Core/Blackjack/Core/Enemy.cs` (antes `Core/Enemy.cs`): nova classe `Enemy : Duelist` com `StandThreshold`, `IsFirstCardHidden` e método `ShouldHit(int handLimit)`.
+- Refatorado `Assets/Scripts/Core/Blackjack/Core/BlackjackGame.cs` (antes `Core/BlackjackGame.cs`): removidas flags locais de "stand" e migrada lógica para `Player.HasStood` / `Enemy.HasStood`; `Enemy` agora é tipado como classe própria e decisão de compra usa `Enemy.ShouldHit(...)`.
 - Refatorado `Assets/Scripts/Unity/BlackjackController.cs`: removido estado local `_enemyFirstCardHidden` e migrado para `_game.Enemy.IsFirstCardHidden`.
 - Verificação pós-refatoração: sem erros de lint nos arquivos alterados.
 
@@ -257,11 +267,86 @@ Tema escuro e místico, runas e símbolos matemáticos, luzes azuis/cianas. Mesa
 
 - Renomeada cena `MapPrototype.unity` → `Map.unity`. Adicionadas cenas `Map` e `Core` ao `EditorBuildSettings.asset`.
 - Criado sistema de save em JSON (`Application.persistentDataPath/save.json`):
-  - `SaveData.cs` — dados persistidos: `currentRun`, `playerRow`/`playerCol`, `coins`, `currentSeed`, `playerHealth`, `seedHistory`.
-  - `SeedHistoryEntry.cs` — registro de seed por run (estrutura pronta para futura UI de replay).
-  - `SaveManager.cs` — classe estática com `Load()`, `Save()`, `Delete()`. Cria defaults seguros no primeiro load (run=1, pos=(-1,-1), seed aleatória, health=100).
-- Criado `RunState.cs` — classe estática para transporte de dados voláteis entre cenas (`CurrentNodeType`, `LastBattleResult`).
+  - `Assets/Scripts/Core/Save/SaveData.cs` — dados persistidos: `currentRun`, `playerRow`/`playerCol`, `coins`, `currentSeed`, `playerHealth`, `seedHistory`.
+  - `SeedHistoryEntry` — no mesmo ficheiro que `SaveData`.
+  - `Assets/Scripts/Core/Save/SaveManager.cs` — classe estática com `Load()`, `Save()`, `Delete()`. Cria defaults seguros no primeiro load (run=1, pos=(-1,-1), seed aleatória, health=100).
+- Criado `Assets/Scripts/Core/Utils/RunState.cs` — classe estática para transporte de dados voláteis entre cenas (`CurrentNodeType`, `CurrentCombatDifficulty`, `LastBattleResult`).
 - `MapGenerator.cs` — inicialização movida para `Awake()` em play mode; seed carregada do `SaveData`; adicionados `Seed` property, `GenerateWithSeed()`, `ConnectionSet`.
 - `BlackjackController.cs` — carregamento de deck por tipo de node via mapeamento de prefixos (`combat_add_cards.json`, etc.) com fallback para `config_cards.json`; vida do player carregada do save; detecção de fim de batalha (health ≤ 0) com lógica de morte/reset de run ou vitória; transição automática de volta à cena Map.
 - Criado `NodeInteraction.cs` — seleção de nodes no mapa via clique (com threshold para distinguir de drag); acessibilidade: pos (-1,-1) habilita qualquer node da row 0, senão apenas nodes conectados; ao selecionar, salva posição e carrega cena Core; exibe mensagem de transição ao retornar do Core.
 - `MapVisualizer.cs` — adicionado `ApplyAccessibility()` que reduz opacidade (alpha ~0.3) de nodes e conexões inacessíveis; destaque visual do node atual do jogador.
+
+### 2026-04-05 — Dificuldade por faixa de linha (row) no mapa
+
+- `MapGenerator.cs` — a dificuldade de combate de cada nó segue o **índice de linha** do nó (`row` 0-based), não um sorteio em [0,1].
+- Dois limites **exclusivos** (serializáveis): `easyRowEndExclusive` e `mediumRowEndExclusive`.
+  - **Easy:** `row` em `[0, easyRowEndExclusive)`
+  - **Medium:** `row` em `[easyRowEndExclusive, mediumRowEndExclusive)`
+  - **Hard:** `row` em `[mediumRowEndExclusive, rows)` (até `rows - 1` inclusive).
+- Exemplo com `rows = 10` (linhas 0–9): `easyRowEndExclusive = 3` e `mediumRowEndExclusive = 7` → linhas 0–2 fáceis, 3–6 médias, 7–9 difíceis (equivalente à ideia 1–3 / 3–7 / 7–10 em numeração começando em 1).
+- `autoEqualDifficultyRowBands` (default **true**): ao mudar `rows`, recalcula os dois limites para **três faixas o mais iguais possível** (resto de `rows % 3` distribuído nas primeiras faixas). Com `false`, os limites são só validados (clamp) contra `rows`.
+- Baralhos em `StreamingAssets` por pasta Easy/Medium/Hard + `RunState.CurrentCombatDifficulty` permanecem alinhados a esse `row`.
+
+### 2026-04-05 — Hook pós-vitória ao voltar ao mapa
+
+- Criado `Assets/Scripts/Core/Utils/PostVictoryReturnFlow.cs` (`RunAfterVictoriousBattle`): chamado em `BlackjackController` após persistir vida do jogador numa vitória, **antes** do `LoadScene("Map")`. Corpo atual só com `Debug.Log` (placeholder).
+- **Extensibilidade (ideias, não obrigatório implementar agora):**
+  - **Evento estático multicast** (`event Action` ou `event Action<BattleContext>`): vários sistemas subscrevem sem o fluxo central conhecer nomes — bom para loot, achievements, áudio.
+  - **Interface `IPostVictoryListener`** + registo explícito (lista na inicialização ou `[RuntimeInitializeOnLoadMethod]`): ordem controlada, testável, fácil de mockar.
+  - **ScriptableObject** “channels” ou assets de regra: designers ligam efeitos no Inspector sem tocar no código do combate.
+  - **UnityEvent** num `MonoBehaviour` persistente (DontDestroyOnLoad): útil para ligações visuais no Editor; menos ideal para lógica pura de domínio.
+  - **Payload único** (struct/context com `MapNodeType`, `CombatEquationDifficulty`, vida restante, etc.) passado ao hook quando existir mais de um consumidor — evita cada um ir buscar estado global à parte.
+- Manter **um único ponto de chamada** a partir do combate (`BlackjackController` ou futuro `BattleFlowCoordinator`) mantém o desenho **ortogonal**: o que acontece depois da vitória não espalha `if (won)` pelo projeto.
+
+### 2026-04-05 — Árvore `Assets/Scripts/Core/` (pós-refatoração)
+
+Organização por **grupo lógico**; referências no código e no histórico acima devem usar estes caminhos.
+
+```
+Core/
+├── Save/                    # Persistência JSON
+│   ├── SaveData.cs          # SaveData + SeedHistoryEntry (namespace global)
+│   └── SaveManager.cs
+├── Utils/                   # Estado volátil entre cenas, hooks de fluxo
+│   ├── RunState.cs
+│   └── PostVictoryReturnFlow.cs
+└── Blackjack/
+    ├── Core/
+    │   ├── BlackjackGame.cs
+    │   ├── GameState.cs     # enum + GameStateSemantics
+    │   ├── Duelist.cs
+    │   └── Enemy.cs
+    ├── Balance/
+    │   ├── RoundBalance.cs
+    │   └── RoundStartBalance.cs
+    ├── Combat/
+    │   └── RoundDamageResolver.cs  # RoundDamageOutcome + dano fim de rodada
+    └── Decks/
+        ├── Card.cs
+        ├── Hand.cs
+        ├── Deck.cs
+        ├── DeckConfig.cs
+        └── ExpressionEvaluator.cs
+```
+
+- **Namespaces:** `Blackjack.Core` — jogo (`BlackjackGame`, `GameState`, `GameStateSemantics`, `RoundBalance`, `RoundStartBalance`, `RoundDamageResolver`, `Duelist`, `Enemy`). `Blackjack.Decks` — cartas e baralho.
+- **Quem referencia o quê:** `BlackjackController` e `CardHandDisplay` usam `using Blackjack.Core;` e `using Blackjack.Decks;`. `Save*` e `RunState` permanecem no namespace global (acessíveis sem `using` extra em `Map/` e `Unity/`).
+- **Novos ficheiros em Core:** colocar na pasta do grupo (Save / Utils / `Blackjack/Core` / `Blackjack/Decks`) e no namespace `Blackjack.*` apenas quando forem código de domínio do baralho ou da mesa.
+
+### 2026-04-05 — Combate: dano unificado, balance inicial, HUD rodada/turno
+
+- **`GameState.cs`:** enum único + **`GameStateSemantics`** (`IsTurnPhase`, `IsRoundResolutionPhase`, `IsRoundTerminal`, `IsRoundOver`).
+- **`RoundStartBalance`:** após deal inicial, se `Hand.Value` do jogador ou inimigo for `> 21` ou `== 21`, `Deck.Reset()` e novo deal (até 32 tentativas); **`Debug.Log` em todo acionamento** `[RoundStartBalance]` e logs por redeal. **Não há natural 21 no deal** enquanto esta regra existir.
+- **`RoundDamageResolver` / `RoundDamageOutcome`:** dano ao fim da rodada = distância da **mão do perdedor** ao limite 21 × multiplicador (10); empate 0; **`[RoundDamage]`** no console. `BlackjackGame.CommitRoundDamage()` único caminho após estado terminal.
+- **`Duelist.ApplyDamage(int)`** — dano aplicado pelo resolver; `ReceiveDamageByHandDiff` mantido como legado.
+- **`BlackjackGame`:** `CurrentRoundNumber`, `LastRoundDamageOutcome?`, integração com balance e resolver; naturals no deal removidos (cobertos pelo balance).
+- **`BattleUiCopy` + `BlackjackController`:** `TurnPhaseLabel`, `PlayerRoundResultCaption`; **`txtRoundLabel`** (rodada + fase no topo), **`txtBattleCenter`** (feed + resumo no centro); coroutine de resumo + input para continuar.
+
+### 2026-04-05 — Cena Core: HUD central unificado
+
+- **`Core.unity`:** `CanvasScaler` **Constant Pixel Size**; `txtPlayerHealth` / `txtEnemyHealth` nos cantos; **`txtBattleCenter`** (centro, ~780×420); **`txtRoundLabel`** de novo no topo só para “Rodada N”; removidos `txtSummary*`, `txtTurnPhase`, `TxtEnemyFeed` como objetos separados.
+- **`ApplyRoundSummaryUi`:** escreve o bloco completo em `txtBattleCenter` (rich text). **Hit/Stand** na base; sem botão Nova rodada no fluxo.
+
+### 2026-04-05 — (histórico) Feed e resumos em vários TMP
+
+- Obsoleto: múltiplos TMP para resumo e feed; consolidado em **`txtBattleCenter`** (ver entrada “HUD central unificado”).

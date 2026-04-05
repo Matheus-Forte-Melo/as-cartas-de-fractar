@@ -1,5 +1,6 @@
 using System.Collections;
 using System.IO;
+using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -21,32 +22,33 @@ public class BlackjackController : MonoBehaviour
     public TMP_Text txtPlayerHealth;
     public TMP_Text txtEnemyHealth;
 
-    [Header("UI - Status")]
-    public TMP_Text txtStatus;
-
-    [Header("UI - Rodada e turno (opcional)")]
+    [Header("UI - Topo: rodada + fase (Turno jogador/inimigo, Resolução, Fim da rodada)")]
     [SerializeField] private TMP_Text txtRoundLabel;
-    [SerializeField] private TMP_Text txtTurnPhase;
 
-    [Header("UI - Resumo fim de rodada (opcional)")]
-    [SerializeField] private TMP_Text txtSummaryPlayerHand;
-    [SerializeField] private TMP_Text txtSummaryEnemyHand;
-    [SerializeField] private TMP_Text txtSummaryDamage;
+    [Header("UI - Texto central (turno, feed, resumo)")]
+    [SerializeField] private TMP_Text txtBattleCenter;
+
+    [Header("UI - Valor da mão (limite 21 no jogo)")]
+    [SerializeField] private TMP_Text txtPlayerHandValue;
+    [SerializeField] private TMP_Text txtEnemyHandValue;
 
     [Header("UI - Botões")]
     public Button btnHit;
     public Button btnStand;
-    public Button btnNewGame;
 
     private BlackjackGame _game;
     private bool _battleOver;
     private bool _roundResolutionActive;
     private bool _waitingRoundContinue;
+    private string _centerFeedLine = "";
 
     private const string DefaultDeckFile = "config_cards.json";
+    private const int DamageMultiplierDisplay = 10;
 
     private void Awake()
     {
+        ResolveHandValueTextsIfMissing();
+
         var config = LoadDeckConfig();
         _game = new BlackjackGame(config);
 
@@ -55,12 +57,31 @@ public class BlackjackController : MonoBehaviour
 
         btnHit.onClick.AddListener(OnHit);
         btnStand.onClick.AddListener(OnStand);
-        btnNewGame.onClick.AddListener(OnNewRound);
 
         btnHit.GetComponentInChildren<TMP_Text>().text = "Hit";
         btnStand.GetComponentInChildren<TMP_Text>().text = "Stand";
-        btnNewGame.GetComponentInChildren<TMP_Text>().text = "Nova Rodada";
-        btnNewGame.interactable = false;
+    }
+
+    private void ResolveHandValueTextsIfMissing()
+    {
+        Canvas canvas = FindFirstObjectByType<Canvas>();
+        if (canvas == null)
+            return;
+
+        Transform root = canvas.transform;
+        if (txtPlayerHandValue == null)
+        {
+            var t = root.Find("txtPlayerHandValue");
+            if (t != null)
+                txtPlayerHandValue = t.GetComponent<TMP_Text>();
+        }
+
+        if (txtEnemyHandValue == null)
+        {
+            var t = root.Find("txtEnemyHandValue");
+            if (t != null)
+                txtEnemyHandValue = t.GetComponent<TMP_Text>();
+        }
     }
 
     private void Update()
@@ -113,17 +134,17 @@ public class BlackjackController : MonoBehaviour
 
         StopAllCoroutines();
         _roundResolutionActive = false;
-        btnNewGame.interactable = false;
         playerHand.Clear();
         enemyHand.Clear();
-        ClearRoundSummaryFields();
+        ClearBattleCenter();
+        ClearHandValueLabels();
         _game.NewRound();
         RefreshUI();
     }
 
     private void OnHit()
     {
-        // Pode acionar o estado PlayerBust, Comparing e EnemyTurn
+        ClearCenterFeedOnly();
         _game.PlayerHit();
         SyncCards();
 
@@ -152,7 +173,7 @@ public class BlackjackController : MonoBehaviour
 
     private void OnStand()
     {
-        // Pode acionar o estado EnemyTurn e Comparing
+        ClearCenterFeedOnly();
         _game.PlayerStand();
 
         if (_game.State == GameState.Comparing)
@@ -176,15 +197,13 @@ public class BlackjackController : MonoBehaviour
     {
         while (_game.State == GameState.EnemyTurn)
         {
-            RefreshHudRoundTurn();
-            txtStatus.text = "Inimigo está jogando...";
+            SetCenterFeedLine("Inimigo está jogando...");
             yield return new WaitForSeconds(Random.Range(1.0f, 1.5f));
 
-            // Pode setar o game state para EnemyBust ou Comparing
             bool hit = _game.EnemyAct();
             SyncCards();
 
-            txtStatus.text = hit ? "Inimigo comprou uma carta." : "Inimigo passou a vez.";
+            SetCenterFeedLine(hit ? "Inimigo comprou uma carta." : "Inimigo passou a vez.");
             yield return new WaitForSeconds(Random.Range(0.8f, 1.0f));
 
             if (_game.State == GameState.EnemyBust)
@@ -205,8 +224,7 @@ public class BlackjackController : MonoBehaviour
 
     private IEnumerator CompareHandsRoutine()
     {
-        txtStatus.text = "Comparando mãos...";
-        RefreshHudRoundTurn();
+        SetCenterFeedLine("Inimigo revela a carta escondida.");
         yield return new WaitForSeconds(0.5f);
 
         _game.Enemy.IsFirstCardHidden = false;
@@ -214,20 +232,51 @@ public class BlackjackController : MonoBehaviour
         RefreshUI();
     }
 
-    private void ClearRoundSummaryFields()
+    private void ClearHandValueLabels()
     {
-        if (txtSummaryPlayerHand != null) txtSummaryPlayerHand.text = "";
-        if (txtSummaryEnemyHand != null) txtSummaryEnemyHand.text = "";
-        if (txtSummaryDamage != null) txtSummaryDamage.text = "";
+        if (txtPlayerHandValue != null)
+            txtPlayerHandValue.text = "";
+        if (txtEnemyHandValue != null)
+            txtEnemyHandValue.text = "";
     }
 
-    private void RefreshHudRoundTurn()
+    private void ClearBattleCenter()
     {
-        if (txtRoundLabel != null)
-            txtRoundLabel.text = $"Rodada {_game.CurrentRoundNumber}";
+        _centerFeedLine = "";
+        if (txtBattleCenter != null)
+            txtBattleCenter.text = "";
+    }
 
-        if (txtTurnPhase != null)
-            txtTurnPhase.text = BattleUiCopy.TurnPhaseLabel(_game.State);
+    private void ClearCenterFeedOnly()
+    {
+        _centerFeedLine = "";
+        RefreshBattleCenter();
+    }
+
+    private void SetCenterFeedLine(string message)
+    {
+        _centerFeedLine = message ?? "";
+        RefreshBattleCenter();
+    }
+
+    private void RefreshHudTopBanner()
+    {
+        if (txtRoundLabel == null)
+            return;
+
+        var sb = new StringBuilder();
+        sb.Append("Rodada ").Append(_game.CurrentRoundNumber);
+        string phase = BattleUiCopy.TurnPhaseLabel(_game.State);
+        if (!string.IsNullOrEmpty(phase))
+            sb.Append('\n').Append(phase);
+        txtRoundLabel.text = sb.ToString();
+    }
+
+    private void RefreshBattleCenter()
+    {
+        if (txtBattleCenter == null)
+            return;
+        txtBattleCenter.text = _centerFeedLine ?? "";
     }
 
     private void RefreshUI()
@@ -236,14 +285,15 @@ public class BlackjackController : MonoBehaviour
             _game.Enemy.IsFirstCardHidden = false;
 
         SyncCards();
-        RefreshHudRoundTurn();
 
         txtPlayerHealth.text = $"Vida: {_game.Player.Health}";
         txtEnemyHealth.text = $"Vida: {_game.Enemy.Health}";
+        RefreshHudTopBanner();
+        ClearHandValueLabels();
 
         if (_game.IsRoundOver)
         {
-            txtStatus.text = StatusText(_game.State);
+            SetCenterFeedLine(EnemyOutcomeLine(_game.State));
 
             if (!_battleOver && !_roundResolutionActive)
             {
@@ -254,7 +304,13 @@ public class BlackjackController : MonoBehaviour
             return;
         }
 
-        txtStatus.text = StatusText(_game.State);
+        if (_game.State == GameState.PlayerTurn)
+            ClearCenterFeedOnly();
+        else if (_game.State == GameState.EnemyTurn)
+            SetCenterFeedLine("Inimigo vai agir...");
+        else
+            RefreshBattleCenter();
+
         SetPlayerActionsEnabled(_game.State == GameState.PlayerTurn);
     }
 
@@ -263,7 +319,6 @@ public class BlackjackController : MonoBehaviour
         try
         {
             SetPlayerActionsEnabled(false);
-            btnNewGame.interactable = false;
             _game.Enemy.IsFirstCardHidden = false;
             SyncCards();
 
@@ -279,6 +334,7 @@ public class BlackjackController : MonoBehaviour
 
             txtPlayerHealth.text = $"Vida: {_game.Player.Health}";
             txtEnemyHealth.text = $"Vida: {_game.Enemy.Health}";
+            RefreshHudTopBanner();
 
             float hold = 1.2f;
             float t = 0f;
@@ -294,6 +350,8 @@ public class BlackjackController : MonoBehaviour
             while (_waitingRoundContinue)
                 yield return null;
 
+            ClearBattleCenter();
+            ClearHandValueLabels();
             ResolvePostRoundFlow();
         }
         finally
@@ -302,23 +360,52 @@ public class BlackjackController : MonoBehaviour
         }
     }
 
+    private void ApplyHandValueLabelsFromOutcome(RoundDamageOutcome o)
+    {
+        if (txtPlayerHandValue != null)
+            txtPlayerHandValue.text = $"Valor da mão: {o.PlayerHandTotal}";
+        if (txtEnemyHandValue != null)
+            txtEnemyHandValue.text = $"Valor da mão: {o.EnemyHandTotal}";
+    }
+
     private void ApplyRoundSummaryUi(RoundDamageOutcome o)
     {
-        string playerLine = $"Sua mão (total): {o.PlayerHandTotal}";
-        string enemyLine = $"Mão do inimigo (total): {o.EnemyHandTotal}";
-        string diffLine = $"Diferença entre mãos: {o.HandDifference}";
-        string damageLine = o.DamageDealt <= 0
-            ? "Dano: 0 (empate)"
-            : $"Dano aplicado: {o.DamageDealt} → {(o.DamageToPlayer ? "jogador" : "inimigo")}";
+        ApplyHandValueLabelsFromOutcome(o);
+        if (txtBattleCenter == null)
+            return;
 
-        if (txtSummaryPlayerHand != null)
-            txtSummaryPlayerHand.text = playerLine;
-        if (txtSummaryEnemyHand != null)
-            txtSummaryEnemyHand.text = enemyLine;
-        if (txtSummaryDamage != null)
-            txtSummaryDamage.text = $"{diffLine}\n{damageLine}";
+        string caption = BattleUiCopy.PlayerRoundResultCaption(o.TerminalState);
+        var sb = new StringBuilder();
+        sb.Append("<b>Resumo da rodada</b>");
+        sb.Append("\n\n<b>").Append(caption).Append("</b>");
 
-        txtStatus.text = $"{StatusText(o.TerminalState)}\n— Toque ou tecla para continuar —";
+        if (o.DamageDealt <= 0)
+        {
+            sb.Append("\n\nEmpate — sem dano.");
+        }
+        else
+        {
+            int lim = o.HandLimit;
+            int gap = o.RawGap;
+            int dmg = o.DamageDealt;
+            int mult = DamageMultiplierDisplay;
+
+            if (o.DamageToEnemy)
+            {
+                sb.Append("\n\nDano no inimigo: ").Append(dmg);
+                sb.Append("\n( mão dele ").Append(o.EnemyHandTotal).Append(" → distância até ")
+                    .Append(lim).Append(": ").Append(gap).Append(" → ").Append(gap).Append(" × ").Append(mult).Append(" )");
+            }
+            else
+            {
+                sb.Append("\n\nDano em você: ").Append(dmg);
+                sb.Append("\n( sua mão ").Append(o.PlayerHandTotal).Append(" → distância até ")
+                    .Append(lim).Append(": ").Append(gap).Append(" → ").Append(gap).Append(" × ").Append(mult).Append(" )");
+            }
+        }
+
+        sb.Append("\n\n<i>— Toque ou tecla para continuar —</i>");
+        txtBattleCenter.text = sb.ToString();
     }
 
     private void ResolvePostRoundFlow()
@@ -327,7 +414,6 @@ public class BlackjackController : MonoBehaviour
         {
             _battleOver = true;
             SetPlayerActionsEnabled(false);
-            btnNewGame.interactable = false;
             StartCoroutine(EndBattleRoutine(playerWon: true));
             return;
         }
@@ -336,7 +422,6 @@ public class BlackjackController : MonoBehaviour
         {
             _battleOver = true;
             SetPlayerActionsEnabled(false);
-            btnNewGame.interactable = false;
             StartCoroutine(EndBattleRoutine(playerWon: false));
             return;
         }
@@ -348,7 +433,12 @@ public class BlackjackController : MonoBehaviour
     {
         if (playerWon)
         {
-            txtStatus.text = "Inimigo derrotado! Retornando ao mapa...";
+            ClearHandValueLabels();
+            if (txtBattleCenter != null)
+            {
+                txtBattleCenter.text =
+                    "<b>Vitória</b>\n\nInimigo derrotado.\n\n<i>A seguir: mapa</i>";
+            }
             RunState.LastBattleResult = BattleResult.Won;
 
             SaveData save = SaveManager.Load();
@@ -359,7 +449,12 @@ public class BlackjackController : MonoBehaviour
         }
         else
         {
-            txtStatus.text = "Você foi derrotado... Reiniciando run...";
+            ClearHandValueLabels();
+            if (txtBattleCenter != null)
+            {
+                txtBattleCenter.text =
+                    "<b>Run terminada</b>\n\n<i>A reiniciar…</i>";
+            }
             RunState.LastBattleResult = BattleResult.Lost;
 
             SaveData save = SaveManager.Load();
@@ -392,19 +487,16 @@ public class BlackjackController : MonoBehaviour
         btnStand.interactable = enabled;
     }
 
-    private string StatusText(GameState state)
+    private static string EnemyOutcomeLine(GameState state)
     {
         return state switch
         {
-            GameState.PlayerTurn => "Seu turno — escolha: Hit ou Stand",
-            GameState.EnemyTurn  => "Turno do inimigo",
-            GameState.PlayerBust => "Você estourou! Inimigo vence.",
-            GameState.EnemyBust  => "Inimigo estourou! Você vence.",
-            GameState.Comparing  => "Comparando mãos...",
-            GameState.PlayerWin  => "Você venceu a rodada!",
-            GameState.EnemyWin   => "Inimigo venceu a rodada!",
-            GameState.Push       => "Empate.",
-            _ => "..."
+            GameState.PlayerBust => "Inimigo vence a rodada.",
+            GameState.EnemyBust => "Inimigo estourou a mão.",
+            GameState.PlayerWin => "Inimigo perde a rodada.",
+            GameState.EnemyWin => "Inimigo vence a rodada.",
+            GameState.Push => "Inimigo empata — sem dano.",
+            _ => ""
         };
     }
 }

@@ -21,7 +21,7 @@ namespace Blackjack.Core
 
         private readonly RoundStartBalance _roundStartBalance = new();
 
-        private const int HandLimit = 21;
+        public const int HandLimit = 21;
 
         public BlackjackGame(DeckConfig config)
         {
