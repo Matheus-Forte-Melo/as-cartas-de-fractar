@@ -24,6 +24,7 @@ public class MapNode
     public Vector2 WorldPosition;
     public List<MapNode> Children = new();
     public MapNodeType Type = MapNodeType.Combat_Add;
+    public CombatEquationDifficulty Difficulty = CombatEquationDifficulty.Medium;
 
     public MapNode(int row, int col, Vector2 worldPosition)
     {

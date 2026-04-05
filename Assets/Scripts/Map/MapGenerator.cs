@@ -33,6 +33,14 @@ public class MapGenerator : MonoBehaviour
     [Header("Node Type Distribution")]
     [SerializeField] private List<NodeTypeWeight> typeWeights = new();
 
+    [Header("Difficulty by map row (0-based index)")]
+    [Tooltip("Quando ativo, recalcula os limites abaixo ao mudar Rows: divide o mapa em 3 faixas o mais iguais possível (resto distribuído nas primeiras faixas).")]
+    [SerializeField] private bool autoEqualDifficultyRowBands = true;
+    [Tooltip("Primeira linha que NÃO é Easy: Easy = row em [0, easyRowEndExclusive). Ex.: 3 → linhas 0,1,2 são Easy.")]
+    [SerializeField] private int easyRowEndExclusive = 5;
+    [Tooltip("Primeira linha que NÃO é Medium: Medium = row em [easyRowEndExclusive, mediumRowEndExclusive). Hard = [mediumRowEndExclusive, rows).")]
+    [SerializeField] private int mediumRowEndExclusive = 10;
+
     private readonly Dictionary<(int row, int col), MapNode> _graph = new();
     private readonly HashSet<(int fromRow, int fromCol, int toRow, int toCol)> _connections = new();
 
@@ -71,6 +79,8 @@ public class MapGenerator : MonoBehaviour
     private void OnValidate()
     {
         SyncTypeWeights();
+        rows = Mathf.Max(2, rows);
+        ApplyDifficultyRowBandSettings();
     }
 
     public void GenerateMap()
@@ -81,7 +91,7 @@ public class MapGenerator : MonoBehaviour
 
         List<List<int>> paths = GeneratePaths();
         BuildGraph(paths);
-        AssignNodeTypes();
+        AssignNodeTypesAndDifficulty();
     }
 
     private void ClearGraph()
@@ -114,6 +124,46 @@ public class MapGenerator : MonoBehaviour
         colSpacing = Mathf.Max(0.01f, colSpacing);
         rowSpacing = Mathf.Max(0.01f, rowSpacing);
         jitter = Mathf.Max(0f, jitter);
+        ApplyDifficultyRowBandSettings();
+    }
+
+    /// <summary>
+    /// Com autoEqualDifficultyRowBands: reparte <see cref="rows"/> em três blocos (Easy / Medium / Hard) o mais iguais possível.
+    /// Caso contrário: mantém os limites editados, apenas com clamp para caber em [0, rows].
+    /// </summary>
+    private void ApplyDifficultyRowBandSettings()
+    {
+        if (autoEqualDifficultyRowBands)
+            ComputeEqualThirdRowBands();
+        else
+            ClampManualDifficultyRowBands();
+    }
+
+    private void ComputeEqualThirdRowBands()
+    {
+        int n = rows;
+        int third = n / 3;
+        int rem = n % 3;
+        int easyN = third + (rem > 0 ? 1 : 0);
+        int mediumN = third + (rem > 1 ? 1 : 0);
+        easyRowEndExclusive = easyN;
+        mediumRowEndExclusive = easyN + mediumN;
+    }
+
+    private void ClampManualDifficultyRowBands()
+    {
+        easyRowEndExclusive = Mathf.Clamp(easyRowEndExclusive, 0, rows);
+        mediumRowEndExclusive = Mathf.Clamp(mediumRowEndExclusive, easyRowEndExclusive, rows);
+    }
+
+    private CombatEquationDifficulty GetDifficultyForRow(int row)
+    {
+        row = Mathf.Clamp(row, 0, rows - 1);
+        if (row < easyRowEndExclusive)
+            return CombatEquationDifficulty.Easy;
+        if (row < mediumRowEndExclusive)
+            return CombatEquationDifficulty.Medium;
+        return CombatEquationDifficulty.Hard;
     }
 
     // Gera o "Wireframe" que será utilizado para construir os caminhos
@@ -211,13 +261,16 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    private void AssignNodeTypes()
+    private void AssignNodeTypesAndDifficulty()
     {
-        if (typeWeights == null || typeWeights.Count == 0)
-            return;
+        List<MapNode> sorted = _graph.Values.OrderBy(n => n.Row).ThenBy(n => n.Col).ToList();
 
-        foreach (MapNode node in _graph.Values)
-            node.Type = PickRandomType();
+        foreach (MapNode node in sorted)
+        {
+            if (typeWeights != null && typeWeights.Count > 0)
+                node.Type = PickRandomType();
+            node.Difficulty = GetDifficultyForRow(node.Row);
+        }
     }
 
     // Weighted Random

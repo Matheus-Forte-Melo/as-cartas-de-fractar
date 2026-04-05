@@ -1,0 +1,68 @@
+{
+  "groups": [
+    {
+      "label": "HardMultiplication1",
+      "cards": [
+        { "equation": "2.5 * 0.4" },
+        { "equation": "12.5 * 0.16" },
+        { "equation": "7.5 * 0.4" },
+        { "equation": "2.5 * 1.6" },
+        { "equation": "12.5 * 0.4" },
+        { "equation": "7.5 * 0.8" },
+        { "equation": "1.75 * 0.25" },
+        { "equation": "2.5 * 3.2" },
+        { "equation": "12 * 0.75" },
+        { "equation": "16 * 0.625" },
+        { "equation": "1.375 * 8", "ace": false }
+      ]
+    },
+    {
+      "label": "HardMultiplication2",
+      "cards": [
+        { "equation": "0.32 * 3.125" },
+        { "equation": "0.32 * 6.25" },
+        { "equation": "0.375 * 8" },
+        { "equation": "3.2 * 1.25" },
+        { "equation": "6.25 * 0.8" },
+        { "equation": "2.4 * 2.5" },
+        { "equation": "8.75 * 0.8" },
+        { "equation": "2.56 * 3.125" },
+        { "equation": "3.6 * 2.5" },
+        { "equation": "3.2 * 3.125" },
+        { "equation": "0.88 * 12.5", "ace": false }
+      ]
+    },
+    {
+      "label": "HardMultiplication3",
+      "cards": [
+        { "equation": "12.5 * 0.08" },
+        { "equation": "6.25 * 0.32" },
+        { "equation": "0.96 * 3.125" },
+        { "equation": "0.64 * 6.25" },
+        { "equation": "0.4 * 12.5" },
+        { "equation": "0.48 * 12.5" },
+        { "equation": "5.6 * 1.25" },
+        { "equation": "12.5 * 0.64" },
+        { "equation": "0.72 * 12.5" },
+        { "equation": "6.25 * 1.6" },
+        { "equation": "34.375 * 0.32", "ace": false }
+      ]
+    },
+    {
+      "label": "HardMultiplication4",
+      "cards": [
+        { "equation": "6.25 * 0.16" },
+        { "equation": "31.25 * 0.064" },
+        { "equation": "18.75 * 0.16" },
+        { "equation": "1.25 * 3.2" },
+        { "equation": "15.625 * 0.32" },
+        { "equation": "9.6 * 0.625" },
+        { "equation": "11.2 * 0.625" },
+        { "equation": "0.875 * 8" },
+        { "equation": "1.44 * 6.25" },
+        { "equation": "12.5 * 0.8" },
+        { "equation": "3.52 * 3.125", "ace": false }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "groups": [
+    {
+      "label": "EasyDivision2",
+      "cards": [
+        { "equation": "2 / 2" },
+        { "equation": "4 / 2" },
+        { "equation": "6 / 2" },
+        { "equation": "8 / 2" },
+        { "equation": "10 / 2" },
+        { "equation": "12 / 2" },
+        { "equation": "14 / 2" },
+        { "equation": "16 / 2" },
+        { "equation": "18 / 2" },
+        { "equation": "20 / 2" },
+        { "equation": "22 / 2", "ace": false }
+      ]
+    },
+    {
+      "label": "EasyDivision3",
+      "cards": [
+        { "equation": "3 / 3" },
+        { "equation": "6 / 3" },
+        { "equation": "9 / 3" },
+        { "equation": "12 / 3" },
+        { "equation": "15 / 3" },
+        { "equation": "18 / 3" },
+        { "equation": "21 / 3" },
+        { "equation": "24 / 3" },
+        { "equation": "27 / 3" },
+        { "equation": "30 / 3" },
+        { "equation": "33 / 3", "ace": false }
+      ]
+    },
+    {
+      "label": "EasyDivision4",
+      "cards": [
+        { "equation": "4 / 4" },
+        { "equation": "8 / 4" },
+        { "equation": "12 / 4" },
+        { "equation": "16 / 4" },
+        { "equation": "20 / 4" },
+        { "equation": "24 / 4" },
+        { "equation": "28 / 4" },
+        { "equation": "32 / 4" },
+        { "equation": "36 / 4" },
+        { "equation": "40 / 4" },
+        { "equation": "44 / 4", "ace": false }
+      ]
+    },
+    {
+      "label": "EasyDivision5",
+      "cards": [
+        { "equation": "5 / 5" },
+        { "equation": "10 / 5" },
+        { "equation": "15 / 5" },
+        { "equation": "20 / 5" },
+        { "equation": "25 / 5" },
+        { "equation": "30 / 5" },
+        { "equation": "35 / 5" },
+        { "equation": "40 / 5" },
+        { "equation": "45 / 5" },
+        { "equation": "50 / 5" },
+        { "equation": "55 / 5", "ace": false }
+      ]
+    }
+  ]
+}

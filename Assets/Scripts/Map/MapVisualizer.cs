@@ -13,6 +13,7 @@ public class NodeTypeVisual
 public class DifficultyBorder
 {
     public CombatEquationDifficulty difficulty;
+    public Color nodeColor = Color.white;
     public Sprite border;
 }
 
@@ -163,8 +164,40 @@ public class MapVisualizer : MonoBehaviour
         foreach (CombatEquationDifficulty val in enumValues)
         {
             if (!difficultyBorders.Exists(b => b.difficulty == val))
-                difficultyBorders.Add(new DifficultyBorder { difficulty = val });
+            {
+                difficultyBorders.Add(new DifficultyBorder
+                {
+                    difficulty = val,
+                    nodeColor = DefaultNodeColorForDifficulty(val)
+                });
+            }
         }
+    }
+
+    private static Color DefaultNodeColorForDifficulty(CombatEquationDifficulty d)
+    {
+        return d switch
+        {
+            CombatEquationDifficulty.Easy => new Color(0.42f, 0.78f, 0.52f, 1f),
+            CombatEquationDifficulty.Medium => new Color(0.92f, 0.70f, 0.32f, 1f),
+            CombatEquationDifficulty.Hard => new Color(0.70f, 0.20f, 0.26f, 1f),
+            _ => Color.gray
+        };
+    }
+
+    private DifficultyBorder GetDifficultyStyle(CombatEquationDifficulty difficulty)
+    {
+        foreach (DifficultyBorder b in difficultyBorders)
+        {
+            if (b.difficulty == difficulty)
+                return b;
+        }
+
+        return new DifficultyBorder
+        {
+            difficulty = difficulty,
+            nodeColor = DefaultNodeColorForDifficulty(difficulty)
+        };
     }
 
     private void SpawnNodes()
@@ -178,14 +211,46 @@ public class MapVisualizer : MonoBehaviour
             if (nodePrefab == null)
                 instance.transform.SetParent(_nodesRoot, false);
 
-            instance.name = $"Node_{node.Row}_{node.Col}_{node.Type}";
+            instance.name = $"Node_{node.Row}_{node.Col}_{node.Type}_{node.Difficulty}";
             instance.transform.position = new Vector3(node.WorldPosition.x, node.WorldPosition.y, 0f);
-            AttachTypeLabel(instance.transform, node.Type);
+            ApplyDifficultyVisuals(instance.transform, node.Difficulty);
+            AttachTypeLabel(instance.transform, node.Type, node.Difficulty);
             _nodeViews[(node.Row, node.Col)] = instance.transform;
         }
     }
 
-    private void AttachTypeLabel(Transform nodeTransform, MapNodeType type)
+    private void ApplyDifficultyVisuals(Transform nodeRoot, CombatEquationDifficulty difficulty)
+    {
+        DifficultyBorder style = GetDifficultyStyle(difficulty);
+
+        foreach (Renderer r in nodeRoot.GetComponentsInChildren<Renderer>(true))
+        {
+            if (r is LineRenderer)
+                continue;
+            if (r.GetComponent<TextMesh>() != null)
+                continue;
+
+            Material mat = r.material;
+            Color c = style.nodeColor;
+            c.a = mat.color.a;
+            mat.color = c;
+        }
+
+        if (style.border != null)
+        {
+            var borderGo = new GameObject("DifficultyBorderSprite");
+            borderGo.transform.SetParent(nodeRoot, false);
+            borderGo.transform.localPosition = new Vector3(0f, 0f, -0.06f);
+            var sr = borderGo.AddComponent<SpriteRenderer>();
+            sr.sprite = style.border;
+            sr.color = Color.white;
+            sr.sortingOrder = 2;
+            float s = 0.55f;
+            borderGo.transform.localScale = new Vector3(s, s, 1f);
+        }
+    }
+
+    private void AttachTypeLabel(Transform nodeTransform, MapNodeType type, CombatEquationDifficulty difficulty)
     {
         if (!showNodeTypeLabel)
             return;
@@ -195,7 +260,7 @@ public class MapVisualizer : MonoBehaviour
         labelObject.transform.localPosition = new Vector3(0f, 1.05f, 0f);
 
         var textMesh = labelObject.AddComponent<TextMesh>();
-        textMesh.text = type.ToString().Replace('_', ' ');
+        textMesh.text = $"{type.ToString().Replace('_', ' ')}\n{difficulty}";
         textMesh.characterSize = 0.08f;
         textMesh.fontSize = 40;
         textMesh.anchor = TextAnchor.MiddleCenter;

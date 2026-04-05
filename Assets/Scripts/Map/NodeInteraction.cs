@@ -153,6 +153,7 @@ public class NodeInteraction : MonoBehaviour
     private void SelectNode(MapNode node)
     {
         RunState.CurrentNodeType = node.Type;
+        RunState.CurrentCombatDifficulty = node.Difficulty;
 
         _save.playerRow = node.Row;
         _save.playerCol = node.Col;

@@ -1,0 +1,68 @@
+{
+  "groups": [
+    {
+      "label": "MediumMultiplication1",
+      "cards": [
+        { "equation": "0.25 * 4" },
+        { "equation": "0.4 * 5" },
+        { "equation": "1.5 * 2" },
+        { "equation": "0.8 * 5" },
+        { "equation": "1.25 * 4" },
+        { "equation": "1.5 * 4" },
+        { "equation": "3.5 * 2" },
+        { "equation": "1.6 * 5" },
+        { "equation": "4.5 * 2" },
+        { "equation": "2.5 * 4" },
+        { "equation": "2.2 * 5", "ace": false }
+      ]
+    },
+    {
+      "label": "MediumMultiplication2",
+      "cards": [
+        { "equation": "0.2 * 5" },
+        { "equation": "0.5 * 4" },
+        { "equation": "0.75 * 4" },
+        { "equation": "0.5 * 8" },
+        { "equation": "2.5 * 2" },
+        { "equation": "0.75 * 8" },
+        { "equation": "1.4 * 5" },
+        { "equation": "0.8 * 10" },
+        { "equation": "2.25 * 4" },
+        { "equation": "1.25 * 8" },
+        { "equation": "2.75 * 4", "ace": false }
+      ]
+    },
+    {
+      "label": "MediumMultiplication3",
+      "cards": [
+        { "equation": "2 * 0.5" },
+        { "equation": "8 * 0.25" },
+        { "equation": "6 * 0.5" },
+        { "equation": "8 * 0.5" },
+        { "equation": "20 * 0.25" },
+        { "equation": "12 * 0.5" },
+        { "equation": "4 * 1.75" },
+        { "equation": "40 * 0.2" },
+        { "equation": "5 * 1.8" },
+        { "equation": "20 * 0.5" },
+        { "equation": "55 * 0.2", "ace": false }
+      ]
+    },
+    {
+      "label": "MediumMultiplication4",
+      "cards": [
+        { "equation": "4 * 0.25" },
+        { "equation": "10 * 0.2" },
+        { "equation": "1.5 * 2" },
+        { "equation": "16 * 0.25" },
+        { "equation": "25 * 0.2" },
+        { "equation": "50 * 0.12" },
+        { "equation": "25 * 0.28" },
+        { "equation": "5 * 1.6" },
+        { "equation": "45 * 0.2" },
+        { "equation": "100 * 0.1" },
+        { "equation": "25 * 0.44", "ace": false }
+      ]
+    }
+  ]
+}

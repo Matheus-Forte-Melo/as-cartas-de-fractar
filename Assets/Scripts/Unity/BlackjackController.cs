@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using TMPro;
 using UnityEngine;
@@ -31,14 +30,6 @@ public class BlackjackController : MonoBehaviour
     private BlackjackGame _game;
     private bool _battleOver;
 
-    private static readonly Dictionary<MapNodeType, string> DeckPrefixes = new()
-    {
-        { MapNodeType.Combat_Add, "combat_add" },
-        { MapNodeType.Combat_Sub, "combat_sub" },
-        { MapNodeType.Combat_Multi, "combat_multi" },
-        { MapNodeType.Combat_Div, "combat_div" },
-    };
-
     private const string DefaultDeckFile = "config_cards.json";
 
     private void Awake()
@@ -61,19 +52,18 @@ public class BlackjackController : MonoBehaviour
 
     private DeckConfig LoadDeckConfig()
     {
-        string filename = DefaultDeckFile;
-
-        if (DeckPrefixes.TryGetValue(RunState.CurrentNodeType, out string prefix))
-        {
-            string candidate = $"{prefix}_cards.json";
-            string candidatePath = Path.Combine(Application.streamingAssetsPath, candidate);
-            if (File.Exists(candidatePath))
-                filename = candidate;
-        }
+        string path = StreamingAssetsDeckPaths.TryGetExistingDeckPath(
+                RunState.CurrentNodeType,
+                RunState.CurrentCombatDifficulty,
+                out string deckPath)
+            ? deckPath
+            : Path.Combine(Application.streamingAssetsPath, DefaultDeckFile);
 
         try
         {
-            string path = Path.Combine(Application.streamingAssetsPath, filename);
+            if (!File.Exists(path))
+                path = Path.Combine(Application.streamingAssetsPath, DefaultDeckFile);
+
             string json = File.ReadAllText(path, System.Text.Encoding.UTF8);
             return DeckConfig.Load(json);
         }
@@ -243,6 +233,8 @@ public class BlackjackController : MonoBehaviour
             SaveData save = SaveManager.Load();
             save.playerHealth = _game.Player.Health;
             SaveManager.Save(save);
+
+            PostVictoryReturnFlow.RunAfterVictoriousBattle();
         }
         else
         {
