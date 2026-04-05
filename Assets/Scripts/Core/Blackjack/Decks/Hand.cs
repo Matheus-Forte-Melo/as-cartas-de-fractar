@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Blackjack.Core
+namespace Blackjack.Decks
 {
     public class Hand
     {

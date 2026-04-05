@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Blackjack.Core
+namespace Blackjack.Decks
 {
     public readonly struct CardDefinition
     {

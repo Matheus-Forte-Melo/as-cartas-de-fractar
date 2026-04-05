@@ -49,6 +49,9 @@ public class MapVisualizer : MonoBehaviour
     private readonly Dictionary<(int row, int col), Transform> _nodeViews = new();
     private readonly Dictionary<(int fromRow, int fromCol, int toRow, int toCol), LineRenderer> _connectionViews = new();
 
+    private static readonly int ShaderColorId = Shader.PropertyToID("_Color");
+    private static readonly int ShaderBaseColorId = Shader.PropertyToID("_BaseColor");
+
     private void OnValidate()
     {
         SyncNodeVisuals();
@@ -230,10 +233,44 @@ public class MapVisualizer : MonoBehaviour
             if (r.GetComponent<TextMesh>() != null)
                 continue;
 
-            Material mat = r.material;
-            Color c = style.nodeColor;
-            c.a = mat.color.a;
-            mat.color = c;
+            if (r is SpriteRenderer spriteRenderer)
+            {
+                Color c = style.nodeColor;
+                c.a = spriteRenderer.color.a;
+                spriteRenderer.color = c;
+                continue;
+            }
+
+            Color tint = style.nodeColor;
+            Material shared = r.sharedMaterial;
+            if (shared != null)
+            {
+                if (shared.HasProperty(ShaderBaseColorId))
+                    tint.a = shared.GetColor(ShaderBaseColorId).a;
+                else if (shared.HasProperty(ShaderColorId))
+                    tint.a = shared.GetColor(ShaderColorId).a;
+            }
+
+            var block = new MaterialPropertyBlock();
+            r.GetPropertyBlock(block);
+            if (shared != null)
+            {
+                if (shared.HasProperty(ShaderBaseColorId))
+                    block.SetColor(ShaderBaseColorId, tint);
+                if (shared.HasProperty(ShaderColorId))
+                    block.SetColor(ShaderColorId, tint);
+                if (!shared.HasProperty(ShaderBaseColorId) && !shared.HasProperty(ShaderColorId))
+                {
+                    block.SetColor(ShaderColorId, tint);
+                    block.SetColor(ShaderBaseColorId, tint);
+                }
+            }
+            else
+            {
+                block.SetColor(ShaderColorId, tint);
+            }
+
+            r.SetPropertyBlock(block);
         }
 
         if (style.border != null)

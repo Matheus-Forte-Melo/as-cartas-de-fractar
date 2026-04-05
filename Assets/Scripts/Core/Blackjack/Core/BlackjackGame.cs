@@ -1,17 +1,8 @@
+using Blackjack.Decks;
+using UnityEngine;
+
 namespace Blackjack.Core
 {
-    public enum GameState
-    {
-        PlayerTurn,
-        EnemyTurn,
-        PlayerBust,
-        EnemyBust,
-        Comparing,
-        PlayerWin,
-        EnemyWin,
-        Push
-    }
-
     // Máquina de estados de uma rodada de Blackjack. 
     // Define ações que definem o estado conforme lógica de blackjack. 
     public class BlackjackGame
@@ -22,6 +13,14 @@ namespace Blackjack.Core
 
         public GameState State { get; private set; } = GameState.PlayerTurn;
 
+        /// <summary>Número da rodada na batalha atual (1 na primeira mão).</summary>
+        public int CurrentRoundNumber { get; private set; }
+
+        /// <summary>Preenchido ao fechar a rodada com estado terminal (dano aplicado).</summary>
+        public RoundDamageOutcome? LastRoundDamageOutcome { get; private set; }
+
+        private readonly RoundStartBalance _roundStartBalance = new();
+
         private const int HandLimit = 21;
 
         public BlackjackGame(DeckConfig config)
@@ -29,28 +28,22 @@ namespace Blackjack.Core
             Deck = new Deck(config);
         }
 
+        public bool IsRoundOver => GameStateSemantics.IsRoundOver(State);
+
         public void NewRound()
         {
-            Player.Hand.Clear();
-            Enemy.Hand.Clear();
-            Deck.Reset();
-
-            Player.Hand.Add(Deck.Draw());
-            Enemy.Hand.Add(Deck.Draw());
-            Player.Hand.Add(Deck.Draw());
-            Enemy.Hand.Add(Deck.Draw());
+            LastRoundDamageOutcome = null;
+            CurrentRoundNumber++;
 
             Player.HasStood = false;
             Enemy.HasStood = false;
             Enemy.IsFirstCardHidden = true;
+
+            _roundStartBalance.Apply(Player, Enemy, Deck, CurrentRoundNumber);
+
             State = GameState.PlayerTurn;
 
-            bool playerNatural = Player.Hand.Value == HandLimit;
-            bool enemyNatural = Enemy.Hand.Value == HandLimit;
-
-            if (playerNatural && enemyNatural) State = GameState.Push;
-            else if (playerNatural) State = GameState.PlayerWin;
-            else if (enemyNatural) State = GameState.EnemyWin;
+            Debug.Log($"[Battle] Rodada {CurrentRoundNumber} iniciada");
         }
 
         public void PlayerHit()
@@ -63,7 +56,7 @@ namespace Blackjack.Core
             if (Player.Hand.Value > HandLimit)
             {
                 State = GameState.PlayerBust;
-                Player.ReceiveDamageByHandDiff(HandLimit);
+                CommitRoundDamage();
                 return;
             }
 
@@ -106,7 +99,7 @@ namespace Blackjack.Core
                 if (Enemy.Hand.Value > HandLimit)
                 {
                     State = GameState.EnemyBust;
-                    Enemy.ReceiveDamageByHandDiff(HandLimit);
+                    CommitRoundDamage();
                     return true;
                 }
 
@@ -133,24 +126,24 @@ namespace Blackjack.Core
             if (State != GameState.Comparing) return;
 
             if (Player.Hand.Value > Enemy.Hand.Value)
-            {
                 State = GameState.PlayerWin;
-                Enemy.ReceiveDamageByHandDiff(HandLimit);
-            }
             else if (Player.Hand.Value < Enemy.Hand.Value)
-            {
                 State = GameState.EnemyWin;
-                Player.ReceiveDamageByHandDiff(HandLimit);
-            }
             else
-            {
                 State = GameState.Push;
-            }
+
+            CommitRoundDamage();
         }
 
-        public bool IsRoundOver =>
-            State is GameState.PlayerBust or GameState.EnemyBust
-                  or GameState.PlayerWin or GameState.EnemyWin
-                  or GameState.Push;
+        private void CommitRoundDamage()
+        {
+            LastRoundDamageOutcome = RoundDamageResolver.ResolveAndApply(
+                Player,
+                Enemy,
+                State,
+                CurrentRoundNumber,
+                HandLimit,
+                10.0);
+        }
     }
 }

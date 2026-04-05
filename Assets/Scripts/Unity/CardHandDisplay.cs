@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-using Blackjack.Core;
+using Blackjack.Decks;
 
 public class CardHandDisplay : MonoBehaviour
 {

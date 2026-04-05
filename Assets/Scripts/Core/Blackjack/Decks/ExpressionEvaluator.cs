@@ -1,7 +1,7 @@
 using System;
 using System.Globalization;
 
-namespace Blackjack.Core
+namespace Blackjack.Decks
 {
     /// <summary>
     /// Avalia expressões matemáticas simples usadas nas cartas.

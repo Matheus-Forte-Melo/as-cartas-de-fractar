@@ -1,6 +1,6 @@
 using System;
 
-namespace Blackjack.Core
+namespace Blackjack.Decks
 {
     public class Card
     {
