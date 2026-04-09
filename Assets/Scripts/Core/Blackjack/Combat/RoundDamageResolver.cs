@@ -135,6 +135,8 @@ namespace Blackjack.Core
             bool toPlayer = ReferenceEquals(victim, player);
             if (!toPlayer && player.DamageMultiplier > 0f)
                 damage = (int)Math.Round(damage * player.DamageMultiplier);
+            if (toPlayer && enemy.DamageMultiplier > 0f)
+                damage = (int)Math.Round(damage * enemy.DamageMultiplier);
 
             if (toPlayer)
                 player.ApplyDamage(damage);

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using TMPro;
@@ -46,6 +47,13 @@ public class BlackjackController : MonoBehaviour
     private const string DefaultDeckFile = "config_cards.json";
     private const int DamageMultiplierDisplay = 10;
 
+    private static string FormatAttackerMultiplier(float multiplier)
+    {
+        if (multiplier <= 0f)
+            return "0";
+        return multiplier.ToString("0.##", CultureInfo.InvariantCulture);
+    }
+
     private void Awake()
     {
         ResolveHandValueTextsIfMissing();
@@ -57,6 +65,12 @@ public class BlackjackController : MonoBehaviour
         _game.Player.Health = save.playerHealth;
         _game.Player.MaxHealth = PlayerItemStats.CalculateMaxHealth(save);
         _game.Player.DamageMultiplier = PlayerItemStats.CalculateDamageMultiplier(save);
+
+        CombatEquationDifficulty combatDifficulty = RunState.CurrentCombatDifficulty;
+        int enemyHp = EnemyCombatBalance.GetEnemyMaxHealth(combatDifficulty);
+        _game.Enemy.MaxHealth = enemyHp;
+        _game.Enemy.Health = enemyHp;
+        _game.Enemy.DamageMultiplier = EnemyCombatBalance.GetEnemyDamageMultiplier(combatDifficulty);
 
         btnHit.onClick.AddListener(OnHit);
         btnStand.onClick.AddListener(OnStand);
@@ -397,13 +411,15 @@ public class BlackjackController : MonoBehaviour
             {
                 sb.Append("\n\nDano no inimigo: ").Append(dmg);
                 sb.Append("\n( mão dele ").Append(o.EnemyHandTotal).Append(" → distância até ")
-                    .Append(lim).Append(": ").Append(gap).Append(" → ").Append(gap).Append(" × ").Append(mult).Append(" )");
+                    .Append(lim).Append(": ").Append(gap).Append(" → ").Append(gap).Append(" × ").Append(mult)
+                    .Append(" × ").Append(FormatAttackerMultiplier(_game.Player.DamageMultiplier)).Append(" )");
             }
             else
             {
                 sb.Append("\n\nDano em você: ").Append(dmg);
                 sb.Append("\n( sua mão ").Append(o.PlayerHandTotal).Append(" → distância até ")
-                    .Append(lim).Append(": ").Append(gap).Append(" → ").Append(gap).Append(" × ").Append(mult).Append(" )");
+                    .Append(lim).Append(": ").Append(gap).Append(" → ").Append(gap).Append(" × ").Append(mult)
+                    .Append(" × ").Append(FormatAttackerMultiplier(_game.Enemy.DamageMultiplier)).Append(" )");
             }
         }
 
