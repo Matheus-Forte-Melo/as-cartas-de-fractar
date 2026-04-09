@@ -9,6 +9,7 @@ public class SaveData
     public int coins = 0;
     public int currentSeed;
     public int playerHealth = 100;
+    public List<string> ownedItemIds = new();
     public List<SeedHistoryEntry> seedHistory = new();
 }
 

@@ -6,6 +6,8 @@ namespace Blackjack.Core
     public class Duelist
     {
         public int Health { get; set; } = 100;
+        public int MaxHealth { get; set; } = 100;
+        public float DamageMultiplier { get; set; } = 1f;
         public Hand Hand { get; } = new();
         public bool HasStood { get; set; }
 

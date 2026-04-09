@@ -8,6 +8,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Blackjack.Core;
 using Blackjack.Decks;
+using Items;
 
 // Serve como intermediário entre UI Unity (do jogador) e Código (da lógica do 21 e do inimigo).
 // Define ações para os botões e exibe feedback na tela conforme estado
@@ -54,6 +55,8 @@ public class BlackjackController : MonoBehaviour
 
         SaveData save = SaveManager.Load();
         _game.Player.Health = save.playerHealth;
+        _game.Player.MaxHealth = PlayerItemStats.CalculateMaxHealth(save);
+        _game.Player.DamageMultiplier = PlayerItemStats.CalculateDamageMultiplier(save);
 
         btnHit.onClick.AddListener(OnHit);
         btnStand.onClick.AddListener(OnStand);
@@ -198,7 +201,7 @@ public class BlackjackController : MonoBehaviour
         while (_game.State == GameState.EnemyTurn)
         {
             SetCenterFeedLine("Inimigo está jogando...");
-            yield return new WaitForSeconds(Random.Range(1.0f, 1.5f));
+            yield return new WaitForSeconds(Random.Range(1.0f, 2.25f));
 
             bool hit = _game.EnemyAct();
             SyncCards();
@@ -434,16 +437,18 @@ public class BlackjackController : MonoBehaviour
         if (playerWon)
         {
             ClearHandValueLabels();
-            if (txtBattleCenter != null)
-            {
-                txtBattleCenter.text =
-                    "<b>Vitória</b>\n\nInimigo derrotado.\n\n<i>A seguir: mapa</i>";
-            }
             RunState.LastBattleResult = BattleResult.Won;
 
             SaveData save = SaveManager.Load();
             save.playerHealth = _game.Player.Health;
+            int coinsEarned = BattleRewardResolver.ApplyVictoryRewards(save, RunState.CurrentCombatDifficulty);
             SaveManager.Save(save);
+
+            if (txtBattleCenter != null)
+            {
+                txtBattleCenter.text =
+                    $"<b>Vitória</b>\n\nInimigo derrotado.\n+{coinsEarned} moedas\n\n<i>A seguir: mapa</i>";
+            }
 
             PostVictoryReturnFlow.RunAfterVictoriousBattle();
         }
@@ -467,7 +472,7 @@ public class BlackjackController : MonoBehaviour
             });
             save.playerRow = -1;
             save.playerCol = -1;
-            save.playerHealth = 100;
+            save.playerHealth = PlayerItemStats.CalculateMaxHealth(save);
             SaveManager.Save(save);
         }
 

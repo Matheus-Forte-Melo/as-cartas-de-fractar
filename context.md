@@ -350,3 +350,89 @@ Core/
 ### 2026-04-05 — (histórico) Feed e resumos em vários TMP
 
 - Obsoleto: múltiplos TMP para resumo e feed; consolidado em **`txtBattleCenter`** (ver entrada “HUD central unificado”).
+
+### 2026-04-09 — Loja, sistema de itens e recompensas
+
+- **Pasta `AssetsTempLoja/`** (projeto externo) integrada como cena isolada; assets úteis migrados, lixo deletado.
+- **Cena `Assets/Scenes/Store.unity`** no Build Settings. Camera + `UIDocument` (UI Toolkit) + `StoreController`. Não acessível pelas demais cenas por enquanto; transição via `SceneManager.LoadScene("Store")`.
+
+#### Sistema de itens (`Assets/Scripts/Items/`)
+
+- **`ItemType.cs`:** enum `Attack`, `Defense`, `Consumable`.
+- **`ItemId.cs`:** enum `SwordGold`, `ShieldSilver`, `HealthPotion`, `MagicAmulet`.
+- **`ItemDefinition.cs`** + **`ItemCatalogData`:** classes `[Serializable]` com `id`, `displayName`, `description`, `type`, `price`, `icon`, `attackMultiplier`, `bonusHealth`, `consumableEffect`, `consumableValue`. Mapeamento `type` → `ItemType` e `id` → `ItemId` via switch expression.
+- **`ItemCatalog.cs`:** classe estática; carrega `StreamingAssets/Items/item_catalog.json` (lazy, indexado por `id`). Expõe `All` e `Get(string id)`.
+- **`PlayerItemStats.cs`:** `CalculateMaxHealth(SaveData)` = `100 + soma bonusHealth dos defense owned`; `CalculateDamageMultiplier(SaveData)` = `produto attackMultiplier dos attack owned`.
+- **JSON:** `Assets/StreamingAssets/Items/item_catalog.json` com 4 itens de exemplo (Espada de Ouro, Escudo de Prata, Poção de Vida, Amuleto Mágico).
+
+#### Save (`Assets/Scripts/Core/Save/SaveData.cs`)
+
+- **Novo campo:** `List<string> ownedItemIds` — IDs dos itens comprados.
+- Todos os itens owned são automaticamente ativos (sem equip slots por enquanto).
+- **Na derrota:** `save.playerHealth = PlayerItemStats.CalculateMaxHealth(save)` (antes era hardcoded 100).
+
+#### Duelist (`Assets/Scripts/Core/Blackjack/Core/Duelist.cs`)
+
+- **Novos campos:** `MaxHealth` (int, default 100), `DamageMultiplier` (float, default 1f).
+- **`BlackjackController.Awake`:** após carregar save, seta `Player.MaxHealth` e `Player.DamageMultiplier` via `PlayerItemStats`.
+- **`RoundDamageResolver`:** quando dano é ao enemy, multiplica pelo `player.DamageMultiplier`.
+
+#### Recompensas (`Assets/Scripts/Core/Blackjack/Rewards/BattleRewardResolver.cs`)
+
+- **`GetCoinReward`:** Easy=10, Medium=50, Hard=100.
+- **`ApplyVictoryRewards(SaveData, CombatEquationDifficulty)`:** soma moedas ao save. Retorna quantidade.
+- Chamado em `BlackjackController.EndBattleRoutine` na vitória, **antes** de `SaveManager.Save`. UI mostra `+N moedas`.
+- **Extensível:** ponto de adição para drops de itens consumíveis no futuro.
+
+#### Loja (`Assets/Scripts/Store/StoreController.cs`)
+
+- **Reescrito** para usar `ItemCatalog` (não mais JSON mock). Saldo vem de `SaveData.coins`.
+- **Compra:** deduz moedas, adiciona `id` a `save.ownedItemIds`, aplica `bonusHealth` à vida do jogador (defense), salva. Itens já comprados ficam desabilitados.
+- **Consumíveis:** botão com label "Em breve" (placeholder, `ItemType.Consumable` existe mas sem lógica de uso).
+- **UI migrada:** `Assets/UI/Store/` (StoreView.uxml, StoreItemView.uxml, StoreStyles.uss, DefaultPanelSettings.asset). Fundo: `Assets/Art/Store/MagicDungeonBackground.png`. Ícones: `Assets/Resources/Icons/`.
+- **Botão Voltar:** `SceneManager.LoadScene("Map")`.
+
+#### Árvore de novos arquivos
+
+```
+Scripts/
+├── Items/
+│   ├── ItemId.cs
+│   ├── ItemType.cs
+│   ├── ItemDefinition.cs   # ItemDefinition + ItemCatalogData
+│   ├── ItemCatalog.cs
+│   └── PlayerItemStats.cs
+├── Store/
+│   └── StoreController.cs
+└── Core/Blackjack/Rewards/
+    └── BattleRewardResolver.cs
+
+StreamingAssets/Items/
+└── item_catalog.json
+
+UI/Store/
+├── StoreView.uxml
+├── StoreItemView.uxml
+├── StoreStyles.uss
+└── DefaultPanelSettings.asset
+
+Art/Store/
+└── MagicDungeonBackground.png
+
+Resources/Icons/
+├── Espada de Ouro.png
+├── Escudo de Prata.png
+├── Poção de Vida.png
+├── Amuleto Mágico.png
+└── CoinFrames/ (1-6.png)
+
+Scenes/
+└── Store.unity
+```
+
+#### Extensibilidade
+
+- **Consumíveis:** `ItemType.Consumable` + `consumableEffect`/`consumableValue` no JSON; implementação futura remove do `ownedItemIds` e aplica efeito.
+- **Drops de itens:** `BattleRewardResolver` pode ser estendido com tabela de drops por dificuldade.
+- **Equip slots:** futuramente adicionar `equippedItemIds` ao save para separar posse de uso.
+- **Novos itens:** adicionar entrada no `item_catalog.json` + novo valor no `ItemId` enum.
