@@ -320,7 +320,8 @@ Core/
     │   ├── RoundBalance.cs
     │   └── RoundStartBalance.cs
     ├── Combat/
-    │   └── RoundDamageResolver.cs  # RoundDamageOutcome + dano fim de rodada
+    │   ├── RoundDamageResolver.cs  # RoundDamageOutcome + dano fim de rodada
+    │   └── EnemyCombatBalance.cs   # vida e mult. de dano do inimigo por dificuldade
     └── Decks/
         ├── Card.cs
         ├── Hand.cs
@@ -349,4 +350,121 @@ Core/
 
 ### 2026-04-05 — (histórico) Feed e resumos em vários TMP
 
+<<<<<<< Updated upstream
 - Obsoleto: múltiplos TMP para resumo e feed; consolidado em **`txtBattleCenter`** (ver entrada “HUD central unificado”).
+=======
+- Obsoleto: múltiplos TMP para resumo e feed; consolidado em **`txtBattleCenter`** (ver entrada “HUD central unificado”).
+
+### 2026-04-09 — Loja, sistema de itens e recompensas
+
+- **Pasta `AssetsTempLoja/`** (projeto externo) integrada como cena isolada; assets úteis migrados, lixo deletado.
+- **Cena `Assets/Scenes/Store.unity`** no Build Settings. Camera + `UIDocument` (UI Toolkit) + `StoreController`. Não acessível pelas demais cenas por enquanto; transição via `SceneManager.LoadScene("Store")`.
+
+#### Sistema de itens (`Assets/Scripts/Items/`)
+
+- **`ItemType.cs`:** enum `Attack`, `Defense`, `Consumable`.
+- **`ItemId.cs`:** enum `SwordGold`, `ShieldSilver`, `HealthPotion`, `MagicAmulet`.
+- **`ItemDefinition.cs`** + **`ItemCatalogData`:** classes `[Serializable]` com `id`, `displayName`, `description`, `type`, `price`, `icon`, `attackMultiplier`, `bonusHealth`, `consumableEffect`, `consumableValue`. Mapeamento `type` → `ItemType` e `id` → `ItemId` via switch expression; **`ParseConsumableAction()`** mapeia `consumableEffect` (ex. `heal`) → **`ConsumableActionType`**.
+- **`ConsumableActionType.cs`:** enum `None`, `Heal`.
+- **`ConsumableBattleEffects.cs`:** `TryApply(ItemDefinition, Duelist player, out message)` — hoje só **Heal** usando `consumableValue` (cura até `MaxHealth`).
+- **`ItemCatalog.cs`:** classe estática; carrega `StreamingAssets/Items/item_catalog.json` (lazy, indexado por `id`). Expõe `All` e `Get(string id)`.
+- **`PlayerItemStats.cs`:** `CalculateMaxHealth(SaveData)` = `100 + soma bonusHealth dos defense owned`; `CalculateDamageMultiplier(SaveData)` = `produto attackMultiplier dos attack owned`.
+- **JSON:** `Assets/StreamingAssets/Items/item_catalog.json` com 4 itens de exemplo (Espada de Ouro, Escudo de Prata, Poção de Vida, Amuleto Mágico).
+
+#### Save (`Assets/Scripts/Core/Save/SaveData.cs`)
+
+- **`ownedItemIds`:** apenas itens **attack** e **defense** comprados na loja (ativos na run).
+- **`consumableSlots`:** até **3** IDs de consumíveis, **sem stack** (o mesmo `id` pode aparecer em slots distintos). Não entra em `ownedItemIds`.
+- **Na derrota:** `save.playerHealth = PlayerItemStats.CalculateMaxHealth(save)` (antes era hardcoded 100).
+
+#### Duelist (`Assets/Scripts/Core/Blackjack/Core/Duelist.cs`)
+
+- **Novos campos:** `MaxHealth` (int, default 100), `DamageMultiplier` (float, default 1f).
+- **`BlackjackController.Awake`:** após carregar save, seta `Player.MaxHealth` e `Player.DamageMultiplier` via `PlayerItemStats`.
+- **`RoundDamageResolver`:** quando dano é ao enemy, multiplica pelo `player.DamageMultiplier`; quando dano é ao player, multiplica pelo `enemy.DamageMultiplier`.
+
+#### Inimigo por dificuldade (`Assets/Scripts/Core/Blackjack/Combat/EnemyCombatBalance.cs`)
+
+- **`GetEnemyMaxHealth` / `GetEnemyDamageMultiplier`:** Easy 80 HP / ×1; Medium 150 / ×1,5; Hard 300 / ×2 (valores default = Easy).
+- **`BlackjackController.Awake`:** após criar `BlackjackGame`, aplica HP/MaxHP e `DamageMultiplier` do inimigo com `RunState.CurrentCombatDifficulty` (alinhado ao deck e às moedas de vitória).
+- **Resumo de dano (`ApplyRoundSummaryUi`):** texto explica `gap × 10 ×` multiplicador do atacante (jogador ou inimigo, conforme o alvo do dano).
+
+#### Recompensas (`Assets/Scripts/Core/Blackjack/Rewards/BattleRewardResolver.cs`)
+
+- **`GetCoinReward`:** Easy=10, Medium=50, Hard=100.
+- **`ApplyVictoryRewards(SaveData, CombatEquationDifficulty)`:** soma moedas ao save. Retorna quantidade.
+- Chamado em `BlackjackController.EndBattleRoutine` na vitória, **antes** de `SaveManager.Save`. UI mostra `+N moedas`.
+- **Extensível:** ponto de adição para drops de itens consumíveis no futuro.
+
+#### Loja (`Assets/Scripts/Store/StoreController.cs`)
+
+- **`ItemCatalog`** + `SaveData.coins`. **`MaxConsumableSlots` = 3** (constante na loja).
+- **Attack/Defense:** compra → `ownedItemIds` + defense aplica `bonusHealth` em `playerHealth`.
+- **Consumíveis:** compra → só `consumableSlots.Add(id)` se `Count < 3`; **não** grava em `ownedItemIds`. Cabeçalho **`Consumíveis: N/3`** (`ConsumableSlotsLabel` no UXML). Com 3/3: botões dos consumíveis **“Inventário cheio (3/3)”**; modal de confirmação bloqueado com mensagem para usar na batalha primeiro.
+- **UI:** `StoreView.uxml` + `StoreStyles.uss` (classe `.consumable-slots-label`). Fundo e ícones como antes.
+- **Botão Voltar:** `SceneManager.LoadScene("Map")`.
+
+#### Batalha — consumíveis (`BlackjackController`)
+
+- **`_save`** mantido em memória na cena; `consumableSlots` mutável; **teclas 1 / 2 / 3** usam o slot de índice 0–2 **só em `GameState.PlayerTurn`** (e sem resolução de rodada / uso já em curso).
+- **Coroutine:** desativa Hit/Stand; `txtBattleCenter` mostra `Usando "NOME"...` depois o resultado (ex. `+N vida`); remove o slot, `SaveManager.Save`, atualiza HUD.
+
+#### Árvore de novos arquivos
+
+```
+Scripts/
+├── Items/
+│   ├── ItemId.cs
+│   ├── ItemType.cs
+│   ├── ConsumableActionType.cs
+│   ├── ConsumableBattleEffects.cs
+│   ├── ItemDefinition.cs   # ItemDefinition + ItemCatalogData
+│   ├── ItemCatalog.cs
+│   └── PlayerItemStats.cs
+├── Store/
+│   └── StoreController.cs
+└── Core/Blackjack/Rewards/
+    └── BattleRewardResolver.cs
+
+StreamingAssets/Items/
+└── item_catalog.json
+
+UI/Store/
+├── StoreView.uxml
+├── StoreItemView.uxml
+├── StoreStyles.uss
+└── DefaultPanelSettings.asset
+
+Art/Store/
+└── MagicDungeonBackground.png
+
+Resources/Icons/
+├── Espada de Ouro.png
+├── Escudo de Prata.png
+├── Poção de Vida.png
+├── Amuleto Mágico.png
+└── CoinFrames/ (1-6.png)
+
+Scenes/
+└── Store.unity
+```
+
+#### Extensibilidade
+
+- **Novos consumíveis:** novo `consumableEffect` + ramo em `ConsumableBattleEffects` / `ParseConsumableAction`.
+- **Drops de itens:** `BattleRewardResolver` pode ser estendido com tabela de drops por dificuldade.
+- **Equip slots:** futuramente adicionar `equippedItemIds` ao save para separar posse de uso.
+- **Novos itens:** adicionar entrada no `item_catalog.json` + novo valor no `ItemId` enum.
+
+### 2026-04-09 — Combate: inimigo por dificuldade da fase
+
+- **`EnemyCombatBalance`:** mapeia `CombatEquationDifficulty` → vida máxima e `DamageMultiplier` do `Enemy` (Easy/Medium/Hard).
+- **Entrada na batalha:** `BlackjackController.Awake` preenche `_game.Enemy` antes do primeiro `NewRound`.
+- **Dano:** `RoundDamageResolver` aplica `enemy.DamageMultiplier` quando o dano é ao jogador; UI do resumo de rodada mostra a cadeia `× 10 × mult` do atacante.
+
+### 2026-04-09 — Consumíveis (poção, save, loja, uso em combate)
+
+- **`SaveData.consumableSlots`**, máximo 3; poção no JSON: `heal` + `consumableValue` 50.
+- **Loja:** contador N/3; compra não usa `ownedItemIds` para consumíveis.
+- **Combate:** atalhos numéricos 1–3; feedback em `txtBattleCenter`; item removido do save após uso.
+>>>>>>> Stashed changes
