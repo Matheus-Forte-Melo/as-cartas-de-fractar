@@ -11,9 +11,9 @@ namespace Blackjack.Core
         public static int GetCoinReward(CombatEquationDifficulty difficulty) =>
             difficulty switch
             {
-                CombatEquationDifficulty.Easy => 10,
-                CombatEquationDifficulty.Medium => 50,
-                CombatEquationDifficulty.Hard => 100,
+                CombatEquationDifficulty.Easy => 100,
+                CombatEquationDifficulty.Medium => 250,
+                CombatEquationDifficulty.Hard => 500,
                 _ => 10
             };
 

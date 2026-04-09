@@ -57,9 +57,7 @@ namespace Blackjack.Core
         }
     }
 
-    /// <summary>
-    /// Dano ao fim da rodada (GDD: distância da mão do perdedor ao limite × multiplicador).
-    /// </summary>
+
     public static class RoundDamageResolver
     {
         public static RoundDamageOutcome ResolveAndApply(
