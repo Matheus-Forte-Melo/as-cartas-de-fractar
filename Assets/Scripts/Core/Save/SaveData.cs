@@ -10,6 +10,8 @@ public class SaveData
     public int currentSeed;
     public int playerHealth = 100;
     public List<string> ownedItemIds = new();
+    /// <summary>Até 3 IDs de consumíveis (sem stack; mesma id pode repetir em slots diferentes).</summary>
+    public List<string> consumableSlots = new();
     public List<SeedHistoryEntry> seedHistory = new();
 }
 

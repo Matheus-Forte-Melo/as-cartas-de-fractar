@@ -10,9 +10,12 @@
         <ui:VisualElement class="store-header">
             <ui:VisualElement name="StoreTitleContainer" class="store-title-container" />
             <ui:VisualElement class="header-right">
-                <ui:VisualElement style="flex-direction: row; align-items: center;">
-                    <ui:Label name="PlayerBalance" text="Saldo: 1000" class="player-balance" />
-                    <ui:VisualElement class="coin-icon" style="margin-right: 20px;" />
+                <ui:VisualElement style="flex-direction: column; align-items: flex-end;">
+                    <ui:VisualElement style="flex-direction: row; align-items: center;">
+                        <ui:Label name="PlayerBalance" text="Saldo: 1000" class="player-balance" />
+                        <ui:VisualElement class="coin-icon" style="margin-right: 20px;" />
+                    </ui:VisualElement>
+                    <ui:Label name="ConsumableSlotsLabel" text="Consumíveis: 0/3" class="consumable-slots-label" />
                 </ui:VisualElement>
                 <ui:Button name="BackButton" text="Voltar" class="back-button" />
             </ui:VisualElement>

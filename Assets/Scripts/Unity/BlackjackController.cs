@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -39,9 +40,11 @@ public class BlackjackController : MonoBehaviour
     public Button btnStand;
 
     private BlackjackGame _game;
+    private SaveData _save;
     private bool _battleOver;
     private bool _roundResolutionActive;
     private bool _waitingRoundContinue;
+    private bool _usingConsumable;
     private string _centerFeedLine = "";
 
     private const string DefaultDeckFile = "config_cards.json";
@@ -61,10 +64,13 @@ public class BlackjackController : MonoBehaviour
         var config = LoadDeckConfig();
         _game = new BlackjackGame(config);
 
-        SaveData save = SaveManager.Load();
-        _game.Player.Health = save.playerHealth;
-        _game.Player.MaxHealth = PlayerItemStats.CalculateMaxHealth(save);
-        _game.Player.DamageMultiplier = PlayerItemStats.CalculateDamageMultiplier(save);
+        _save = SaveManager.Load();
+        if (_save.consumableSlots == null)
+            _save.consumableSlots = new List<string>();
+
+        _game.Player.Health = _save.playerHealth;
+        _game.Player.MaxHealth = PlayerItemStats.CalculateMaxHealth(_save);
+        _game.Player.DamageMultiplier = PlayerItemStats.CalculateDamageMultiplier(_save);
 
         CombatEquationDifficulty combatDifficulty = RunState.CurrentCombatDifficulty;
         int enemyHp = EnemyCombatBalance.GetEnemyMaxHealth(combatDifficulty);
@@ -103,11 +109,103 @@ public class BlackjackController : MonoBehaviour
 
     private void Update()
     {
+        if (!_battleOver && !_roundResolutionActive && !_usingConsumable && _game != null
+            && _game.State == GameState.PlayerTurn && !_game.IsRoundOver)
+        {
+            TryConsumableHotkeys();
+        }
+
         if (!_waitingRoundContinue)
             return;
 
         if (TryGetAnyInputDown())
             _waitingRoundContinue = false;
+    }
+
+    private void TryConsumableHotkeys()
+    {
+        if (Keyboard.current == null)
+            return;
+
+        if (Keyboard.current.digit1Key.wasPressedThisFrame)
+            TryStartUseConsumable(0);
+        else if (Keyboard.current.digit2Key.wasPressedThisFrame)
+            TryStartUseConsumable(1);
+        else if (Keyboard.current.digit3Key.wasPressedThisFrame)
+            TryStartUseConsumable(2);
+    }
+
+    private void TryStartUseConsumable(int slotIndex)
+    {
+        if (_save.consumableSlots == null || slotIndex < 0 || slotIndex >= _save.consumableSlots.Count)
+        {
+            StartCoroutine(FlashConsumableMessageCoroutine("Slot vazio."));
+            return;
+        }
+
+        StartCoroutine(UseConsumableRoutine(slotIndex));
+    }
+
+    private IEnumerator FlashConsumableMessageCoroutine(string message)
+    {
+        SetCenterFeedLine(message);
+        yield return new WaitForSeconds(0.45f);
+        if (_game.State == GameState.PlayerTurn && !_game.IsRoundOver)
+            ClearCenterFeedOnly();
+    }
+
+    private IEnumerator UseConsumableRoutine(int slotIndex)
+    {
+        if (_save.consumableSlots == null || slotIndex < 0 || slotIndex >= _save.consumableSlots.Count)
+            yield break;
+
+        string itemId = _save.consumableSlots[slotIndex];
+        ItemDefinition def = ItemCatalog.Get(itemId);
+        if (def == null || def.ItemType != ItemType.Consumable)
+        {
+            Debug.LogWarning($"[BlackjackController] Consumível inválido no slot {slotIndex}: {itemId}");
+            yield break;
+        }
+
+        if (def.ParseConsumableAction() == ConsumableActionType.None)
+        {
+            Debug.LogWarning($"[BlackjackController] Efeito de consumível não suportado: {itemId}");
+            yield break;
+        }
+
+        _usingConsumable = true;
+        SetPlayerActionsEnabled(false);
+
+        if (txtBattleCenter != null)
+            txtBattleCenter.text = $"Usando \"{def.displayName}\"...";
+
+        yield return new WaitForSeconds(0.85f);
+
+        if (!ConsumableBattleEffects.TryApply(def, _game.Player, out string resultMessage))
+        {
+            _usingConsumable = false;
+            if (_game.State == GameState.PlayerTurn && !_game.IsRoundOver)
+                SetPlayerActionsEnabled(true);
+            yield break;
+        }
+
+        _save.playerHealth = _game.Player.Health;
+        _save.consumableSlots.RemoveAt(slotIndex);
+        SaveManager.Save(_save);
+
+        txtPlayerHealth.text = $"Vida: {_game.Player.Health}";
+
+        if (txtBattleCenter != null)
+            txtBattleCenter.text = $"<b>{def.displayName}</b>\n\n{resultMessage}";
+
+        yield return new WaitForSeconds(0.65f);
+
+        _usingConsumable = false;
+        if (_game.State == GameState.PlayerTurn && !_game.IsRoundOver)
+        {
+            ClearCenterFeedOnly();
+            SetPlayerActionsEnabled(true);
+        }
     }
 
     private static bool TryGetAnyInputDown()

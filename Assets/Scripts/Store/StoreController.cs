@@ -8,6 +8,8 @@ namespace Store
 {
     public class StoreController : MonoBehaviour
     {
+        public const int MaxConsumableSlots = 3;
+
         [Header("UI Document")]
         [SerializeField] private UIDocument uiDocument;
 
@@ -17,6 +19,7 @@ namespace Store
         private VisualElement root;
         private VisualElement itemsGrid;
         private Label balanceLabel;
+        private Label consumableSlotsLabel;
         private VisualElement modalOverlay;
         private Label modalTitle;
         private Label modalMessage;
@@ -40,8 +43,10 @@ namespace Store
             if (uiDocument != null && storeItemTemplate != null)
             {
                 _save = SaveManager.Load();
+                EnsureConsumableList();
                 InitializeUI();
                 UpdateBalanceDisplay();
+                UpdateConsumableSlotsDisplay();
                 LoadStoreData();
             }
             else
@@ -49,6 +54,16 @@ namespace Store
                 Debug.LogError("[StoreController] UIDocument ou storeItemTemplate não referenciados!");
             }
         }
+
+        private static void EnsureConsumableList(SaveData save)
+        {
+            if (save.consumableSlots == null)
+                save.consumableSlots = new List<string>();
+        }
+
+        private void EnsureConsumableList() => EnsureConsumableList(_save);
+
+        private int ConsumableSlotCount => _save.consumableSlots?.Count ?? 0;
 
         private void InitializeUI()
         {
@@ -60,6 +75,7 @@ namespace Store
                 backButton.clicked += OnBackButtonClicked;
 
             balanceLabel = root.Q<Label>("PlayerBalance");
+            consumableSlotsLabel = root.Q<Label>("ConsumableSlotsLabel");
 
             modalOverlay = root.Q<VisualElement>("ConfirmationModal");
             modalTitle = root.Q<Label>("ModalTitle");
@@ -90,9 +106,20 @@ namespace Store
                 }
             }
 
+            RebuildCoinIconCache();
+            root.schedule.Execute(AnimateLoop).Every(100);
+        }
+
+        private void RebuildCoinIconCache()
+        {
             _coinIcons.Clear();
             root.Query<VisualElement>(className: "coin-icon").ForEach(el => _coinIcons.Add(el));
-            root.schedule.Execute(AnimateLoop).Every(100);
+        }
+
+        private void UpdateConsumableSlotsDisplay()
+        {
+            if (consumableSlotsLabel != null)
+                consumableSlotsLabel.text = $"Consumíveis: {ConsumableSlotCount}/{MaxConsumableSlots}";
         }
 
         private void AnimateLoop()
@@ -134,6 +161,8 @@ namespace Store
 
             foreach (var item in ItemCatalog.All)
                 InstantiateItem(item);
+
+            RebuildCoinIconCache();
         }
 
         private void InstantiateItem(ItemDefinition itemData)
@@ -156,8 +185,8 @@ namespace Store
             if (iconSprite != null && itemIcon != null)
                 itemIcon.style.backgroundImage = new StyleBackground(iconSprite);
 
-            bool alreadyOwned = _save.ownedItemIds != null && _save.ownedItemIds.Contains(itemData.id);
             bool isConsumable = itemData.ItemType == ItemType.Consumable;
+            bool alreadyOwned = !isConsumable && _save.ownedItemIds != null && _save.ownedItemIds.Contains(itemData.id);
 
             if (buyButton != null)
             {
@@ -167,7 +196,10 @@ namespace Store
                 }
                 else if (isConsumable)
                 {
-                    SetButtonPurchased(buyButton, "Em breve");
+                    if (ConsumableSlotCount >= MaxConsumableSlots)
+                        SetButtonPurchased(buyButton, "Inventário cheio (3/3)");
+                    else
+                        buyButton.clicked += () => OnBuyItemClicked(itemData, buyButton);
                 }
                 else
                 {
@@ -185,8 +217,6 @@ namespace Store
             }
 
             itemsGrid.Add(itemInstance);
-
-            itemInstance.Query<VisualElement>(className: "coin-icon").ForEach(el => _coinIcons.Add(el));
         }
 
         private void SetButtonPurchased(Button btn, string label)
@@ -209,6 +239,19 @@ namespace Store
             if (modalOverlay == null) return;
 
             modalOverlay.style.display = DisplayStyle.Flex;
+
+            bool isConsumable = itemData.ItemType == ItemType.Consumable;
+            if (isConsumable && ConsumableSlotCount >= MaxConsumableSlots)
+            {
+                modalTitle.text = "Inventário cheio";
+                modalMessage.text =
+                    "Você já tem 3 consumíveis. Use um na batalha antes de comprar outro.";
+                modalMessage.AddToClassList("error");
+                modalCancelBtn.style.display = DisplayStyle.Flex;
+                modalConfirmBtn.style.display = DisplayStyle.None;
+                modalCancelBtn.text = "Fechar";
+                return;
+            }
 
             if (_save.coins >= itemData.price)
             {
@@ -242,6 +285,28 @@ namespace Store
         private void ConfirmPurchase()
         {
             if (_pendingItem == null) return;
+
+            if (_pendingItem.ItemType == ItemType.Consumable)
+            {
+                EnsureConsumableList();
+                if (ConsumableSlotCount >= MaxConsumableSlots)
+                {
+                    Debug.LogWarning("[Store] Tentativa de compra de consumível com inventário cheio.");
+                    CloseModal();
+                    return;
+                }
+
+                _save.coins -= _pendingItem.price;
+                _save.consumableSlots.Add(_pendingItem.id);
+                SaveManager.Save(_save);
+                UpdateBalanceDisplay();
+                UpdateConsumableSlotsDisplay();
+                Debug.Log($"[Store] Consumível: {_pendingItem.displayName}. Slots: {ConsumableSlotCount}/{MaxConsumableSlots}");
+
+                CloseModal();
+                LoadStoreData();
+                return;
+            }
 
             _save.coins -= _pendingItem.price;
             _save.ownedItemIds ??= new List<string>();

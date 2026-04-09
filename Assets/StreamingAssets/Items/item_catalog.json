@@ -27,14 +27,14 @@
     {
       "id": "health_potion",
       "displayName": "Poção de Vida",
-      "description": "Restaura 30 pontos de vida. (Em breve)",
+      "description": "Restaura 50 pontos de vida na batalha (até o máximo atual). Ocupa 1 dos 3 slots de consumíveis.",
       "type": "consumable",
       "price": 50,
       "icon": "Icons/Poção de Vida",
       "attackMultiplier": 1.0,
       "bonusHealth": 0,
       "consumableEffect": "heal",
-      "consumableValue": 30
+      "consumableValue": 50
     },
     {
       "id": "magic_amulet",

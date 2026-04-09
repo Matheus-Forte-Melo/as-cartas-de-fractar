@@ -32,6 +32,17 @@ namespace Items
             "magic_amulet" => ItemId.MagicAmulet,
             _ => ItemId.None
         };
+
+        public ConsumableActionType ParseConsumableAction()
+        {
+            if (string.IsNullOrWhiteSpace(consumableEffect))
+                return ConsumableActionType.None;
+            return consumableEffect.Trim().ToLowerInvariant() switch
+            {
+                "heal" => ConsumableActionType.Heal,
+                _ => ConsumableActionType.None
+            };
+        }
     }
 
     [Serializable]
