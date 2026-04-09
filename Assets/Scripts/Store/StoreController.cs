@@ -28,6 +28,7 @@ namespace Store
         private Button _pendingBuyButton;
 
         private List<Label> titleChars = new();
+        private List<VisualElement> _coinIcons = new();
         private float titleTimeElapsed;
         private float currentCoinRotation;
 
@@ -89,12 +90,14 @@ namespace Store
                 }
             }
 
-            root.schedule.Execute(AnimateLoop).Every(33);
+            _coinIcons.Clear();
+            root.Query<VisualElement>(className: "coin-icon").ForEach(el => _coinIcons.Add(el));
+            root.schedule.Execute(AnimateLoop).Every(100);
         }
 
         private void AnimateLoop()
         {
-            float dt = 0.033f;
+            const float dt = 0.1f;
 
             if (titleChars.Count > 0)
             {
@@ -107,17 +110,16 @@ namespace Store
                 }
             }
 
-            currentCoinRotation += 5f;
+            currentCoinRotation += 15f;
             if (currentCoinRotation >= 360f) currentCoinRotation -= 360f;
 
             float rad = currentCoinRotation * Mathf.Deg2Rad;
             float scaleX = Mathf.Abs(Mathf.Cos(rad));
             if (scaleX < 0.1f) scaleX = 0.1f;
 
-            root.Query<VisualElement>(className: "coin-icon").ForEach(coinIcon =>
-            {
-                coinIcon.style.scale = new StyleScale(new Scale(new Vector3(scaleX, 1f, 1f)));
-            });
+            var scale = new StyleScale(new Scale(new Vector3(scaleX, 1f, 1f)));
+            foreach (var coinIcon in _coinIcons)
+                coinIcon.style.scale = scale;
         }
 
         private void UpdateBalanceDisplay()
@@ -183,6 +185,8 @@ namespace Store
             }
 
             itemsGrid.Add(itemInstance);
+
+            itemInstance.Query<VisualElement>(className: "coin-icon").ForEach(el => _coinIcons.Add(el));
         }
 
         private void SetButtonPurchased(Button btn, string label)

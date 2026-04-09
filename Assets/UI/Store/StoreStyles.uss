@@ -1,5 +1,10 @@
+:root {
+    flex-grow: 1;
+}
+
 Label, Button {
     -unity-font-definition: initial;
+    -unity-font: url('/Assets/TextMesh Pro/Fonts/LiberationSans.ttf');
 }
 
 .store-container {
@@ -35,7 +40,6 @@ Label, Button {
 .back-button {
     font-size: 24px;
     -unity-font-style: bold;
-    -unity-font-definition: initial;
     color: white;
     -unity-text-align: middle-center;
     background-color: #FFA12B;
@@ -52,7 +56,6 @@ Label, Button {
     border-bottom-width: 10px;
     border-bottom-color: #915100;
     
-    text-shadow: 2px 2px 0 #915100;
     margin-bottom: 0;
     
     cursor: link;
@@ -89,10 +92,7 @@ Label, Button {
     border-radius: 10px;
     background-color: rgb(255, 215, 0);
     border-width: 2px;
-    border-color: rgb(218, 165, 32); /* Goldenrod border */
-    /* Add a subtle inset shadow effect using border and background */
-    transition-property: scale, background-color;
-    transition-duration: 0.8s;
+    border-color: rgb(218, 165, 32);
 }
 
 .items-grid {
@@ -115,11 +115,9 @@ Label, Button {
     justify-content: space-between;
     border-width: 2px;
     border-color: rgba(80, 90, 130, 0.8);
-    transition-duration: 0.2s;
 }
 
 .store-item:hover {
-    scale: 1.05;
     border-color: rgb(120, 160, 255);
     background-color: rgba(40, 45, 65, 0.95);
 }
@@ -170,8 +168,6 @@ Label, Button {
     left: 0; right: 0; top: 8px; bottom: -8px;
     background-color: #371b5b;
     border-radius: 8px;
-    transition-duration: 0.3s;
-    transition-property: background-color;
 }
 
 .buy-btn-container:hover .buy-btn-shadow {
@@ -185,8 +181,6 @@ Label, Button {
     border-radius: 8px;
     align-items: center;
     justify-content: center;
-    transition-duration: 0.3s;
-    transition-property: background-color, translate;
 }
 
 .buy-btn-container:hover .buy-btn-top {
@@ -197,16 +191,12 @@ Label, Button {
     color: rgb(200, 180, 230);
     font-size: 18px;
     -unity-font-style: bold;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-    transition-duration: 0.3s;
-    transition-property: color;
     padding: 0;
     margin: 0;
 }
 
 .buy-btn-container:hover .buy-btn-label {
     color: white;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
 }
 
 .buy-btn-glow {
@@ -214,12 +204,10 @@ Label, Button {
     left: -10px; right: -10px; top: -10px; bottom: -10px;
     border-radius: 12px;
     background-color: rgba(166, 97, 255, 0.0);
-    transition-duration: 0.3s;
-    transition-property: background-color;
 }
 
 .buy-btn-container:hover .buy-btn-glow {
-    background-color: rgba(166, 97, 255, 0.15);
+    background-color: rgba(166, 97, 255, 0.1);
 }
 
 /* Active / Pressed State */
@@ -347,7 +335,6 @@ Label, Button {
     padding: 0;
     margin: 0;
     cursor: link;
-    transition-duration: 0.2s;
 }
 
 .info-btn:hover {
