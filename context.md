@@ -350,15 +350,12 @@ Core/
 
 ### 2026-04-05 — (histórico) Feed e resumos em vários TMP
 
-<<<<<<< Updated upstream
-- Obsoleto: múltiplos TMP para resumo e feed; consolidado em **`txtBattleCenter`** (ver entrada “HUD central unificado”).
-=======
 - Obsoleto: múltiplos TMP para resumo e feed; consolidado em **`txtBattleCenter`** (ver entrada “HUD central unificado”).
 
 ### 2026-04-09 — Loja, sistema de itens e recompensas
 
 - **Pasta `AssetsTempLoja/`** (projeto externo) integrada como cena isolada; assets úteis migrados, lixo deletado.
-- **Cena `Assets/Scenes/Store.unity`** no Build Settings. Camera + `UIDocument` (UI Toolkit) + `StoreController`. Não acessível pelas demais cenas por enquanto; transição via `SceneManager.LoadScene("Store")`.
+- **Cena `Assets/Scenes/Store.unity`** no Build Settings. Camera + `UIDocument` (UI Toolkit) + `StoreController`. **Atalho de dev no mapa:** `TemporaryMapStoreAccess` (ver §11 «ATENÇÃO — Loja temporária no mapa»); `StoreController` volta com `LoadScene("Map")`.
 
 #### Sistema de itens (`Assets/Scripts/Items/`)
 
@@ -467,4 +464,14 @@ Scenes/
 - **`SaveData.consumableSlots`**, máximo 3; poção no JSON: `heal` + `consumableValue` 50.
 - **Loja:** contador N/3; compra não usa `ownedItemIds` para consumíveis.
 - **Combate:** atalhos numéricos 1–3; feedback em `txtBattleCenter`; item removido do save após uso.
->>>>>>> Stashed changes
+
+### ATENÇÃO — Loja temporária no mapa (remover ao integrar a UI real)
+
+> **Provisório — não é desenho de UX final.** Quem ligar a loja a nós/hub deve **apagar** este atalho e usar só o fluxo novo.
+
+- **Código:** [`Assets/Scripts/Map/TemporaryMapStoreAccess.cs`](Assets/Scripts/Map/TemporaryMapStoreAccess.cs) — componente na cena **`Map.unity`** no GameObject **`MapGenerator`**.
+- **Runtime:** com `createRuntimeUi` ativo (default), no `Start` cria **`TEMP_MapShopButtonRoot`** sob o `TransitionCanvas`, canto superior direito, rótulo **“Loja [TEMP]”** → `SceneManager.LoadScene("Store")`. Desmarcar `createRuntimeUi` no Inspector desliga sem remover o script.
+- **Input:** a cena `Map` inclui **`EventSystem`** + **`InputSystemUIInputModule`** (como em `Core`) — sem isto o `Button` não recebe clique. **`MapUiRaycasts`** + alterações em **`MapNavigation`** / **`NodeInteraction`** ignoram drag, scroll e clique em nó quando o ponteiro está sobre UI (evita o drag do mapa roubar o clique na loja).
+- **`TransitionCanvas`:** `sortingOrder` elevado (50) para a UI do mapa ficar por cima do conteúdo que competir por input.
+- **Checklist de remoção:** (1) tirar o componente da cena `Map`; (2) apagar `TemporaryMapStoreAccess.cs` + `.meta`; (3) `grep` por `LoadScene("Store")` e garantir entrada única pelo fluxo definitivo; (4) apagar **`TEMP_MapShopButtonRoot`** da hierarquia se existir após testes em Play Mode.
+- **GDD:** em **§2.1** / **§9** a loja na run segue **cortada**; isto é só **atalho de desenvolvimento**.

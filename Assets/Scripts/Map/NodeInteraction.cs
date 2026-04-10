@@ -72,8 +72,14 @@ public class NodeInteraction : MonoBehaviour
 
         if (mouse.leftButton.wasPressedThisFrame)
         {
-            _isPressed = true;
-            _pressPosition = mouse.position.ReadValue();
+            Vector2 press = mouse.position.ReadValue();
+            if (MapUiRaycasts.IsScreenPositionOverUi(press))
+                _isPressed = false;
+            else
+            {
+                _isPressed = true;
+                _pressPosition = press;
+            }
         }
 
         if (mouse.leftButton.wasReleasedThisFrame && _isPressed)
@@ -82,6 +88,8 @@ public class NodeInteraction : MonoBehaviour
             Vector2 releasePos = mouse.position.ReadValue();
             if (Vector2.Distance(_pressPosition, releasePos) < DragThreshold)
             {
+                if (MapUiRaycasts.IsScreenPositionOverUi(releasePos))
+                    return;
                 Vector3 worldPos = mainCamera.ScreenToWorldPoint(new Vector3(releasePos.x, releasePos.y, 0f));
                 TrySelectNode(new Vector2(worldPos.x, worldPos.y));
             }

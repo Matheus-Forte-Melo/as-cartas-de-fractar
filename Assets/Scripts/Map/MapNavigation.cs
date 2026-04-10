@@ -91,6 +91,9 @@ public class MapNavigation : MonoBehaviour
         var mouse = Mouse.current;
         if (mouse == null) return;
 
+        if (MapUiRaycasts.IsMouseOverUi())
+            return;
+
         float scrollRaw = mouse.scroll.ReadValue().y;
         if (Mathf.Abs(scrollRaw) < 0.01f) return;
 
@@ -136,6 +139,8 @@ public class MapNavigation : MonoBehaviour
 
         if (touch.phase == UnityEngine.InputSystem.TouchPhase.Began)
         {
+            if (MapUiRaycasts.IsScreenPositionOverUi(touch.screenPosition))
+                return;
             _isDragging = true;
             _lastPointerPosition = touch.screenPosition;
             return;

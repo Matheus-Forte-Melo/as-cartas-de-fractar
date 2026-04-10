@@ -1,0 +1,52 @@
+{
+  "items": [
+    {
+      "id": "sword_gold",
+      "displayName": "Espada de Ouro",
+      "description": "Espada forjada em ouro puro. +15% de dano em combate.",
+      "type": "attack",
+      "price": 500,
+      "icon": "Icons/Espada de Ouro",
+      "attackMultiplier": 1.15,
+      "bonusHealth": 0,
+      "consumableEffect": "",
+      "consumableValue": 0
+    },
+    {
+      "id": "shield_silver",
+      "displayName": "Escudo de Prata",
+      "description": "Escudo leve e resistente. +20 de vida máxima.",
+      "type": "defense",
+      "price": 300,
+      "icon": "Icons/Escudo de Prata",
+      "attackMultiplier": 1.0,
+      "bonusHealth": 20,
+      "consumableEffect": "",
+      "consumableValue": 0
+    },
+    {
+      "id": "health_potion",
+      "displayName": "Poção de Vida",
+      "description": "Restaura 50 pontos de vida na batalha (até o máximo atual). Ocupa 1 dos 3 slots de consumíveis.",
+      "type": "consumable",
+      "price": 50,
+      "icon": "Icons/Poção de Vida",
+      "attackMultiplier": 1.0,
+      "bonusHealth": 0,
+      "consumableEffect": "heal",
+      "consumableValue": 50
+    },
+    {
+      "id": "magic_amulet",
+      "displayName": "Amuleto Mágico",
+      "description": "Proteção arcana poderosa. +30 de vida máxima.",
+      "type": "defense",
+      "price": 1200,
+      "icon": "Icons/Amuleto Mágico",
+      "attackMultiplier": 1.0,
+      "bonusHealth": 30,
+      "consumableEffect": "",
+      "consumableValue": 0
+    }
+  ]
+}

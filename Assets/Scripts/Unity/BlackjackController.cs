@@ -1,4 +1,6 @@
 using System.Collections;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using TMPro;
@@ -8,6 +10,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Blackjack.Core;
 using Blackjack.Decks;
+using Items;
 
 // Serve como intermediário entre UI Unity (do jogador) e Código (da lógica do 21 e do inimigo).
 // Define ações para os botões e exibe feedback na tela conforme estado
@@ -37,13 +40,22 @@ public class BlackjackController : MonoBehaviour
     public Button btnStand;
 
     private BlackjackGame _game;
+    private SaveData _save;
     private bool _battleOver;
     private bool _roundResolutionActive;
     private bool _waitingRoundContinue;
+    private bool _usingConsumable;
     private string _centerFeedLine = "";
 
     private const string DefaultDeckFile = "config_cards.json";
     private const int DamageMultiplierDisplay = 10;
+
+    private static string FormatAttackerMultiplier(float multiplier)
+    {
+        if (multiplier <= 0f)
+            return "0";
+        return multiplier.ToString("0.##", CultureInfo.InvariantCulture);
+    }
 
     private void Awake()
     {
@@ -52,8 +64,19 @@ public class BlackjackController : MonoBehaviour
         var config = LoadDeckConfig();
         _game = new BlackjackGame(config);
 
-        SaveData save = SaveManager.Load();
-        _game.Player.Health = save.playerHealth;
+        _save = SaveManager.Load();
+        if (_save.consumableSlots == null)
+            _save.consumableSlots = new List<string>();
+
+        _game.Player.Health = _save.playerHealth;
+        _game.Player.MaxHealth = PlayerItemStats.CalculateMaxHealth(_save);
+        _game.Player.DamageMultiplier = PlayerItemStats.CalculateDamageMultiplier(_save);
+
+        CombatEquationDifficulty combatDifficulty = RunState.CurrentCombatDifficulty;
+        int enemyHp = EnemyCombatBalance.GetEnemyMaxHealth(combatDifficulty);
+        _game.Enemy.MaxHealth = enemyHp;
+        _game.Enemy.Health = enemyHp;
+        _game.Enemy.DamageMultiplier = EnemyCombatBalance.GetEnemyDamageMultiplier(combatDifficulty);
 
         btnHit.onClick.AddListener(OnHit);
         btnStand.onClick.AddListener(OnStand);
@@ -86,11 +109,103 @@ public class BlackjackController : MonoBehaviour
 
     private void Update()
     {
+        if (!_battleOver && !_roundResolutionActive && !_usingConsumable && _game != null
+            && _game.State == GameState.PlayerTurn && !_game.IsRoundOver)
+        {
+            TryConsumableHotkeys();
+        }
+
         if (!_waitingRoundContinue)
             return;
 
         if (TryGetAnyInputDown())
             _waitingRoundContinue = false;
+    }
+
+    private void TryConsumableHotkeys()
+    {
+        if (Keyboard.current == null)
+            return;
+
+        if (Keyboard.current.digit1Key.wasPressedThisFrame)
+            TryStartUseConsumable(0);
+        else if (Keyboard.current.digit2Key.wasPressedThisFrame)
+            TryStartUseConsumable(1);
+        else if (Keyboard.current.digit3Key.wasPressedThisFrame)
+            TryStartUseConsumable(2);
+    }
+
+    private void TryStartUseConsumable(int slotIndex)
+    {
+        if (_save.consumableSlots == null || slotIndex < 0 || slotIndex >= _save.consumableSlots.Count)
+        {
+            StartCoroutine(FlashConsumableMessageCoroutine("Slot vazio."));
+            return;
+        }
+
+        StartCoroutine(UseConsumableRoutine(slotIndex));
+    }
+
+    private IEnumerator FlashConsumableMessageCoroutine(string message)
+    {
+        SetCenterFeedLine(message);
+        yield return new WaitForSeconds(0.45f);
+        if (_game.State == GameState.PlayerTurn && !_game.IsRoundOver)
+            ClearCenterFeedOnly();
+    }
+
+    private IEnumerator UseConsumableRoutine(int slotIndex)
+    {
+        if (_save.consumableSlots == null || slotIndex < 0 || slotIndex >= _save.consumableSlots.Count)
+            yield break;
+
+        string itemId = _save.consumableSlots[slotIndex];
+        ItemDefinition def = ItemCatalog.Get(itemId);
+        if (def == null || def.ItemType != ItemType.Consumable)
+        {
+            Debug.LogWarning($"[BlackjackController] Consumível inválido no slot {slotIndex}: {itemId}");
+            yield break;
+        }
+
+        if (def.ParseConsumableAction() == ConsumableActionType.None)
+        {
+            Debug.LogWarning($"[BlackjackController] Efeito de consumível não suportado: {itemId}");
+            yield break;
+        }
+
+        _usingConsumable = true;
+        SetPlayerActionsEnabled(false);
+
+        if (txtBattleCenter != null)
+            txtBattleCenter.text = $"Usando \"{def.displayName}\"...";
+
+        yield return new WaitForSeconds(0.85f);
+
+        if (!ConsumableBattleEffects.TryApply(def, _game.Player, out string resultMessage))
+        {
+            _usingConsumable = false;
+            if (_game.State == GameState.PlayerTurn && !_game.IsRoundOver)
+                SetPlayerActionsEnabled(true);
+            yield break;
+        }
+
+        _save.playerHealth = _game.Player.Health;
+        _save.consumableSlots.RemoveAt(slotIndex);
+        SaveManager.Save(_save);
+
+        txtPlayerHealth.text = $"Vida: {_game.Player.Health}";
+
+        if (txtBattleCenter != null)
+            txtBattleCenter.text = $"<b>{def.displayName}</b>\n\n{resultMessage}";
+
+        yield return new WaitForSeconds(0.65f);
+
+        _usingConsumable = false;
+        if (_game.State == GameState.PlayerTurn && !_game.IsRoundOver)
+        {
+            ClearCenterFeedOnly();
+            SetPlayerActionsEnabled(true);
+        }
     }
 
     private static bool TryGetAnyInputDown()
@@ -198,7 +313,7 @@ public class BlackjackController : MonoBehaviour
         while (_game.State == GameState.EnemyTurn)
         {
             SetCenterFeedLine("Inimigo está jogando...");
-            yield return new WaitForSeconds(Random.Range(1.0f, 1.5f));
+            yield return new WaitForSeconds(Random.Range(1.0f, 2.25f));
 
             bool hit = _game.EnemyAct();
             SyncCards();
@@ -394,13 +509,15 @@ public class BlackjackController : MonoBehaviour
             {
                 sb.Append("\n\nDano no inimigo: ").Append(dmg);
                 sb.Append("\n( mão dele ").Append(o.EnemyHandTotal).Append(" → distância até ")
-                    .Append(lim).Append(": ").Append(gap).Append(" → ").Append(gap).Append(" × ").Append(mult).Append(" )");
+                    .Append(lim).Append(": ").Append(gap).Append(" → ").Append(gap).Append(" × ").Append(mult)
+                    .Append(" × ").Append(FormatAttackerMultiplier(_game.Player.DamageMultiplier)).Append(" )");
             }
             else
             {
                 sb.Append("\n\nDano em você: ").Append(dmg);
                 sb.Append("\n( sua mão ").Append(o.PlayerHandTotal).Append(" → distância até ")
-                    .Append(lim).Append(": ").Append(gap).Append(" → ").Append(gap).Append(" × ").Append(mult).Append(" )");
+                    .Append(lim).Append(": ").Append(gap).Append(" → ").Append(gap).Append(" × ").Append(mult)
+                    .Append(" × ").Append(FormatAttackerMultiplier(_game.Enemy.DamageMultiplier)).Append(" )");
             }
         }
 
@@ -434,16 +551,18 @@ public class BlackjackController : MonoBehaviour
         if (playerWon)
         {
             ClearHandValueLabels();
-            if (txtBattleCenter != null)
-            {
-                txtBattleCenter.text =
-                    "<b>Vitória</b>\n\nInimigo derrotado.\n\n<i>A seguir: mapa</i>";
-            }
             RunState.LastBattleResult = BattleResult.Won;
 
             SaveData save = SaveManager.Load();
             save.playerHealth = _game.Player.Health;
+            int coinsEarned = BattleRewardResolver.ApplyVictoryRewards(save, RunState.CurrentCombatDifficulty);
             SaveManager.Save(save);
+
+            if (txtBattleCenter != null)
+            {
+                txtBattleCenter.text =
+                    $"<b>Vitória</b>\n\nInimigo derrotado.\n+{coinsEarned} moedas\n\n<i>A seguir: mapa</i>";
+            }
 
             PostVictoryReturnFlow.RunAfterVictoriousBattle();
         }
@@ -467,7 +586,7 @@ public class BlackjackController : MonoBehaviour
             });
             save.playerRow = -1;
             save.playerCol = -1;
-            save.playerHealth = 100;
+            save.playerHealth = PlayerItemStats.CalculateMaxHealth(save);
             SaveManager.Save(save);
         }
 

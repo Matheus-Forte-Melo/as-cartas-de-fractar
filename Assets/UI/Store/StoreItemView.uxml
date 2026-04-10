@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ui="UnityEngine.UIElements"
+    xsi:noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd">
+
+    <ui:Style src="StoreStyles.uss" />
+
+    <ui:VisualElement class="store-item">
+        <ui:Button name="InfoButton" class="info-btn" text="i" />
+        
+        <ui:VisualElement name="FrontContainer" class="item-front">
+            <ui:VisualElement name="ItemIcon" class="item-icon" />
+            <ui:Label name="ItemName" text="Item Name" class="item-name" />
+            
+            <ui:VisualElement class="item-price-container">
+                <ui:Label name="ItemPrice" text="100" class="item-price" />
+                <ui:VisualElement class="coin-icon" />
+            </ui:VisualElement>
+
+            <ui:Button name="BuyButton" class="buy-btn-container">
+                <ui:VisualElement class="buy-btn-glow" />
+                <ui:VisualElement class="buy-btn-shadow" />
+                <ui:VisualElement class="buy-btn-top">
+                    <ui:Label name="BuyButtonText" text="Comprar" class="buy-btn-label" />
+                </ui:VisualElement>
+            </ui:Button>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="BackContainer" class="item-back">
+            <ui:Label name="ItemDescription" text="Descrição..." class="item-desc" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

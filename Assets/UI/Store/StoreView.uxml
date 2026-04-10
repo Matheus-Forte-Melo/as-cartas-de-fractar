@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ui="UnityEngine.UIElements"
+    xsi:noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd">
+    
+    <ui:Style src="StoreStyles.uss" />
+
+    <ui:VisualElement class="store-container">
+        <ui:VisualElement class="store-header">
+            <ui:VisualElement name="StoreTitleContainer" class="store-title-container" />
+            <ui:VisualElement class="header-right">
+                <ui:VisualElement style="flex-direction: column; align-items: flex-end;">
+                    <ui:VisualElement style="flex-direction: row; align-items: center;">
+                        <ui:Label name="PlayerBalance" text="Saldo: 1000" class="player-balance" />
+                        <ui:VisualElement class="coin-icon" style="margin-right: 20px;" />
+                    </ui:VisualElement>
+                    <ui:Label name="ConsumableSlotsLabel" text="Consumíveis: 0/3" class="consumable-slots-label" />
+                </ui:VisualElement>
+                <ui:Button name="BackButton" text="Voltar" class="back-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        
+        <ui:ScrollView style="width: 100%; flex-grow: 1;">
+            <ui:VisualElement name="ItemsGrid" class="items-grid">
+                <!-- Items will be instantiated here dynamically -->
+            </ui:VisualElement>
+        </ui:ScrollView>
+
+        <!-- Overlay de Confirmação -->
+        <ui:VisualElement name="ConfirmationModal" class="modal-overlay" style="display: none;">
+            <ui:VisualElement class="modal-box">
+                <ui:Label name="ModalTitle" text="Confirmar Compra" class="modal-title" />
+                <ui:Label name="ModalMessage" text="Deseja comprar este item?" class="modal-message" />
+                <ui:VisualElement class="modal-buttons">
+                    <ui:Button name="ModalCancelBtn" text="Cancelar" class="modal-btn-cancel" />
+                    <ui:Button name="ModalConfirmBtn" text="Confirmar" class="modal-btn-confirm" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

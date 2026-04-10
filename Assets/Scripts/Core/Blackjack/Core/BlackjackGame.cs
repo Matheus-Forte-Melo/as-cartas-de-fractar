@@ -13,10 +13,8 @@ namespace Blackjack.Core
 
         public GameState State { get; private set; } = GameState.PlayerTurn;
 
-        /// <summary>Número da rodada na batalha atual (1 na primeira mão).</summary>
         public int CurrentRoundNumber { get; private set; }
 
-        /// <summary>Preenchido ao fechar a rodada com estado terminal (dano aplicado).</summary>
         public RoundDamageOutcome? LastRoundDamageOutcome { get; private set; }
 
         private readonly RoundStartBalance _roundStartBalance = new();

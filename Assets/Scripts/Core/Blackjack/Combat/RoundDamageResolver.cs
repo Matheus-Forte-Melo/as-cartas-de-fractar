@@ -57,9 +57,7 @@ namespace Blackjack.Core
         }
     }
 
-    /// <summary>
-    /// Dano ao fim da rodada (GDD: distância da mão do perdedor ao limite × multiplicador).
-    /// </summary>
+
     public static class RoundDamageResolver
     {
         public static RoundDamageOutcome ResolveAndApply(
@@ -135,6 +133,11 @@ namespace Blackjack.Core
             int damage = (int)Math.Round(rawGap * damageMultiplier);
 
             bool toPlayer = ReferenceEquals(victim, player);
+            if (!toPlayer && player.DamageMultiplier > 0f)
+                damage = (int)Math.Round(damage * player.DamageMultiplier);
+            if (toPlayer && enemy.DamageMultiplier > 0f)
+                damage = (int)Math.Round(damage * enemy.DamageMultiplier);
+
             if (toPlayer)
                 player.ApplyDamage(damage);
             else
