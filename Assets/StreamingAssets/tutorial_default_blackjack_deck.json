@@ -1,0 +1,76 @@
+{
+  "groups": [
+    {
+      "label": "Copas",
+      "cards": [
+        { "value": 2 },
+        { "value": 3 },
+        { "value": 4 },
+        { "value": 5 },
+        { "value": 6 },
+        { "value": 7 },
+        { "value": 8 },
+        { "value": 9 },
+        { "value": 10 },
+        { "value": 10 },
+        { "value": 10 },
+        { "value": 10 },
+        { "ace": true }
+      ]
+    },
+    {
+      "label": "Ouros",
+      "cards": [
+        { "value": 2 },
+        { "value": 3 },
+        { "value": 4 },
+        { "value": 5 },
+        { "value": 6 },
+        { "value": 7 },
+        { "value": 8 },
+        { "value": 9 },
+        { "value": 10 },
+        { "value": 10 },
+        { "value": 10 },
+        { "value": 10 },
+        { "ace": true }
+      ]
+    },
+    {
+      "label": "Espadas",
+      "cards": [
+        { "value": 2 },
+        { "value": 3 },
+        { "value": 4 },
+        { "value": 5 },
+        { "value": 6 },
+        { "value": 7 },
+        { "value": 8 },
+        { "value": 9 },
+        { "value": 10 },
+        { "value": 10 },
+        { "value": 10 },
+        { "value": 10 },
+        { "ace": true }
+      ]
+    },
+    {
+      "label": "Paus",
+      "cards": [
+        { "value": 2 },
+        { "value": 3 },
+        { "value": 4 },
+        { "value": 5 },
+        { "value": 6 },
+        { "value": 7 },
+        { "value": 8 },
+        { "value": 9 },
+        { "value": 10 },
+        { "value": 10 },
+        { "value": 10 },
+        { "value": 10 },
+        { "ace": true }
+      ]
+    }
+  ]
+}
