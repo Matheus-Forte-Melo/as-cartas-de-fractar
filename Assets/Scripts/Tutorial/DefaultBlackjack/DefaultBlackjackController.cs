@@ -1,8 +1,10 @@
 using System.Collections;
 using System.IO;
 using TMPro;
+using Tutorial.Onboarding;
 using UnityEngine;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 namespace Tutorial.DefaultBlackjack
 {
@@ -15,7 +17,7 @@ namespace Tutorial.DefaultBlackjack
         private const string DefaultDeckFile = "tutorial_default_blackjack_deck.json";
         private const string DefaultTableFile = "tutorial_default_blackjack_table.json";
 
-        [Header("StreamingAssets (apenas nome do ficheiro)")]
+        [Header("StreamingAssets (só o nome do arquivo)")]
         [SerializeField] private string _deckJsonFileName = DefaultDeckFile;
         [SerializeField] private string _tableJsonFileName = DefaultTableFile;
 
@@ -30,8 +32,14 @@ namespace Tutorial.DefaultBlackjack
         [SerializeField] private TMP_Text _txtDealerValue;
         [SerializeField] private TMP_Text _txtRoundLabel;
 
-        [Header("Tempos (animação)")]
-        [SerializeField] private float _dealerStepDelay = 0.65f;
+        [Header("Tempos — mesa (ritmo parecido com o Core)")]
+        [SerializeField] private float _dealerRevealPause = 0.55f;
+        [Tooltip("Pausa antes de cada decisão da mesa (pensando).")]
+        [SerializeField] private float _dealerThinkMin = 0.85f;
+        [SerializeField] private float _dealerThinkMax = 2.05f;
+        [Tooltip("Pausa depois de mostrar o resultado de cada jogada da mesa.")]
+        [SerializeField] private float _dealerAfterCardMin = 0.75f;
+        [SerializeField] private float _dealerAfterCardMax = 1f;
 
         private DefaultBlackjackGame _game;
         private TutorialTableRigConfig _tableRig;
@@ -43,7 +51,10 @@ namespace Tutorial.DefaultBlackjack
             TryAutoWireChildren();
 
             string deckPath = Path.Combine(Application.streamingAssetsPath, _deckJsonFileName);
-            string tablePath = Path.Combine(Application.streamingAssetsPath, _tableJsonFileName);
+            string tableFile = !string.IsNullOrEmpty(DefaultBlackjackSession.TableJsonFileNameOverride)
+                ? DefaultBlackjackSession.TableJsonFileNameOverride
+                : _tableJsonFileName;
+            string tablePath = Path.Combine(Application.streamingAssetsPath, tableFile);
 
             var deckCards = TutorialDeckJsonLoader.LoadDeckFromStreamingPath(deckPath);
             _tableRig = TutorialTableRigJsonLoader.LoadFromStreamingPath(tablePath);
@@ -88,51 +99,51 @@ namespace Tutorial.DefaultBlackjack
 
             if (_btnHit == null)
             {
-                var t = transform.Find("UI/BtnHit");
+                var t = transform.Find("UI/BtnHit") ?? transform.Find("Canvas/BtnHit");
                 if (t != null)
                     _btnHit = t.GetComponent<Button>();
             }
 
             if (_btnStand == null)
             {
-                var t = transform.Find("UI/BtnStand");
+                var t = transform.Find("UI/BtnStand") ?? transform.Find("Canvas/BtnStand");
                 if (t != null)
                     _btnStand = t.GetComponent<Button>();
             }
 
             if (_btnNewRound == null)
             {
-                var t = transform.Find("UI/BtnNewRound");
+                var t = transform.Find("UI/BtnNewRound") ?? transform.Find("Canvas/BtnNewRound");
                 if (t != null)
                     _btnNewRound = t.GetComponent<Button>();
             }
 
             if (_txtCenter == null)
             {
-                var t = transform.Find("UI/TxtCenter");
+                var t = transform.Find("UI/TxtCenter") ?? transform.Find("Canvas/TxtCenter");
                 if (t != null)
                     _txtCenter = t.GetComponent<TMP_Text>();
             }
 
             if (_txtPlayerValue == null)
             {
-                var t = transform.Find("UI/TxtPlayerValue");
+                var t = transform.Find("UI/TxtPlayerValue") ?? transform.Find("Canvas/txtPlayerValue");
                 if (t != null)
                     _txtPlayerValue = t.GetComponent<TMP_Text>();
             }
 
             if (_txtDealerValue == null)
             {
-                var t = transform.Find("UI/TxtDealerValue");
+                var t = transform.Find("UI/TxtDealerValue") ?? transform.Find("Canvas/txtDealerValue");
                 if (t != null)
                     _txtDealerValue = t.GetComponent<TMP_Text>();
             }
 
             if (_txtRoundLabel == null)
             {
-                var t = transform.Find("txtRoundLabel");
-                if (t == null)
-                    t = transform.Find("UI/txtRoundLabel");
+                var t = transform.Find("txtRoundLabel")
+                        ?? transform.Find("UI/txtRoundLabel")
+                        ?? transform.Find("Canvas/txtRoundLabel");
                 if (t != null)
                     _txtRoundLabel = t.GetComponent<TMP_Text>();
             }
@@ -152,6 +163,8 @@ namespace Tutorial.DefaultBlackjack
 
             if (_game.State == DefaultBlackjackState.DealerTurn)
                 _dealerRoutineHandle = StartCoroutine(DealerRoutine());
+
+            EventBridge.TriggerEvent(TutorialBlackjackEventIds.NewRound);
         }
 
         private void OnNewRoundClicked() => StartNewRound();
@@ -162,11 +175,18 @@ namespace Tutorial.DefaultBlackjack
                 return;
 
             ClearCenterMessage();
-            _game.PlayerHit();
-            RefreshUi();
+            try
+            {
+                _game.PlayerHit();
+                RefreshUi();
 
-            if (_game.State == DefaultBlackjackState.DealerTurn && !_dealerRoutineRunning)
-                _dealerRoutineHandle = StartCoroutine(DealerRoutine());
+                if (_game.State == DefaultBlackjackState.DealerTurn && !_dealerRoutineRunning)
+                    _dealerRoutineHandle = StartCoroutine(DealerRoutine());
+            }
+            finally
+            {
+                EventBridge.TriggerEvent(TutorialBlackjackEventIds.PlayerHit);
+            }
         }
 
         private void OnStand()
@@ -175,28 +195,56 @@ namespace Tutorial.DefaultBlackjack
                 return;
 
             ClearCenterMessage();
-            _game.PlayerStand();
-            RefreshUi();
+            try
+            {
+                _game.PlayerStand();
+                RefreshUi();
 
-            if (_game.State == DefaultBlackjackState.DealerTurn && !_dealerRoutineRunning)
-                _dealerRoutineHandle = StartCoroutine(DealerRoutine());
+                if (_game.State == DefaultBlackjackState.DealerTurn && !_dealerRoutineRunning)
+                    _dealerRoutineHandle = StartCoroutine(DealerRoutine());
+            }
+            finally
+            {
+                EventBridge.TriggerEvent(TutorialBlackjackEventIds.PlayerStand);
+            }
         }
 
         private IEnumerator DealerRoutine()
         {
             _dealerRoutineRunning = true;
             SetPlayerActionsEnabled(false);
-            SetCenterMessage("Mesa joga…");
+
+            SetCenterMessage("A mesa revela a carta virada para baixo.");
+            yield return new WaitForSeconds(_dealerRevealPause);
+            RefreshUi();
 
             try
             {
                 while (_game.State == DefaultBlackjackState.DealerTurn)
                 {
+                    SetCenterMessage("A mesa está jogando…");
+                    yield return new WaitForSeconds(Random.Range(_dealerThinkMin, _dealerThinkMax));
+
+                    int dealerCountBefore = _game.Dealer.Cards.Count;
                     bool again = _game.TryDealerStep();
                     RefreshUi();
+
+                    if (_game.State == DefaultBlackjackState.DealerBust)
+                    {
+                        SetCenterMessage("A mesa estourou!");
+                        yield return new WaitForSeconds(Random.Range(_dealerAfterCardMin, _dealerAfterCardMax));
+                        break;
+                    }
+
+                    if (_game.Dealer.Cards.Count > dealerCountBefore)
+                        SetCenterMessage("A mesa compra uma carta.");
+                    else
+                        SetCenterMessage("A mesa encerra a jogada por aqui.");
+
+                    yield return new WaitForSeconds(Random.Range(_dealerAfterCardMin, _dealerAfterCardMax));
+
                     if (!again)
                         break;
-                    yield return new WaitForSeconds(_dealerStepDelay);
                 }
             }
             finally
@@ -207,6 +255,28 @@ namespace Tutorial.DefaultBlackjack
 
             RefreshUi();
             SetPlayerActionsEnabled(false);
+            EventBridge.TriggerEvent(TutorialBlackjackEventIds.DealerTurnVisualDone);
+        }
+
+        /// <summary>Usado pelo fluxo guiado: encerra a vez do jogador e deixa a mesa jogar.</summary>
+        public void ForceStandForGuidedTutorial()
+        {
+            if (_game == null || DefaultBlackjackStateSemantics.IsRoundOver(_game.State))
+                return;
+
+            ClearCenterMessage();
+            try
+            {
+                _game.PlayerStand();
+                RefreshUi();
+
+                if (_game.State == DefaultBlackjackState.DealerTurn && !_dealerRoutineRunning)
+                    _dealerRoutineHandle = StartCoroutine(DealerRoutine());
+            }
+            finally
+            {
+                EventBridge.TriggerEvent(TutorialBlackjackEventIds.PlayerStand);
+            }
         }
 
         private void RefreshUi()
@@ -226,14 +296,14 @@ namespace Tutorial.DefaultBlackjack
             }
 
             if (_txtPlayerValue != null)
-                _txtPlayerValue.text = $"Jogador: {_game.Player.Value}";
+                _txtPlayerValue.text = $"Você: {_game.Player.Value}";
 
             if (_txtDealerValue != null)
             {
                 if (hideHole && _game.Dealer.Cards.Count > 0)
                 {
                     int up = VisibleDealerUpcardValue();
-                    _txtDealerValue.text = $"Mesa: {up} (+ ?)";
+                    _txtDealerValue.text = $"Mesa: {up} (+ carta fechada)";
                 }
                 else
                     _txtDealerValue.text = $"Mesa: {_game.Dealer.Value}";
@@ -257,12 +327,12 @@ namespace Tutorial.DefaultBlackjack
 
             string phase = _game.State switch
             {
-                DefaultBlackjackState.PlayerTurn => "Turno do jogador",
-                DefaultBlackjackState.DealerTurn => "Turno da mesa",
-                DefaultBlackjackState.PlayerBust => "Jogador estourou",
-                DefaultBlackjackState.DealerBust => "Mesa estourou",
-                DefaultBlackjackState.PlayerWin => "Jogador vence",
-                DefaultBlackjackState.DealerWin => "Mesa vence",
+                DefaultBlackjackState.PlayerTurn => "Sua vez",
+                DefaultBlackjackState.DealerTurn => "Vez da mesa",
+                DefaultBlackjackState.PlayerBust => "Você estourou",
+                DefaultBlackjackState.DealerBust => "A mesa estourou",
+                DefaultBlackjackState.PlayerWin => "Você venceu",
+                DefaultBlackjackState.DealerWin => "A mesa venceu",
                 DefaultBlackjackState.Push => "Empate",
                 _ => ""
             };
@@ -301,10 +371,10 @@ namespace Tutorial.DefaultBlackjack
         private static string ResultCaption(DefaultBlackjackState s) =>
             s switch
             {
-                DefaultBlackjackState.PlayerBust => "Estourou — vitória da mesa.",
-                DefaultBlackjackState.DealerBust => "Mesa estourou — você vence.",
-                DefaultBlackjackState.PlayerWin => "Você vence.",
-                DefaultBlackjackState.DealerWin => "Mesa vence.",
+                DefaultBlackjackState.PlayerBust => "Você estourou — a mesa ganha a rodada.",
+                DefaultBlackjackState.DealerBust => "A mesa estourou — você ganha!",
+                DefaultBlackjackState.PlayerWin => "Você ganha!",
+                DefaultBlackjackState.DealerWin => "A mesa ganha.",
                 DefaultBlackjackState.Push => "Empate.",
                 _ => ""
             };

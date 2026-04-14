@@ -1,4 +1,5 @@
 using System.IO;
+using System.Text;
 using UnityEngine;
 
 public static class SaveManager
@@ -45,6 +46,29 @@ public static class SaveManager
         {
             File.Delete(SavePath);
             Debug.Log("[SaveManager] Save deletado.");
+        }
+    }
+
+    /// <summary>
+    /// Se <c>save.json</c> existir mas não tiver a chave <c>main_tutorial_completed</c>, regrava o save com <c>false</c>.
+    /// </summary>
+    public static void EnsureMainTutorialCompletedKeyInSaveFile()
+    {
+        if (!File.Exists(SavePath))
+            return;
+
+        try
+        {
+            string raw = File.ReadAllText(SavePath, Encoding.UTF8);
+            if (raw.Contains("\"main_tutorial_completed\""))
+                return;
+            var data = Load();
+            data.main_tutorial_completed = false;
+            Save(data);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning($"[SaveManager] EnsureMainTutorialCompletedKeyInSaveFile: {ex.Message}");
         }
     }
 

@@ -192,6 +192,7 @@ Tema escuro e místico, runas e símbolos matemáticos, luzes azuis/cianas. Mesa
 
 ## 9. Progressão e Hub
 
+- **`SaveData.main_tutorial_completed`** e **`main_tutorial_step_index`:** no `save.json` para o tutorial principal (onboarding guiado). Com **`main_tutorial_completed`** `true`, o `TutorialManager` **não** auto-inicia o fluxo (se `_respectCompletedFlag` estiver ligado). Ao concluir ou pular, grava **`main_tutorial_completed = true`**. **`ResetTutorialProgress()`** volta o passo a 0 e **`main_tutorial_completed`** a `false`. Detalhe em **`docs/TUTORIAL_ONBOARDING.md`**.
 - Moedas atemporais persistem entre runs
 - Hub com melhorias permanentes básicas compráveis antes de cada run
 - Mapa com nós semi-randomizados (majoritariamente duelos e loot)
@@ -267,7 +268,7 @@ Tema escuro e místico, runas e símbolos matemáticos, luzes azuis/cianas. Mesa
 
 - Renomeada cena `MapPrototype.unity` → `Map.unity`. Adicionadas cenas `Map` e `Core` ao `EditorBuildSettings.asset`.
 - Criado sistema de save em JSON (`Application.persistentDataPath/save.json`):
-  - `Assets/Scripts/Core/Save/SaveData.cs` — dados persistidos: `currentRun`, `playerRow`/`playerCol`, `coins`, `currentSeed`, `playerHealth`, `seedHistory`.
+  - `Assets/Scripts/Core/Save/SaveData.cs` — dados persistidos: `currentRun`, `playerRow`/`playerCol`, `coins`, `currentSeed`, `playerHealth`, `main_tutorial_completed`, `main_tutorial_step_index`, `seedHistory`.
   - `SeedHistoryEntry` — no mesmo ficheiro que `SaveData`.
   - `Assets/Scripts/Core/Save/SaveManager.cs` — classe estática com `Load()`, `Save()`, `Delete()`. Cria defaults seguros no primeiro load (run=1, pos=(-1,-1), seed aleatória, health=100).
 - Criado `Assets/Scripts/Core/Utils/RunState.cs` — classe estática para transporte de dados voláteis entre cenas (`CurrentNodeType`, `CurrentCombatDifficulty`, `LastBattleResult`).
@@ -475,3 +476,9 @@ Scenes/
 - **`TransitionCanvas`:** `sortingOrder` elevado (50) para a UI do mapa ficar por cima do conteúdo que competir por input.
 - **Checklist de remoção:** (1) tirar o componente da cena `Map`; (2) apagar `TemporaryMapStoreAccess.cs` + `.meta`; (3) `grep` por `LoadScene("Store")` e garantir entrada única pelo fluxo definitivo; (4) apagar **`TEMP_MapShopButtonRoot`** da hierarquia se existir após testes em Play Mode.
 - **GDD:** em **§2.1** / **§9** a loja na run segue **cortada**; isto é só **atalho de desenvolvimento**.
+
+### 2026-04-13 — Tutorial principal no save + doc de onboarding
+
+- **`SaveData.main_tutorial_completed`** e **`main_tutorial_step_index`:** persistidos em `save.json`; o `TutorialManager` não usa PlayerPrefs. `SaveManager.EnsureMainTutorialCompletedKeyInSaveFile()` na entrada da cena garante `main_tutorial_completed` no JSON com `false` se faltar.
+- **`GuidedBlackjackNarrative` + evento `tutorial.bj.dealer_turn_visual_done`:** fluxo guiado (mesa após Parar).
+- **Documentação:** [`docs/TUTORIAL_ONBOARDING.md`](docs/TUTORIAL_ONBOARDING.md) — `TutorialManager`, JSON, `EventBridge`, save.

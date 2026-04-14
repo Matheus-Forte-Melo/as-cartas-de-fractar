@@ -11,6 +11,7 @@ using UnityEngine.UI;
 using Blackjack.Core;
 using Blackjack.Decks;
 using Items;
+using Tutorial.Onboarding;
 
 // Serve como intermediário entre UI Unity (do jogador) e Código (da lógica do 21 e do inimigo).
 // Define ações para os botões e exibe feedback na tela conforme estado
@@ -255,57 +256,73 @@ public class BlackjackController : MonoBehaviour
         ClearHandValueLabels();
         _game.NewRound();
         RefreshUI();
+
+        EventBridge.TriggerEvent(TutorialBlackjackEventIds.NewRound);
     }
 
     private void OnHit()
     {
         ClearCenterFeedOnly();
-        _game.PlayerHit();
-        SyncCards();
-
-        if (_game.State == GameState.PlayerBust)
+        try
         {
+            _game.PlayerHit();
+            SyncCards();
+
+            if (_game.State == GameState.PlayerBust)
+            {
+                RefreshUI();
+                return;
+            }
+
+            if (_game.State == GameState.Comparing)
+            {
+                SetPlayerActionsEnabled(false);
+                StartCoroutine(CompareHandsRoutine());
+                return;
+            }
+
+            if (_game.State == GameState.EnemyTurn)
+            {
+                SetPlayerActionsEnabled(false);
+                StartCoroutine(EnemyTurnRoutine());
+                return;
+            }
+
             RefreshUI();
-            return;
         }
-
-        if (_game.State == GameState.Comparing)
+        finally
         {
-            SetPlayerActionsEnabled(false);
-            StartCoroutine(CompareHandsRoutine());
-            return;
+            EventBridge.TriggerEvent(TutorialBlackjackEventIds.PlayerHit);
         }
-
-        if (_game.State == GameState.EnemyTurn)
-        {
-            SetPlayerActionsEnabled(false);
-            StartCoroutine(EnemyTurnRoutine());
-            return;
-        }
-
-        RefreshUI();
     }
 
     private void OnStand()
     {
         ClearCenterFeedOnly();
-        _game.PlayerStand();
-
-        if (_game.State == GameState.Comparing)
+        try
         {
-            SetPlayerActionsEnabled(false);
-            StartCoroutine(CompareHandsRoutine());
-            return;
-        }
+            _game.PlayerStand();
 
-        if (_game.State == GameState.EnemyTurn)
+            if (_game.State == GameState.Comparing)
+            {
+                SetPlayerActionsEnabled(false);
+                StartCoroutine(CompareHandsRoutine());
+                return;
+            }
+
+            if (_game.State == GameState.EnemyTurn)
+            {
+                SetPlayerActionsEnabled(false);
+                StartCoroutine(EnemyTurnRoutine());
+                return;
+            }
+
+            RefreshUI();
+        }
+        finally
         {
-            SetPlayerActionsEnabled(false);
-            StartCoroutine(EnemyTurnRoutine());
-            return;
+            EventBridge.TriggerEvent(TutorialBlackjackEventIds.PlayerStand);
         }
-
-        RefreshUI();
     }
 
     private IEnumerator EnemyTurnRoutine()
@@ -464,6 +481,8 @@ public class BlackjackController : MonoBehaviour
             _waitingRoundContinue = true;
             while (_waitingRoundContinue)
                 yield return null;
+
+            EventBridge.TriggerEvent(TutorialBlackjackEventIds.RoundContinue);
 
             ClearBattleCenter();
             ClearHandValueLabels();
