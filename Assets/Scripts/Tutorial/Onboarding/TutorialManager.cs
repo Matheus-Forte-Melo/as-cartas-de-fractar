@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 namespace Tutorial.Onboarding
@@ -15,10 +14,18 @@ namespace Tutorial.Onboarding
     [DisallowMultipleComponent]
     public sealed class TutorialManager : MonoBehaviour
     {
+        /// <summary>Definido antes de <see cref="Awake"/> quando o componente é criado em runtime (ex.: mapa tutorial).</summary>
+        private static string _pendingTutorialId;
+
+        private static List<TutorialStepDefinition> _pendingPreloadedSteps;
+
+        /// <summary>Se verdadeiro, a próxima instância não auto-inicia em <see cref="Start"/> (chamar <see cref="BeginOrResume"/> depois de injetar passos).</summary>
+        public static bool DeferAutostartOnce { get; set; }
+
         [Header("Identidade / persistência")]
         [SerializeField] private string _tutorialId = "blackjack_onboarding";
         [SerializeField] private bool _autoStart = true;
-        [Tooltip("Se verdadeiro, não inicia o onboarding se save.json tiver main_tutorial_completed.")]
+        [Tooltip("Se verdadeiro, não inicia se o tracker reportar concluído (perfil conforme tutorialId).")]
         [SerializeField] private bool _respectCompletedFlag = true;
 
         [Header("Canvas (opcional — vazio cria em runtime)")]
@@ -29,7 +36,6 @@ namespace Tutorial.Onboarding
         [SerializeField] private SpotlightOverlay _spotlight;
         [SerializeField] private TutorialBlocker _blocker;
         [SerializeField] private TooltipUI _tooltip;
-        [SerializeField] private Button _skipButton;
 
         [Header("Sequência")]
         [SerializeField] private List<TutorialStepDefinition> _steps = new();
@@ -47,7 +53,28 @@ namespace Tutorial.Onboarding
         public int CurrentStepIndex => _stepIndex;
         public IReadOnlyList<TutorialStepDefinition> Steps => _steps;
 
-        public bool HasCompletedTutorial() => SaveManager.Load().main_tutorial_completed;
+        /// <summary>
+        /// <see cref="TutorialStepDefinition.stepId"/> do passo corrente (apenas enquanto <see cref="IsRunning"/>
+        /// e o índice é válido). Útil para corrotinas sincronizarem "mostrar → esperar Continuar → avançar".
+        /// </summary>
+        public string CurrentStepId
+        {
+            get
+            {
+                if (!_running) return null;
+                if (_stepIndex < 0 || _steps == null || _stepIndex >= _steps.Count) return null;
+                return _steps[_stepIndex].stepId;
+            }
+        }
+
+        public bool HasCompletedTutorial() => _tracker.LoadCompleted();
+
+        /// <summary>Usado pelo mapa tutorial antes de <c>AddComponent&lt;TutorialManager&gt;</c>.</summary>
+        public static void RegisterPendingBootstrap(string tutorialId, List<TutorialStepDefinition> steps)
+        {
+            _pendingTutorialId = tutorialId;
+            _pendingPreloadedSteps = steps;
+        }
 
         /// <summary>Disparado quando o fluxo termina (último passo) ou o jogador pula.</summary>
         public event Action CompletedOrSkipped;
@@ -68,11 +95,22 @@ namespace Tutorial.Onboarding
 
         private void Awake()
         {
+            if (_pendingPreloadedSteps != null)
+            {
+                _steps = _pendingPreloadedSteps;
+                _pendingPreloadedSteps = null;
+            }
+
+            if (!string.IsNullOrEmpty(_pendingTutorialId))
+            {
+                _tutorialId = _pendingTutorialId;
+                _pendingTutorialId = null;
+            }
+
             _tracker = new TutorialProgressTracker(_tutorialId);
             if (_tutorialCanvas == null && _autoStart && _steps != null && _steps.Count > 0)
                 BuildRuntimeCanvasHierarchy();
 
-            WireSkipIfPresent();
             SetAllLayersVisible(false);
         }
 
@@ -91,6 +129,12 @@ namespace Tutorial.Onboarding
 
         private void Start()
         {
+            if (DeferAutostartOnce)
+            {
+                DeferAutostartOnce = false;
+                return;
+            }
+
             if (!_autoStart)
                 return;
             if (_respectCompletedFlag && HasCompletedTutorial())
@@ -98,16 +142,8 @@ namespace Tutorial.Onboarding
             if (_steps == null || _steps.Count == 0)
                 return;
 
-            _stepIndex = Mathf.Clamp(_tracker.LoadCurrentStepIndex(), 0, _steps.Count - 1);
+            _stepIndex = NormalizeResumeStepIndex(_tracker.LoadCurrentStepIndex());
             BeginOrResume();
-        }
-
-        private void Update()
-        {
-            if (!_running)
-                return;
-            if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
-                SkipEntireTutorial();
         }
 
         public void BeginOrResume()
@@ -129,7 +165,6 @@ namespace Tutorial.Onboarding
 
         public void SkipEntireTutorial()
         {
-            _tracker.SaveStepIndex(_steps != null ? _steps.Count : 0);
             PersistMainTutorialCompletionToSaveIfNeeded();
             StopDelayIfAny();
             ClearPresentation();
@@ -139,7 +174,7 @@ namespace Tutorial.Onboarding
             CompletedOrSkipped?.Invoke();
         }
 
-        /// <summary>Zera passo e <c>main_tutorial_completed</c> no <c>save.json</c>.</summary>
+        /// <summary>Zera passo no save tutorial e <c>main_tutorial_completed</c> no perfil.</summary>
         public void ResetTutorialProgress()
         {
             _tracker.ResetProgress();
@@ -181,8 +216,6 @@ namespace Tutorial.Onboarding
         private void AdvanceAndSave()
         {
             _stepIndex++;
-            _tracker.SaveStepIndex(_stepIndex);
-
             if (_stepIndex >= _steps.Count)
             {
                 PersistMainTutorialCompletionToSaveIfNeeded();
@@ -194,17 +227,24 @@ namespace Tutorial.Onboarding
                 return;
             }
 
+            _tracker.SaveStepIndex(_stepIndex);
             ApplyStep(_stepIndex);
         }
 
-        private void PersistMainTutorialCompletionToSaveIfNeeded()
+        /// <summary>
+        /// Índices gravados como <c>steps.Count</c> após conclusão antiga eram clampados ao último passo; fora do intervalo válido volta a 0.
+        /// </summary>
+        private int NormalizeResumeStepIndex(int saved)
         {
-            var save = SaveManager.Load();
-            if (save.main_tutorial_completed)
-                return;
-            save.main_tutorial_completed = true;
-            SaveManager.Save(save);
+            if (_steps == null || _steps.Count == 0)
+                return 0;
+            if (saved < 0 || saved >= _steps.Count)
+                return 0;
+            return saved;
         }
+
+        private void PersistMainTutorialCompletionToSaveIfNeeded() =>
+            _tracker.PersistCompletionAfterFinish();
 
         private void ApplyStep(int index)
         {
@@ -220,6 +260,7 @@ namespace Tutorial.Onboarding
             _tooltip.SetText(text);
             _tooltip.SetContinueVisible(step.advanceMode == TutorialAdvanceMode.ContinueButton);
             _tooltip.BindContinue(NotifyContinuePressed);
+            _tooltip.SetPanelSize(ResolveTooltipPanelSize(step));
             _tooltip.ShowNearTarget(step.target, step.tooltipOffset, centerOnly);
 
             if (centerOnly)
@@ -230,7 +271,10 @@ namespace Tutorial.Onboarding
             else
             {
                 _spotlight.SetHole(step.target, step.spotlightPadding);
-                _blocker.SetHole(step.target, step.spotlightPadding);
+                if (step.blockEntireScreenInput)
+                    _blocker.SetFullscreenBlock();
+                else
+                    _blocker.SetHole(step.target, step.spotlightPadding);
             }
 
             StopDelayIfAny();
@@ -272,14 +316,6 @@ namespace Tutorial.Onboarding
                 _tutorialCanvas.gameObject.SetActive(on);
         }
 
-        private void WireSkipIfPresent()
-        {
-            if (_skipButton == null)
-                return;
-            _skipButton.onClick.RemoveListener(SkipEntireTutorial);
-            _skipButton.onClick.AddListener(SkipEntireTutorial);
-        }
-
         private void BuildRuntimeCanvasHierarchy()
         {
             if (_steps == null || _steps.Count == 0)
@@ -318,30 +354,17 @@ namespace Tutorial.Onboarding
             tooltipGo.transform.SetParent(go.transform, false);
             Stretch((RectTransform)tooltipGo.transform);
             _tooltip = BuildMinimalTooltip(tooltipGo);
+        }
 
-            var skipGo = new GameObject("BtnSkipTutorial", typeof(RectTransform), typeof(Image), typeof(Button));
-            skipGo.transform.SetParent(go.transform, false);
-            var skipRt = skipGo.GetComponent<RectTransform>();
-            skipRt.anchorMin = new Vector2(1f, 1f);
-            skipRt.anchorMax = new Vector2(1f, 1f);
-            skipRt.pivot = new Vector2(1f, 1f);
-            skipRt.anchoredPosition = new Vector2(-16f, -16f);
-            skipRt.sizeDelta = new Vector2(160f, 40f);
-            _skipButton = skipGo.GetComponent<Button>();
-            var skipLabelGo = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
-            skipLabelGo.transform.SetParent(skipGo.transform, false);
-            var skipTmp = skipLabelGo.GetComponent<TextMeshProUGUI>();
-            skipTmp.text = "Pular treino";
-            skipTmp.color = Color.white;
-            skipTmp.fontSize = 18;
-            skipTmp.alignment = TextAlignmentOptions.Center;
-            var tRt = skipLabelGo.GetComponent<RectTransform>();
-            tRt.anchorMin = Vector2.zero;
-            tRt.anchorMax = Vector2.one;
-            tRt.offsetMin = Vector2.zero;
-            tRt.offsetMax = Vector2.zero;
-
-            WireSkipIfPresent();
+        /// <summary>
+        /// Tamanho do painel por passo: <c>tooltipPanelWidth</c> e <c>tooltipPanelHeight</c> no JSON (ambos &gt; 0).
+        /// Caso contrário, <see cref="TooltipUI.DefaultPanelWidth"/> × <see cref="TooltipUI.DefaultPanelHeight"/>.
+        /// </summary>
+        private static Vector2 ResolveTooltipPanelSize(TutorialStepDefinition step)
+        {
+            if (step != null && step.tooltipPanelWidth > 0f && step.tooltipPanelHeight > 0f)
+                return new Vector2(step.tooltipPanelWidth, step.tooltipPanelHeight);
+            return new Vector2(TooltipUI.DefaultPanelWidth, TooltipUI.DefaultPanelHeight);
         }
 
         private static TooltipUI BuildMinimalTooltip(GameObject host)
@@ -353,7 +376,7 @@ namespace Tutorial.Onboarding
             var panelGo = new GameObject("Panel", typeof(RectTransform), typeof(Image));
             panelGo.transform.SetParent(host.transform, false);
             var panelRt = panelGo.GetComponent<RectTransform>();
-            panelRt.sizeDelta = new Vector2(520f, 160f);
+            panelRt.sizeDelta = new Vector2(TooltipUI.DefaultPanelWidth, TooltipUI.DefaultPanelHeight);
             var img = panelGo.GetComponent<Image>();
             img.color = new Color(0.08f, 0.1f, 0.16f, 0.95f);
             img.raycastTarget = false;
@@ -362,12 +385,12 @@ namespace Tutorial.Onboarding
             bodyGo.transform.SetParent(panelGo.transform, false);
             var bodyRt = bodyGo.GetComponent<RectTransform>();
             bodyRt.anchorMin = new Vector2(0f, 0.25f);
-            bodyRt.anchorMax = new Vector2(1f, 1f);
+            bodyRt.anchorMax = Vector2.one;
             bodyRt.offsetMin = new Vector2(12f, 0f);
             bodyRt.offsetMax = new Vector2(-12f, -8f);
             var tmp = bodyGo.GetComponent<TextMeshProUGUI>();
             tmp.color = Color.white;
-            tmp.fontSize = 22;
+            tmp.fontSize = 22f;
             tmp.textWrappingMode = TextWrappingModes.Normal;
 
             var btnGo = new GameObject("BtnContinue", typeof(RectTransform), typeof(Image), typeof(Button));

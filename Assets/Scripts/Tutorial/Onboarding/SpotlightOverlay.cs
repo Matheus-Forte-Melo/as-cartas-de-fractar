@@ -14,12 +14,24 @@ namespace Tutorial.Onboarding
         [SerializeField] private Image _fullDim;
 
         private RectTransform _root;
+        private RectTransform _trackedTarget;
+        private float _trackedPadding;
 
         private void Awake()
         {
             _root = transform as RectTransform;
             EnsureBars();
             Clear();
+        }
+
+        private void LateUpdate()
+        {
+            // Se o alvo for um bridge que se move pelo mundo, o buraco segue sozinho.
+            if (_trackedTarget == null || _root == null)
+                return;
+            if (!TutorialFocusRingLayout.TryGetHoleInRootLocalSpace(_trackedTarget, _root, _trackedPadding, out Rect hole))
+                return;
+            TutorialFocusRingLayout.ApplyFourBars(_root, _bars, hole);
         }
 
         private void EnsureBars()
@@ -64,6 +76,7 @@ namespace Tutorial.Onboarding
         /// <summary>Sem alvo: escurece a tela inteira (sem buraco).</summary>
         public void SetFullscreenDim()
         {
+            _trackedTarget = null;
             EnsureBars();
             TutorialFocusRingLayout.HideBars(_bars);
             if (_fullDim != null)
@@ -82,6 +95,9 @@ namespace Tutorial.Onboarding
                 return;
             }
 
+            _trackedTarget = target;
+            _trackedPadding = padding;
+
             if (!TutorialFocusRingLayout.TryGetHoleInRootLocalSpace(target, _root, padding, out Rect hole))
             {
                 SetFullscreenDim();
@@ -93,6 +109,7 @@ namespace Tutorial.Onboarding
 
         public void Clear()
         {
+            _trackedTarget = null;
             TutorialFocusRingLayout.HideBars(_bars);
             if (_fullDim != null)
                 _fullDim.gameObject.SetActive(false);

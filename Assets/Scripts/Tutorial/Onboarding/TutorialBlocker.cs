@@ -13,12 +13,23 @@ namespace Tutorial.Onboarding
         [SerializeField] private Image _fullBlock;
 
         private RectTransform _root;
+        private RectTransform _trackedTarget;
+        private float _trackedPadding;
 
         private void Awake()
         {
             _root = transform as RectTransform;
             EnsureBars();
             Clear();
+        }
+
+        private void LateUpdate()
+        {
+            if (_trackedTarget == null || _root == null)
+                return;
+            if (!TutorialFocusRingLayout.TryGetHoleInRootLocalSpace(_trackedTarget, _root, _trackedPadding, out Rect hole))
+                return;
+            TutorialFocusRingLayout.ApplyFourBars(_root, _bars, hole);
         }
 
         private void EnsureBars()
@@ -62,6 +73,7 @@ namespace Tutorial.Onboarding
 
         public void SetFullscreenBlock()
         {
+            _trackedTarget = null;
             EnsureBars();
             TutorialFocusRingLayout.HideBars(_bars);
             if (_fullBlock != null)
@@ -80,6 +92,9 @@ namespace Tutorial.Onboarding
                 return;
             }
 
+            _trackedTarget = target;
+            _trackedPadding = padding;
+
             if (!TutorialFocusRingLayout.TryGetHoleInRootLocalSpace(target, _root, padding, out Rect hole))
             {
                 SetFullscreenBlock();
@@ -91,6 +106,7 @@ namespace Tutorial.Onboarding
 
         public void Clear()
         {
+            _trackedTarget = null;
             TutorialFocusRingLayout.HideBars(_bars);
             if (_fullBlock != null)
                 _fullBlock.gameObject.SetActive(false);

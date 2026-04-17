@@ -23,7 +23,16 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Store.unity
     guid: ded6d009b73d7047ea7d50f128430e1c
-  - enabled: 0
+  - enabled: 1
+    path: Assets/Scenes/MapTutorial.unity
+    guid: f7981025aa7949028bfb195ac6f3e216
+  - enabled: 1
+    path: Assets/Scenes/CoreTutorial.unity
+    guid: 3f48fe80ccdd4fc0ac0c66c8d64eac87
+  - enabled: 1
+    path: Assets/Scenes/StoreTutorial.unity
+    guid: 17afd40a59d34a36bfbd804bd4d33676
+  - enabled: 1
     path: Assets/Scenes/TutorialDefaultBlackjack.unity
     guid: f1e2d3c4b5a697887766554433221100
   m_configObjects:

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 
 [System.Serializable]
@@ -66,8 +67,15 @@ public class MapGenerator : MonoBehaviour
         if (!Application.isPlaying) return;
 
         SaveData save = SaveManager.Load();
-        seed = save.currentSeed;
+        string sceneName = SceneManager.GetActiveScene().name;
+        if (sceneName == GameFlowScenes.MapTutorial)
+            seed = TutorialMapConstants.GenerationSeed;
+        else
+            seed = save.currentSeed;
         RegenerateMap();
+
+        if (sceneName == GameFlowScenes.MapTutorial && GetComponent<MapTutorialOnboardingSession>() == null)
+            gameObject.AddComponent<MapTutorialOnboardingSession>();
     }
 
     private void OnEnable()
@@ -172,11 +180,13 @@ public class MapGenerator : MonoBehaviour
     private List<List<int>> GeneratePaths()
     {
         var paths = new List<List<int>>(pathCount);
+        bool tutorialMap = SceneManager.GetActiveScene().name == GameFlowScenes.MapTutorial;
 
         for (int pathIndex = 0; pathIndex < pathCount; pathIndex++)
         {
             var path = new List<int>(rows);
-            int currentCol = Random.Range(0, columns);
+            // MapTutorial: primeiro caminho começa na coluna 0, garantindo o nó (0,0) para o onboarding.
+            int currentCol = tutorialMap && pathIndex == 0 ? 0 : Random.Range(0, columns);
             path.Add(currentCol);
 
             for (int row = 1; row < rows; row++)

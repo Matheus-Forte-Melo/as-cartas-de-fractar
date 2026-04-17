@@ -449,4 +449,34 @@ public class MapVisualizer : MonoBehaviour
         else
             DestroyImmediate(target);
     }
+
+    public bool TryGetNodeTransform(int row, int col, out Transform t)
+    {
+        return _nodeViews.TryGetValue((row, col), out t);
+    }
+
+    /// <summary>Nó da linha 0 com maior coluna (embaixo à direita entre os existentes).</summary>
+    public bool TryGetBottomRowRightmostNodeTransform(out Transform nodeTransform, out MapNode node)
+    {
+        node = null;
+        nodeTransform = null;
+        if (_generator == null)
+            _generator = GetComponent<MapGenerator>();
+
+        int bestCol = int.MinValue;
+        foreach (var kv in _generator.Graph)
+        {
+            if (kv.Key.row != 0)
+                continue;
+            if (kv.Key.col > bestCol)
+            {
+                bestCol = kv.Key.col;
+                node = kv.Value;
+            }
+        }
+
+        if (node == null)
+            return false;
+        return TryGetNodeTransform(node.Row, node.Col, out nodeTransform);
+    }
 }

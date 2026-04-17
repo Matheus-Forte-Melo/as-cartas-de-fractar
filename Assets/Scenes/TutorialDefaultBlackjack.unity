@@ -624,7 +624,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.32}
   m_AnchorMax: {x: 0.5, y: 0.32}
-  m_AnchoredPosition: {x: 0, y: -98}
+  m_AnchoredPosition: {x: -771.1, y: 638}
   m_SizeDelta: {x: 420, y: 36}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &489099555
@@ -689,7 +689,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 2
+  m_HorizontalAlignment: 1
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -936,7 +936,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 2
+  m_HorizontalAlignment: 1
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -998,7 +998,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.73}
   m_AnchorMax: {x: 0.5, y: 0.73}
-  m_AnchoredPosition: {x: 0, y: -100}
+  m_AnchoredPosition: {x: -771.1, y: 258.89996}
   m_SizeDelta: {x: 420, y: 36}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!1 &585186784
@@ -1044,7 +1044,11 @@ MonoBehaviour:
   _txtPlayerValue: {fileID: 489099556}
   _txtDealerValue: {fileID: 538827694}
   _txtRoundLabel: {fileID: 1203180731}
-  _dealerStepDelay: 0.65
+  _dealerRevealPause: 0.55
+  _dealerThinkMin: 0.85
+  _dealerThinkMax: 2.05
+  _dealerAfterCardMin: 0.75
+  _dealerAfterCardMax: 1
 --- !u!4 &585186786
 Transform:
   m_ObjectHideFlags: 0
@@ -1102,6 +1106,7 @@ MonoBehaviour:
   _stepsJsonFileName: tutorial_blackjack_guided_steps.json
   _stringsJsonFileName: tutorial_blackjack_guided_strings.json
   _tutorialManager: {fileID: 585186787}
+  _resetMainTutorialInSaveOnSceneEnter: 1
 --- !u!114 &585186789
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1117,7 +1122,7 @@ MonoBehaviour:
   _tutorialManager: {fileID: 585186787}
   _btnNewRound: {fileID: 314186078}
   _btnFinishToMap: {fileID: 0}
-  _mapSceneName: Map
+  _mapSceneName: 
   _createFinishButtonIfMissing: 1
 --- !u!1 &619394800
 GameObject:

@@ -10,6 +10,10 @@ namespace Tutorial.Onboarding
     [DisallowMultipleComponent]
     public sealed class TooltipUI : MonoBehaviour
     {
+        /// <summary>Tamanho do painel quando o passo não define <c>tooltipPanelWidth/Height</c> no JSON.</summary>
+        public const float DefaultPanelWidth = 520f;
+        public const float DefaultPanelHeight = 160f;
+
         [SerializeField] private RectTransform _panel;
         [SerializeField] private TMP_Text _body;
         [SerializeField] private Button _continueButton;
@@ -33,6 +37,17 @@ namespace Tutorial.Onboarding
             _panel = panel;
             _body = body;
             _continueButton = continueButton;
+        }
+
+        /// <summary>
+        /// Ajusta o <see cref="RectTransform.sizeDelta"/> do painel (modal). Use os defaults
+        /// <see cref="DefaultPanelWidth"/> / <see cref="DefaultPanelHeight"/> quando o passo não define tamanho no JSON.
+        /// </summary>
+        public void SetPanelSize(Vector2 sizeDelta)
+        {
+            if (_panel == null)
+                return;
+            _panel.sizeDelta = sizeDelta;
         }
 
         public void SetContinueVisible(bool visible)

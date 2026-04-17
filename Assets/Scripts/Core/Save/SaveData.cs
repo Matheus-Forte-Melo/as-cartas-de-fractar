@@ -14,8 +14,14 @@ public class SaveData
     /// Volta a <c>false</c> só via <see cref="Tutorial.Onboarding.TutorialProgressTracker.ResetProgress"/> (dev / reset explícito), não no fluxo normal de run.
     /// </summary>
     public bool main_tutorial_completed;
-    /// <summary>Índice do passo atual do onboarding principal (retomada). Persistido em <c>save.json</c>.</summary>
+    /// <summary>Índice do passo atual do onboarding do blackjack guiado (retomada).</summary>
     public int main_tutorial_step_index;
+
+    /// <summary>Passo do onboarding do mapa (<c>map_onboarding</c>) no save tutorial.</summary>
+    public int map_onboarding_step_index;
+
+    /// <summary>Passo do onboarding do combate (<c>core_onboarding</c>) no save tutorial.</summary>
+    public int core_onboarding_step_index;
     public List<string> ownedItemIds = new();
     /// <summary>Até 3 IDs de consumíveis (sem stack; mesma id pode repetir em slots diferentes).</summary>
     public List<string> consumableSlots = new();

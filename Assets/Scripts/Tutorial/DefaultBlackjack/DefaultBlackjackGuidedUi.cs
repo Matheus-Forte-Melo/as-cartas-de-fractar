@@ -15,7 +15,8 @@ namespace Tutorial.DefaultBlackjack
         [SerializeField] private TutorialManager _tutorialManager;
         [SerializeField] private Button _btnNewRound;
         [SerializeField] private Button _btnFinishToMap;
-        [SerializeField] private string _mapSceneName = "Map";
+        [Tooltip("Vazio = usa GameFlowScenes.CurrentMap (Map ou MapTutorial conforme o contexto). Durante o tutorial o destino é sempre MapTutorial mesmo que este campo esteja preenchido — ele só é respeitado no modo livre.")]
+        [SerializeField] private string _mapSceneName = "";
         [Tooltip("Cria o botão Terminar em runtime se não estiver atribuído.")]
         [SerializeField] private bool _createFinishButtonIfMissing = true;
 
@@ -86,8 +87,25 @@ namespace Tutorial.DefaultBlackjack
 
         private void GoToMap()
         {
-            if (!string.IsNullOrEmpty(_mapSceneName))
-                SceneManager.LoadScene(_mapSceneName);
+            // Se o jogador ainda está na cadeia tutorial, garante que o destino é o MapTutorial —
+            // a cena tem um campo antigo (_mapSceneName = "Map") que não pode sequestrar esta transição.
+            bool inTutorialChain =
+                SaveManager.ActiveContext == SaveContext.Tutorial
+                || !SaveManager.LoadProfile().main_tutorial_completed;
+
+            string scene;
+            if (inTutorialChain)
+            {
+                SaveManager.ActiveContext = SaveContext.Tutorial;
+                scene = GameFlowScenes.MapTutorial;
+            }
+            else
+            {
+                scene = string.IsNullOrEmpty(_mapSceneName) ? GameFlowScenes.CurrentMap : _mapSceneName;
+            }
+
+            if (!string.IsNullOrEmpty(scene))
+                SceneManager.LoadScene(scene);
         }
 
         private static void PositionTopRightActionButton(Button btn, float yFromTop)

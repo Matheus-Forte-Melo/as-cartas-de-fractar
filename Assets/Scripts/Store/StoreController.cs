@@ -328,7 +328,7 @@ namespace Store
 
         private void OnBackButtonClicked()
         {
-            SceneManager.LoadScene("Map");
+            SceneManager.LoadScene(GameFlowScenes.CurrentMap);
         }
     }
 }

@@ -23,6 +23,8 @@ namespace Tutorial.Onboarding
             public float spotlightPadding;
             public float tooltipOffsetX;
             public float tooltipOffsetY;
+            public float tooltipPanelWidth;
+            public float tooltipPanelHeight;
         }
 
         [Serializable]
@@ -74,7 +76,9 @@ namespace Tutorial.Onboarding
                     advanceWhenEventId = sj.advanceWhenEventId ?? "",
                     autoAdvanceDelaySeconds = sj.autoAdvanceDelaySeconds,
                     spotlightPadding = sj.spotlightPadding > 0 ? sj.spotlightPadding : 8f,
-                    tooltipOffset = new Vector2(sj.tooltipOffsetX, sj.tooltipOffsetY)
+                    tooltipOffset = new Vector2(sj.tooltipOffsetX, sj.tooltipOffsetY),
+                    tooltipPanelWidth = sj.tooltipPanelWidth,
+                    tooltipPanelHeight = sj.tooltipPanelHeight
                 };
                 list.Add(def);
             }

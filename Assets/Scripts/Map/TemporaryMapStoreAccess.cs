@@ -10,7 +10,7 @@ using UnityEngine.UI;
 public class TemporaryMapStoreAccess : MonoBehaviour
 {
     private const string RuntimeUiChildName = "TEMP_MapShopButtonRoot";
-    private const string StoreSceneName = "Store";
+    private static string StoreSceneName => GameFlowScenes.CurrentStore;
 
     [Tooltip("Se falso, não cria UI; útil para testar o mapa sem o atalho.")]
     [SerializeField]

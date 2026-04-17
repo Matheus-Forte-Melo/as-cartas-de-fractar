@@ -1,0 +1,68 @@
+{
+  "strings": [
+    {
+      "key": "core_00_intro",
+      "text": "Bem vindo ao duelo. Você está numa luta mano-a-mano de BlackJack contra um inimigo. Cada um começa com uma determinada quantidade de vida, quanto mais desafiador o duelo, mais resistente é o oponente e mais complexo é o baralho de cartas. Quem perde a rodada toma dano; quem chega a 0 primeiro perde a luta.\n\nPerceba que o baralho são equações, o valor real delas é o resultado da equação."
+    },
+    {
+      "key": "core_00b_multi_theory",
+      "text": "As cartas deste combate mostram <b>multiplicações</b>. Multiplicar é só <b>somar o mesmo número várias vezes</b>.\n\n<b>Exemplos:</b>\n• 2 × 3 = 2 + 2 + 2 = <b>6</b>\n• 5 × 2 = 5 + 5 = <b>10</b>\n• 1 × 7 = <b>7</b> (qualquer número × 1 = ele mesmo)\n• 3 × 3 = 3 + 3 + 3 = <b>9</b>\n\nVocê deve realizar as equações e tentar fazer as melhores decisões com base nos resultados que alcançou!"
+    },
+    {
+      "key": "core_01_round1_setup",
+      "text": "<b>Rodada 1.</b> Você recebeu duas cartas e o inimigo também, só que a <b>primeira</b> dele fica <b>virada para baixo</b>.\n\nA sua mão está <b>fraca</b>: ainda dá pra melhorar. Vamos pedir uma carta."
+    },
+    {
+      "key": "core_02_press_hit",
+      "text": "Clique em <b>Pedir</b> para comprar uma carta e aumentar sua mão."
+    },
+    {
+      "key": "core_03_observe_enemy",
+      "text": "<b>Atenção ao turno.</b> Quando você <b>Pedir</b>, compra uma carta e <b>continua a sua vez</b> — você pode pedir de novo ou parar.\n\nMas neste caso você poderia parar se não quiser arriscar, e é isso que vamos fazer.. Agora é a <b>vez do inimigo</b>: ele joga sozinho seguindo a regra da mesa.\n\nClique em <b>Continuar</b> quando estiver pronto para passar a vez."
+    },
+    {
+      "key": "core_04_press_stand",
+      "text": "Clique em <b>Parar</b> para encerrar sua vez e deixar o inimigo jogar."
+    },
+    {
+      "key": "core_05_round1_summary",
+      "text": "<b>Você perdeu esta rodada.</b> O inimigo ficou mais perto de 21 do que você.\n\n<b>Como o dano é calculado:</b> pegamos a mão do perdedor e vemos <b>quanto falta até 21</b>. Essa diferença é multiplicada por <b>10</b> e vira o dano.\n\nExemplo desta rodada: sua mão somou 16 → faltam 5 → <b>5 × 10 = 50</b> de dano em você.\n\n<b>ATENÇÃO</b>: Inimigos poderesos terão multiplicadores de dano! Este inimigo não é tão poderoso, então seu multiplicador de dano é 1."
+    },
+    {
+      "key": "core_06_round2_setup",
+      "text": "<b>Rodada 2.</b> Agora sua mão já está <b>forte</b> (perto de 21). Pedir mais seria arriscado — a chance de <b>estourar</b> (passar de 21) é alta.\n\nVamos <b>Parar</b> direto e ver o que o inimigo faz."
+    },
+    {
+      "key": "core_07_press_stand_safe",
+      "text": "Clique em <b>Parar</b>. Sua vez termina e o inimigo precisa jogar."
+    },
+    {
+      "key": "core_08_enemy_must_hit",
+      "text": "Vamos ver o que o inimigo irá fazer, ele está com um valor consíderavel... Ele pode ou não estourar, Observe e clique em <b>Continuar</b>."
+    },
+    {
+      "key": "core_09_round2_summary",
+      "text": "<b>O inimigo estourou — você ganhou!</b>\n\nComo ele fechou acima de 21, <b>a diferença até 21 vira dano nele</b>: passou em 5 → <b>5 × 10 = 50</b> de dano no inimigo.\n\nClique em <b>Continuar</b>."
+    },
+    {
+      "key": "core_10_round3_setup",
+      "text": "<b>Rodada 3.</b> Sua mão abriu <b>muito forte</b>. Continuar é moleza: basta <b>Parar</b> e torcer para o inimigo ser azarado."
+    },
+    {
+      "key": "core_11_press_stand_again",
+      "text": "Clique em <b>Parar</b> mais uma vez."
+    },
+    {
+      "key": "core_12_enemy_busts_again",
+      "text": "O inimigo está com um valor razoável novamente, ele tem que ter sorte grande para não estourar, para ganhar de você, ele tem que tirar exatamente 21.\n\nEssa é a grande sacada: você deve saber fazer as equações afim de tomar as melhores decisões. Nesse turno, você sabe que sua mão está alta e que o inimigo tem chance de estourar ou ficar atŕas de você, então não há porque arriscar; O inimigo só vai ganhar se tiver sorte."
+    },
+    {
+      "key": "core_13_round3_summary",
+      "text": "<b>Você venceu a rodada novamente!</b> Mesmo depois de perder a primeira, as duas vitórias seguintes mostram como <b>parar no momento certo</b> muda o jogo.\n\nClique em <b>Continuar</b>."
+    },
+    {
+      "key": "core_14_sandbox",
+      "text": "<b>Tutorial concluído.</b> A partir daqui, vamos deixar você brincar com um baralho de multiplicação fácil. A vida dos dois duelistas foi elevada à <b>1000</b>, para você praticar à vontade.\n\nPeça cartas, pare, tente passar o inimigo. Quando cansar, clique em <b>ENCERRAR</b> no canto superior direito para finalizar e adentrar a Torre de Fractar."
+    }
+  ]
+}

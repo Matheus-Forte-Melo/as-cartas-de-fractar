@@ -610,7 +610,7 @@ public class BlackjackController : MonoBehaviour
         }
 
         yield return new WaitForSeconds(2f);
-        SceneManager.LoadScene("Map");
+        SceneManager.LoadScene(GameFlowScenes.CurrentMap);
     }
 
     private void SyncCards()

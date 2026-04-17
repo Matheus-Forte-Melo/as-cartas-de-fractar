@@ -31,8 +31,17 @@ namespace Tutorial.Onboarding
         [Tooltip("Deslocamento do painel de tooltip em relação ao alvo (pixels).")]
         public Vector2 tooltipOffset;
 
+        [Tooltip("Largura do painel do tooltip (px). Deixe 0 para usar o default (520). Só aplica se altura também for > 0.")]
+        public float tooltipPanelWidth;
+
+        [Tooltip("Altura do painel do tooltip (px). Deixe 0 para usar o default (160). Só aplica se largura também for > 0.")]
+        public float tooltipPanelHeight;
+
         [Tooltip("Expansão do buraco em torno do alvo (pixels por lado).")]
         public float spotlightPadding = 8f;
+
+        [Tooltip("Se verdadeiro com alvo: mantém o buraco visual no escurecimento, mas o bloqueador de input cobre a tela inteira (nada por baixo fica clicável — ex.: mapa).")]
+        public bool blockEntireScreenInput;
 
         [Tooltip("Invocado quando o passo é exibido (animações, setas, etc.).")]
         public UnityEvent onStepShown;

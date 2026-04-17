@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Tutorial.Onboarding;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -53,6 +54,22 @@ public class NodeInteraction : MonoBehaviour
         _save = SaveManager.Load();
         HandleTransitionMessage();
         ApplyVisualAccessibility();
+        AttachMapTutorialNodePulseIfNeeded();
+    }
+
+    /// <summary>Adiciona o pulso no nó (0,0) enquanto o jogador ainda não escolheu uma fase em <c>MapTutorial</c>.</summary>
+    private void AttachMapTutorialNodePulseIfNeeded()
+    {
+        if (SceneManager.GetActiveScene().name != GameFlowScenes.MapTutorial)
+            return;
+        if (_save.playerRow != -1 || _save.playerCol != -1)
+            return;
+        if (mapVisualizer == null)
+            return;
+        if (!mapVisualizer.TryGetNodeTransform(0, 0, out Transform nodeTf) || nodeTf == null)
+            return;
+        if (nodeTf.GetComponent<MapTutorialNodePulse>() == null)
+            nodeTf.gameObject.AddComponent<MapTutorialNodePulse>();
     }
 
     private void ApplyVisualAccessibility()
@@ -126,7 +143,12 @@ public class NodeInteraction : MonoBehaviour
     public bool IsAccessible(MapNode node)
     {
         if (_save.playerRow == -1 && _save.playerCol == -1)
+        {
+            // No tutorial do mapa, só o nó (0,0) é selecionável na primeira escolha.
+            if (SceneManager.GetActiveScene().name == GameFlowScenes.MapTutorial)
+                return node.Row == 0 && node.Col == 0;
             return node.Row == 0;
+        }
 
         return mapGenerator.ConnectionSet.Contains((
             _save.playerRow, _save.playerCol,
@@ -140,10 +162,14 @@ public class NodeInteraction : MonoBehaviour
 
         if (_save.playerRow == -1 && _save.playerCol == -1)
         {
+            bool tutorial = SceneManager.GetActiveScene().name == GameFlowScenes.MapTutorial;
             foreach (var node in mapGenerator.Graph.Values)
             {
-                if (node.Row == 0)
-                    accessible.Add((node.Row, node.Col));
+                if (node.Row != 0)
+                    continue;
+                if (tutorial && node.Col != 0)
+                    continue;
+                accessible.Add((node.Row, node.Col));
             }
         }
         else
@@ -167,7 +193,11 @@ public class NodeInteraction : MonoBehaviour
         _save.playerCol = node.Col;
         SaveManager.Save(_save);
 
-        SceneManager.LoadScene("Core");
+        // Permite ao TutorialManager (em MapTutorial) marcar a etapa de spotlight como concluída
+        // antes da transição de cena.
+        EventBridge.TriggerEvent(TutorialMapEventIds.NodeSelected);
+
+        SceneManager.LoadScene(GameFlowScenes.CurrentCore);
     }
 
     private void HandleTransitionMessage()
