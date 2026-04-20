@@ -58,7 +58,6 @@ Label, Button {
     
     margin-bottom: 0;
     
-    cursor: link;
     transition-duration: 0s;
 }
 
@@ -168,7 +167,6 @@ Label, Button {
     background-color: transparent;
     border-width: 0;
     padding: 0;
-    cursor: link;
 }
 
 .buy-btn-shadow {
@@ -246,7 +244,6 @@ Label, Button {
     background-color: transparent;
 }
 .buy-btn-container.purchased {
-    cursor: initial;
 }
 
 /* Modal Styles */
@@ -299,7 +296,6 @@ Label, Button {
     border-radius: 6px;
     border-width: 0;
     font-size: 16px;
-    cursor: link;
 }
 
 .modal-btn-cancel:hover {
@@ -314,7 +310,6 @@ Label, Button {
     border-width: 0;
     font-size: 16px;
     -unity-font-style: bold;
-    cursor: link;
 }
 
 .modal-btn-confirm:hover {
@@ -342,7 +337,6 @@ Label, Button {
     -unity-text-align: middle-center;
     padding: 0;
     margin: 0;
-    cursor: link;
 }
 
 .info-btn:hover {

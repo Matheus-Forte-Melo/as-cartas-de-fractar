@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ui="UnityEngine.UIElements"
+    xsi:noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd">
+
+    <ui:Style src="WikiStyles.uss" />
+
+    <ui:VisualElement name="WikiRoot" class="wiki-root" picking-mode="Ignore">
+
+        <!-- Filho em fluxo (não absolute): o overlay é position:absolute e não dá altura ao pai.
+             Sem isto o WikiRoot colapsa a ~0px e o modal fica fora da área visível. -->
+        <ui:VisualElement name="WikiRootFill" class="wiki-root-fill" picking-mode="Ignore" />
+
+        <ui:VisualElement name="WikiOverlay" class="wiki-overlay" style="display: none;">
+
+            <ui:VisualElement class="wiki-modal">
+
+                <ui:VisualElement class="wiki-header">
+                    <ui:Label text="Ajuda / Wiki" class="wiki-title" />
+                    <ui:Button name="WikiCloseBtn" text="X" class="wiki-close-btn" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="wiki-body">
+
+                    <ui:VisualElement name="WikiTabs" class="wiki-tabs">
+                        <ui:ScrollView class="wiki-tabs-scroll" style="width: 100%; flex-grow: 1; flex-shrink: 1; flex-basis: 0; min-height: 0;">
+                            <ui:Label text="Gameplay" class="wiki-tabs-section-title wiki-tabs-section-title--first" />
+                            <ui:Button name="WikiTab_overview" text="Visão geral" class="wiki-tab wiki-tab--active" />
+                            <ui:Button name="WikiTab_map" text="Mapa" class="wiki-tab" />
+                            <ui:Button name="WikiTab_combat" text="Combate" class="wiki-tab" />
+                            <ui:Button name="WikiTab_difficulty" text="Dificuldade" class="wiki-tab" />
+                            <ui:Button name="WikiTab_enemies" text="Operações" class="wiki-tab" />
+                            <ui:Button name="WikiTab_shop_inventory" text="Loja e inventário" class="wiki-tab" />
+                            <ui:Button name="WikiTab_controls" text="Controles" class="wiki-tab" />
+                            <ui:VisualElement class="wiki-tabs-separator" />
+                            <ui:Label text="Teoria" class="wiki-tabs-section-title" />
+                            <ui:Button name="WikiTab_math_add" text="Adição" class="wiki-tab" />
+                            <ui:Button name="WikiTab_math_sub" text="Subtração" class="wiki-tab" />
+                            <ui:Button name="WikiTab_math_mul" text="Multiplicação" class="wiki-tab" />
+                            <ui:Button name="WikiTab_math_div" text="Divisão" class="wiki-tab" />
+                        </ui:ScrollView>
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="wiki-content-wrap">
+                        <ui:ScrollView class="wiki-content-scroll" style="width: 100%; flex-grow: 1; flex-shrink: 1; min-height: 0;">
+
+                            <ui:VisualElement class="wiki-content-pages">
+                            <ui:VisualElement name="WikiPage_overview" class="wiki-page">
+                                <ui:Label class="wiki-page-title" text="Visão geral" />
+                                <ui:Label class="wiki-page-body" text="Você enfrenta duelos de blackjack em que cada carta vale uma equação. Sobe o mapa escolhendo duelos ligados uns aos outros, entra em combates e tenta levar a vida do oponente a zero antes da sua." />
+                                <ui:Label class="wiki-section-title wiki-section-title--first" text="Moedas" />
+                                <ui:Label class="wiki-page-body" text="Moedas ganhas ao vencer duelos entram no seu saldo e continuam com você nas próximas tentativas. Na loja você gasta em equipamento permanente (peças de ataque e de defesa) e em consumíveis que ficam em até três espaços reservados." />
+                                <ui:Label class="wiki-section-title" text="Se perder a run" />
+                                <ui:Label class="wiki-page-body" text="Você volta ao começo do mapa com um novo traçado de caminhos, escolhe de novo a partir da primeira fileira e sua vida sobe até o máximo que seus equipamentos de defesa permitem. O saldo de moedas não é zerado." />
+                                <ui:Label class="wiki-section-title" text="Se vencer um duelo" />
+                                <ui:Label class="wiki-page-body" text="Sua vida e seu saldo são atualizados, você recebe moedas extras conforme a dificuldade daquele duelo, e retorna ao mapa no mesmo lugar em que estava." />
+                            </ui:VisualElement>
+
+                            <ui:VisualElement name="WikiPage_map" class="wiki-page" style="display: none;">
+                                <ui:Label class="wiki-page-title" text="Mapa" />
+                                <ui:Label class="wiki-page-body" text="Cada ponto do mapa é um duelo com tema de adição, subtração, multiplicação ou divisão. A dificuldade das equações daquele ponto sobe conforme você avança em profundidade no desenho do mapa." />
+                                <ui:Label class="wiki-section-title wiki-section-title--first" text="Primeira escolha" />
+                                <ui:Label class="wiki-page-body" text="Depois de uma derrota, ou no início de uma nova tentativa, você ainda não está em nenhum duelo: só pode entrar em pontos da primeira fileira. Depois da primeira escolha, só pode seguir para duelos ligados por um caminho a partir de onde você está agora." />
+                                <ui:Label class="wiki-section-title" text="Fácil, médio e difícil" />
+                                <ui:Label class="wiki-page-body" text="O jogo divide a altura do mapa em três faixas. Quanto mais alto você sobe na torre desenhada, mais comum ficam duelos médios e difíceis. Na prática, quem está embaixo vê mais combates leves; quem chega no topo encara equações e inimigos mais pesados." />
+                                <ui:Label class="wiki-section-title" text="Clique e câmera" />
+                                <ui:Label class="wiki-page-body" text="Um toque conta como clique só se você soltar o dedo perto de onde apertou. Se estiver arrastando a visão ou girando a roda para mover a câmera, isso não escolhe duelo. Se o cursor estiver em cima de um menu ou botão (loja, ajuda), o clique fica com esse elemento e não com o mapa." />
+                                <ui:Label class="wiki-section-title" text="O que muda na tela" />
+                                <ui:Label class="wiki-page-body" text="Duelos que você não pode visitar ficam apagados. Onde você está pode ganhar destaque. A câmera só se move na vertical: arrastar ou rolar reposiciona a vista." />
+                            </ui:VisualElement>
+
+                            <ui:VisualElement name="WikiPage_combat" class="wiki-page" style="display: none;">
+                                <ui:Label class="wiki-page-title" text="Combate" />
+                                <ui:Label class="wiki-page-body" text="Cada rodada vai até alguém passar de 21, alguém parar e o outro mostrar carta melhor, ou as duas mãos empatarem no mesmo total. O limite usado nas contas de dano é sempre 21." />
+                                <ui:Label class="wiki-section-title wiki-section-title--first" text="Dano ao fim da rodada" />
+                                <ui:Label class="wiki-page-body" text="Quem perde a rodada perde vida. O jogo mede quanto a mão do perdedor ficou longe de 21. Essa distância nunca conta como zero na hora do golpe: no mínimo vale 1. Multiplica por dez e arredonda: esse é o dano base." />
+                                <ui:Label class="wiki-page-body" text="Se quem apanhou foi o inimigo, o dano ainda é ampliado pelos seus equipamentos de ataque (cada peça multiplica junto com as outras). Se quem apanhou foi você, o dano sobe conforme a dificuldade daquele duelo: fácil sem extra, médio multiplica por um e meio, difícil multiplica por dois." />
+                                <ui:Label class="wiki-section-title" text="Empate" />
+                                <ui:Label class="wiki-page-body" text="Mesmo número nas duas mãos: ninguém perde vida naquela rodada." />
+                                <ui:Label class="wiki-section-title" text="Oponente" />
+                                <ui:Label class="wiki-page-body" text="Ele compra carta enquanto a mão dele estiver abaixo de 17 e ainda puder jogar sem estourar o limite da mesa. Quando ele parar, a vez volta para você se a rodada continuar." />
+                                <ui:Label class="wiki-section-title" text="Cartas no duelo" />
+                                <ui:Label class="wiki-page-body" text="O baralho que você enfrenta combina o tema do duelo (adição, subtração, multiplicação ou divisão) com o quão difícil é o ponto. Mesmo tema em duelo mais difícil traz contas mais exigentes." />
+                            </ui:VisualElement>
+
+                            <ui:VisualElement name="WikiPage_difficulty" class="wiki-page" style="display: none;">
+                                <ui:Label class="wiki-page-title" text="Dificuldade e recompensas" />
+                                <ui:Label class="wiki-page-body" text="Cada duelo é classificado como fácil, médio ou difícil. A tabela abaixo resume o que muda para você em cada nível: vida do oponente, quanto a sua derrota na rodada pesa, e moedas extras se você vencer o duelo inteiro." />
+                                <ui:Label class="wiki-section-title wiki-section-title--first" text="Valores por dificuldade" />
+                                <ui:VisualElement class="wiki-table">
+                                    <ui:VisualElement class="wiki-table-row wiki-table-row--header">
+                                        <ui:Label text="Dificuldade" class="wiki-table-cell wiki-table-cell--dificuldade" />
+                                        <ui:Label text="Vida do oponente" class="wiki-table-cell" />
+                                        <ui:Label text="Dano recebido se perder a rodada" class="wiki-table-cell" />
+                                        <ui:Label text="Moedas ao vencer o duelo" class="wiki-table-cell wiki-table-cell--last" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="wiki-table-row wiki-table-row--data wiki-table-row--striped">
+                                        <ui:Label text="Fácil" class="wiki-table-cell wiki-table-cell--dificuldade" />
+                                        <ui:Label text="80" class="wiki-table-cell" />
+                                        <ui:Label text="×1,0 (normal)" class="wiki-table-cell" />
+                                        <ui:Label text="+100" class="wiki-table-cell wiki-table-cell--last" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="wiki-table-row wiki-table-row--data">
+                                        <ui:Label text="Médio" class="wiki-table-cell wiki-table-cell--dificuldade" />
+                                        <ui:Label text="150" class="wiki-table-cell" />
+                                        <ui:Label text="×1,5" class="wiki-table-cell" />
+                                        <ui:Label text="+250" class="wiki-table-cell wiki-table-cell--last" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="wiki-table-row wiki-table-row--data wiki-table-row--striped wiki-table-row--last">
+                                        <ui:Label text="Difícil" class="wiki-table-cell wiki-table-cell--dificuldade" />
+                                        <ui:Label text="300" class="wiki-table-cell" />
+                                        <ui:Label text="×2,0" class="wiki-table-cell" />
+                                        <ui:Label text="+500" class="wiki-table-cell wiki-table-cell--last" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                                <ui:Label class="wiki-page-body" text="O multiplicador de dano recebido só entra quando você perde a rodada: a mesma distância até 21 tira metade a mais de vida no médio e o dobro no difícil, em comparação com o fácil." />
+                                <ui:Label class="wiki-section-title" text="Seu golpe no oponente" />
+                                <ui:Label class="wiki-page-body" text="Equipamentos de ataque aumentam o dano que você causa quando o oponente perde a rodada. Isso é separado da dificuldade do duelo: a dificuldade deixa o inimigo mais forte e a recompensa maior; o ataque é o seu jeito de devolver na mesma moeda." />
+                            </ui:VisualElement>
+
+                            <ui:VisualElement name="WikiPage_math_add" class="wiki-page" style="display: none;">
+                                <ui:Label class="wiki-page-title" text="Adição" />
+                                <ui:Label class="wiki-section-title wiki-section-title--first" text="Contas de adição" />
+                                <ui:Label class="wiki-page-body" text="Na adição, você deve juntar os valores." />
+                                <ui:Label class="wiki-section-title" text="Exemplo: 2 + 3" />
+                                <ui:Label class="wiki-page-body" text="Pegue o primeiro número: 2." />
+                                <ui:Label class="wiki-page-body" text="Some com o segundo número: 3." />
+                                <ui:Label class="wiki-page-body" text="O resultado é 5." />
+                                <ui:Label class="wiki-page-body" text="A adição serve para aumentar o valor. Sempre que aparecer o sinal +, você deve somar." />
+                                <ui:Label class="wiki-section-title" text="Contas de adição com vírgula" />
+                                <ui:Label class="wiki-page-body" text="Essas contas funcionam como a adição normal, mas com números decimais." />
+                                <ui:Label class="wiki-section-title" text="Exemplo: 1,5 + 2,5" />
+                                <ui:Label class="wiki-page-body" text="Junte os números normalmente." />
+                                <ui:Label class="wiki-page-body" text="Some a parte inteira com a parte inteira." />
+                                <ui:Label class="wiki-page-body" text="Some a parte da vírgula com a parte da vírgula." />
+                                <ui:Label class="wiki-page-body" text="O resultado é 4,0 ou simplesmente 4." />
+                                <ui:Label class="wiki-page-body" text="A vírgula mostra que o número não é inteiro. Mesmo assim, a regra continua a mesma: somar os valores." />
+                                <ui:Label class="wiki-page-body" text="Sempre deixe vírgula em cima de vírgula para fazer os cálculos:" />
+                                <ui:VisualElement name="WikiPlaceholder_MathAddVirgula" class="wiki-image-placeholder">
+                                    <ui:Label class="wiki-image-placeholder-label" text="[Ilustração — alinhamento de vírgulas (doc: após este parágrafo)]" />
+                                </ui:VisualElement>
+                                <ui:Label class="wiki-page-body" text="Onde não tem número é o mesmo que ter 0 (zero)." />
+                                <ui:Label class="wiki-section-title" text="Nas cartas" />
+                                <ui:Label class="wiki-page-body" text="Em duelos de adição, uma carta pode aparecer como várias parcelas que somam ao valor da carta." />
+                            </ui:VisualElement>
+
+                            <ui:VisualElement name="WikiPage_math_sub" class="wiki-page" style="display: none;">
+                                <ui:Label class="wiki-page-title" text="Subtração" />
+                                <ui:Label class="wiki-section-title wiki-section-title--first" text="Contas de subtração" />
+                                <ui:Label class="wiki-page-body" text="Na subtração, você deve tirar uma quantidade de outra." />
+                                <ui:Label class="wiki-page-body" text="Ela mostra quanto sobra depois de retirar um valor." />
+                                <ui:Label class="wiki-section-title" text="Exemplo: 55 − 14" />
+                                <ui:Label class="wiki-page-body" text="Passo a passo:" />
+                                <ui:Label class="wiki-page-body" text="Coloque os números um embaixo do outro." />
+                                <ui:Label class="wiki-page-body" text="Alinhe as casas certas: unidade com unidade, dezena com dezena." />
+                                <ui:Label class="wiki-page-body" text="Comece sempre da direita para a esquerda." />
+                                <ui:Label class="wiki-page-body" text="Primeiro faça a conta das unidades." />
+                                <ui:Label class="wiki-page-body" text="Depois faça a conta das dezenas." />
+                                <ui:Label class="wiki-section-title" text="Exemplo montado" />
+                                <ui:VisualElement class="wiki-math-example">
+                                    <ui:Label class="wiki-math-example-line" text="55" />
+                                    <ui:Label class="wiki-math-example-line" text="- 14" />
+                                    <ui:Label class="wiki-math-example-line" text="----" />
+                                    <ui:Label class="wiki-math-example-line" text="41" />
+                                </ui:VisualElement>
+                                <ui:Label class="wiki-section-title" text="Como pensar" />
+                                <ui:Label class="wiki-page-body" text="5 − 4 = 1." />
+                                <ui:Label class="wiki-page-body" text="5 − 1 = 4." />
+                                <ui:Label class="wiki-page-body" text="Resultado final: 41." />
+                                <ui:Label class="wiki-section-title" text="Quando o número de cima é menor" />
+                                <ui:Label class="wiki-page-body" text="Às vezes a conta não dá para fazer direto." />
+                                <ui:Label class="wiki-section-title" text="Exemplo: 42 − 17" />
+                                <ui:Label class="wiki-page-body" text="Passo a passo:" />
+                                <ui:Label class="wiki-page-body" text="Veja as unidades: 2 − 7 não dá." />
+                                <ui:Label class="wiki-page-body" text="Então você pega 1 dezena emprestada do 4." />
+                                <ui:Label class="wiki-page-body" text="O 4 vira 3." />
+                                <ui:Label class="wiki-page-body" text="O 2 vira 12." />
+                                <ui:Label class="wiki-page-body" text="Agora faça 12 − 7 = 5." />
+                                <ui:Label class="wiki-page-body" text="Depois faça 3 − 1 = 2." />
+                                <ui:Label class="wiki-section-title" text="Exemplo montado" />
+                                <ui:VisualElement class="wiki-math-example">
+                                    <ui:Label class="wiki-math-example-line" text="42" />
+                                    <ui:Label class="wiki-math-example-line" text="- 17" />
+                                    <ui:Label class="wiki-math-example-line" text="----" />
+                                    <ui:Label class="wiki-math-example-line" text="25" />
+                                </ui:VisualElement>
+                                <ui:Label class="wiki-page-body" text="Resultado: 25." />
+                                <ui:Label class="wiki-section-title" text="Subtração com vírgula" />
+                                <ui:Label class="wiki-page-body" text="É a mesma lógica de sempre deixar as vírgulas uma em cima da outra para não errar e fazer a subtração normalmente." />
+                                <ui:Label class="wiki-section-title" text="Nas cartas" />
+                                <ui:Label class="wiki-page-body" text="Em duelos de subtração, a carta pode aparecer como cadeias com menos que fecham no valor da carta." />
+                            </ui:VisualElement>
+
+                            <ui:VisualElement name="WikiPage_math_mul" class="wiki-page" style="display: none;">
+                                <ui:Label class="wiki-page-title" text="Multiplicação" />
+                                <ui:Label class="wiki-section-title wiki-section-title--first" text="Contas de multiplicação" />
+                                <ui:Label class="wiki-page-body" text="Na multiplicação, você deve repetir um número várias vezes." />
+                                <ui:Label class="wiki-section-title" text="Exemplo: 3 × 4" />
+                                <ui:Label class="wiki-page-body" text="O número 3 será repetido 4 vezes." />
+                                <ui:Label class="wiki-page-body" text="Isso fica: 3 + 3 + 3 + 3." />
+                                <ui:Label class="wiki-page-body" text="O resultado é 12." />
+                                <ui:Label class="wiki-page-body" text="Outra forma de pensar é:" />
+                                <ui:Label class="wiki-page-body" text="3 × 4 significa 3 vezes 4 ou 4 vezes 3." />
+                                <ui:Label class="wiki-page-body" text="O resultado é o mesmo." />
+                                <ui:Label class="wiki-page-body" text="Quando aparecer o sinal ×, você deve multiplicar." />
+                                <ui:Label class="wiki-section-title" text="Contas de multiplicação com vírgula" />
+                                <ui:Label class="wiki-page-body" text="Na multiplicação com vírgula, você a fará normalmente ignorando a vírgula; apenas no final terá que contar as casas decimais atrás das vírgulas para adicionar no resultado." />
+                                <ui:VisualElement name="WikiPlaceholder_MathMulVirgula" class="wiki-image-placeholder">
+                                    <ui:Label class="wiki-image-placeholder-label" text="[Ilustração — multiplicação com vírgula (doc: após este parágrafo)]" />
+                                </ui:VisualElement>
+                                <ui:Label class="wiki-page-body" text="Pode ser colocado o 0 (zero) no lugar do + caso ajude na visualização." />
+                                <ui:Label class="wiki-section-title" text="Nas cartas" />
+                                <ui:Label class="wiki-page-body" text="Em duelos de multiplicação, a carta pode aparecer como fatores que multiplicam até o valor da carta." />
+                            </ui:VisualElement>
+
+                            <ui:VisualElement name="WikiPage_math_div" class="wiki-page" style="display: none;">
+                                <ui:Label class="wiki-page-title" text="Divisão e fração" />
+                                <ui:Label class="wiki-section-title wiki-section-title--first" text="Contas de divisão" />
+                                <ui:Label class="wiki-page-body" text="Na divisão, você deve separar um valor em partes iguais." />
+                                <ui:Label class="wiki-section-title" text="Exemplo: 8 ÷ 2" />
+                                <ui:Label class="wiki-page-body" text="Pegue o número 8." />
+                                <ui:Label class="wiki-page-body" text="Divida-o em 2 partes iguais." />
+                                <ui:Label class="wiki-page-body" text="Cada parte fica com 4." />
+                                <ui:Label class="wiki-page-body" text="Então, 8 ÷ 2 = 4." />
+                                <ui:Label class="wiki-page-body" text="Quando aparecer o sinal ÷ ou /, você deve dividir." />
+                                <ui:Label class="wiki-section-title" text="Frações" />
+                                <ui:Label class="wiki-page-body" text="Frações representam uma parte de um todo e, na prática, também podem ser entendidas como uma forma de divisão." />
+                                <ui:Label class="wiki-page-body" text="Uma fração é escrita com um número em cima e outro embaixo, separados por uma linha." />
+                                <ui:Label class="wiki-section-title" text="Exemplo: 3/4" />
+                                <ui:Label class="wiki-page-body" text="Para ler uma fração, você lê primeiro o número de cima e depois o de baixo:" />
+                                <ui:Label class="wiki-page-body" text="3/4 = três quartos." />
+                                <ui:Label class="wiki-page-body" text="1/2 = um meio." />
+                                <ui:Label class="wiki-page-body" text="5/6 = cinco sextos." />
+                                <ui:Label class="wiki-section-title" text="Na fração" />
+                                <ui:Label class="wiki-page-body" text="O número de cima é chamado de numerador;" />
+                                <ui:Label class="wiki-page-body" text="O número de baixo é chamado de denominador." />
+                                <ui:Label class="wiki-page-body" text="A ordem para interpretar a fração é sempre esta:" />
+                                <ui:Label class="wiki-page-body" text="Veja o número de cima." />
+                                <ui:Label class="wiki-page-body" text="Veja o número de baixo." />
+                                <ui:Label class="wiki-page-body" text="Entenda que o número de cima está sendo dividido pelo número de baixo." />
+                                <ui:Label class="wiki-section-title" text="Exemplo: 6/2" />
+                                <ui:Label class="wiki-page-body" text="Isso significa: 6 dividido por 2." />
+                                <ui:Label class="wiki-page-body" text="O resultado é 3." />
+                                <ui:Label class="wiki-page-body" text="Então, a fração funciona como uma divisão escrita de outra forma." />
+                                <ui:Label class="wiki-section-title" text="Contas de divisão com vírgula" />
+                                <ui:Label class="wiki-page-body" text="Na divisão com vírgula, você precisa igualar as casas decimais atrás da vírgula, multiplicando por 10 para os dois lados, pois o que você faz em um lado tem que ser feito no outro; assim que eliminar as vírgulas, poderá começar a divisão normalmente." />
+                                <ui:VisualElement name="WikiPlaceholder_MathDivVirgula" class="wiki-image-placeholder">
+                                    <ui:Label class="wiki-image-placeholder-label" text="[Ilustração — divisão com vírgula (doc: após este parágrafo)]" />
+                                </ui:VisualElement>
+                                <ui:Label class="wiki-section-title" text="Nas cartas" />
+                                <ui:Label class="wiki-page-body" text="Em duelos de divisão, a carta pode aparecer como divisões ou formas equivalentes que fecham no valor da carta." />
+                            </ui:VisualElement>
+
+                            <ui:VisualElement name="WikiPage_enemies" class="wiki-page" style="display: none;">
+                                <ui:Label class="wiki-page-title" text="Quatro tipos de duelo" />
+                                <ui:Label class="wiki-page-body" text="O mapa oferece quatro sabores de combate. Cada um muda o jeito das cartas na mesa e o conjunto de equações que você pode comprar naquele ponto." />
+                                <ui:Label class="wiki-section-title wiki-section-title--first" text="Adição" />
+                                <ui:Label class="wiki-page-body" text="Cartas tendem a aparecer como somas de parcelas." />
+                                <ui:Label class="wiki-section-title" text="Subtração" />
+                                <ui:Label class="wiki-page-body" text="Cartas tendem a aparecer como cadeias com menos." />
+                                <ui:Label class="wiki-section-title" text="Multiplicação" />
+                                <ui:Label class="wiki-page-body" text="Cartas tendem a aparecer como produtos." />
+                                <ui:Label class="wiki-section-title" text="Divisão" />
+                                <ui:Label class="wiki-page-body" text="Cartas tendem a aparecer como divisões ou formas parecidas." />
+                            </ui:VisualElement>
+
+                            <ui:VisualElement name="WikiPage_shop_inventory" class="wiki-page" style="display: none;">
+                                <ui:Label class="wiki-page-title" text="Loja e inventário" />
+                                <ui:Label class="wiki-section-title wiki-section-title--first wiki-section-title--after-title-only" text="Como abrir a loja" />
+                                <ui:Label class="wiki-page-body" text="No mapa, use o botão roxo da loja. De lá você compra itens com moedas e volta ao mapa quando quiser." />
+                                <ui:Label class="wiki-section-title" text="Ataque e defesa" />
+                                <ui:Label class="wiki-page-body" text="Peças de ataque ficam com você para sempre e aumentam o dano que você causa ao oponente quando ele perde uma rodada. Várias peças multiplicam o efeito entre si. Peças de defesa aumentam sua vida máxima; ao comprar uma, sua vida atual também sobe na mesma hora." />
+                                <ui:Label class="wiki-section-title" text="Consumíveis" />
+                                <ui:Label class="wiki-page-body" text="Podem ser comprados na loja quando você tiver espaço. O inventário reserva três espaços numerados mentalmente como 1, 2 e 3 (atalhos 1, 2 e 3 no teclado). Cada espaço guarda um item; o mesmo tipo pode aparecer em mais de um espaço." />
+                                <ui:Label class="wiki-page-body" text="No seu turno no duelo, as teclas 1, 2 e 3 usam o item do espaço correspondente. Consumíveis podem recuperar vida até o seu máximo atual. Depois de usar, o espaço fica vazio e o item some do inventário." />
+                                <ui:Label class="wiki-section-title" text="Regras na loja" />
+                                <ui:Label class="wiki-page-body" text="Com os três espaços cheios, não dá para comprar outro consumível até você usar um no duelo. Equipamento de ataque ou defesa que você já comprou aparece como indisponível para recompra." />
+                            </ui:VisualElement>
+
+                            <ui:VisualElement name="WikiPage_controls" class="wiki-page" style="display: none;">
+                                <ui:Label class="wiki-page-title" text="Controles" />
+                                <ui:Label class="wiki-section-title wiki-section-title--first wiki-section-title--after-title-only" text="Mapa" />
+                                <ui:Label class="wiki-page-body" text="Mouse para escolher duelos. Scroll ou arrasto vertical move a câmera. Esc fecha esta ajuda quando ela estiver aberta." />
+                                <ui:Label class="wiki-section-title" text="Combate" />
+                                <ui:Label class="wiki-page-body" text="Mouse nos botões da mesa. Espaço passa o turno (parar). B compra carta. Setas ou WASD navegam na interface. Enter confirma. Teclas 1, 2 e 3 usam consumíveis nos três espaços durante o seu turno." />
+                            </ui:VisualElement>
+
+                            </ui:VisualElement>
+                        </ui:ScrollView>
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>
