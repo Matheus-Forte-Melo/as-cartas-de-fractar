@@ -1,6 +1,7 @@
 using System.Collections;
 using System.IO;
 using TMPro;
+using Tutorial;
 using Tutorial.Onboarding;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,10 +15,10 @@ namespace Tutorial.DefaultBlackjack
     /// </summary>
     public sealed class DefaultBlackjackController : MonoBehaviour
     {
-        private const string DefaultDeckFile = "tutorial_default_blackjack_deck.json";
-        private const string DefaultTableFile = "tutorial_default_blackjack_table.json";
+        private const string DefaultDeckFile = TutorialContentPaths.DefaultBlackjackDeck;
+        private const string DefaultTableFile = TutorialContentPaths.DefaultBlackjackTable;
 
-        [Header("StreamingAssets (só o nome do arquivo)")]
+        [Header("StreamingAssets (caminho relativo à raiz)")]
         [SerializeField] private string _deckJsonFileName = DefaultDeckFile;
         [SerializeField] private string _tableJsonFileName = DefaultTableFile;
 

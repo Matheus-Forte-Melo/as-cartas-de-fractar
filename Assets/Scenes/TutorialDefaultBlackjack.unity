@@ -1033,8 +1033,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63afede25099e9450afc8b2ae7476bd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tutorial.DefaultBlackjack.DefaultBlackjackController
-  _deckJsonFileName: tutorial_default_blackjack_deck.json
-  _tableJsonFileName: tutorial_default_blackjack_table.json
+  _deckJsonFileName: TUTORIAL/defaultblackjack/tutorial_default_blackjack_deck.json
+  _tableJsonFileName: TUTORIAL/defaultblackjack/tutorial_default_blackjack_table.json
   _playerHandDisplay: {fileID: 1834008696}
   _dealerHandDisplay: {fileID: 314377151}
   _btnHit: {fileID: 128906536}
@@ -1102,9 +1102,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9f8e7d6c5b4a3928170645342312013, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tutorial.DefaultBlackjack.DefaultBlackjackGuidedSession
-  _forcedTableJsonFileName: tutorial_blackjack_guided_table.json
-  _stepsJsonFileName: tutorial_blackjack_guided_steps.json
-  _stringsJsonFileName: tutorial_blackjack_guided_strings.json
+  _forcedTableJsonFileName: TUTORIAL/blackjackguided/tutorial_blackjack_guided_table.json
+  _stepsJsonFileName: TUTORIAL/blackjackguided/tutorial_blackjack_guided_steps.json
+  _stringsJsonFileName: TUTORIAL/blackjackguided/tutorial_blackjack_guided_strings.json
   _tutorialManager: {fileID: 585186787}
   _resetMainTutorialInSaveOnSceneEnter: 1
 --- !u!114 &585186789

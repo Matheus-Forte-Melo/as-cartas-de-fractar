@@ -34,11 +34,7 @@
     },
     {
       "key": "core_07_press_stand_safe",
-      "text": "Clique em <b>Parar</b>. Sua vez termina e o inimigo precisa jogar."
-    },
-    {
-      "key": "core_08_enemy_must_hit",
-      "text": "Vamos ver o que o inimigo irá fazer, ele está com um valor consíderavel... Ele pode ou não estourar, Observe e clique em <b>Continuar</b>."
+      "text": "Clique em <b>Parar</b>. Sua vez termina e o inimigo precisa jogar.\n\nVamos ver o que o inimigo irá fazer, ele está com um valor consíderavel... Ele pode ou não estourar."
     },
     {
       "key": "core_09_round2_summary",
@@ -46,15 +42,11 @@
     },
     {
       "key": "core_10_round3_setup",
-      "text": "<b>Rodada 3.</b> Sua mão abriu <b>muito forte</b>. Continuar é moleza: basta <b>Parar</b> e torcer para o inimigo ser azarado."
+      "text": "<b>Rodada 3.</b> Sua mão abriu <b>muito forte</b>."
     },
     {
       "key": "core_11_press_stand_again",
-      "text": "Clique em <b>Parar</b> mais uma vez."
-    },
-    {
-      "key": "core_12_enemy_busts_again",
-      "text": "O inimigo está com um valor razoável novamente, ele tem que ter sorte grande para não estourar, para ganhar de você, ele tem que tirar exatamente 21.\n\nEssa é a grande sacada: você deve saber fazer as equações afim de tomar as melhores decisões. Nesse turno, você sabe que sua mão está alta e que o inimigo tem chance de estourar ou ficar atŕas de você, então não há porque arriscar; O inimigo só vai ganhar se tiver sorte."
+      "text": "Clique em <b>Parar</b> mais uma vez. O inimigo está com um valor razoável novamente, ele tem que ter sorte grande para não estourar, para ganhar de você, ele tem que tirar exatamente 21.\n\nEssa é a grande sacada: você deve saber fazer as equações afim de tomar as melhores decisões. Nesse turno, você sabe que sua mão está alta e que o inimigo tem chance de estourar ou ficar atŕas de você, então não há porque arriscar; O inimigo só vai ganhar se tiver sorte."
     },
     {
       "key": "core_13_round3_summary",

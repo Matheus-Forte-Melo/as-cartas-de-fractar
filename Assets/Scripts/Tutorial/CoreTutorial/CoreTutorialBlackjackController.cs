@@ -5,6 +5,7 @@ using System.Text;
 using Blackjack.Core;
 using Blackjack.Decks;
 using TMPro;
+using Tutorial;
 using Tutorial.Onboarding;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -28,12 +29,23 @@ namespace Tutorial.CoreTutorial
     /// <para>As corrotinas didáticas (turno do inimigo, resumo) **pausam** enquanto o tutorial mostra um passo
     /// de <see cref="TutorialAdvanceMode.ContinueButton"/>, garantindo que o jogador tem tempo de ler antes
     /// da UI de fundo mudar (<see cref="PauseIfTutorialExplaining"/>).</para>
+    /// <para>Nos passos <c>roundN_press_stand</c>, o evento <c>tutorial.bj.player_stand</c> só dispara no fim do
+    /// resumo da rodada (<see cref="MaybeAdvanceTutorialAfterStandResolved"/>), com o modal escondido durante
+    /// o turno do inimigo (<see cref="TutorialManager.SetSpotlightAndTooltipVisible"/>). Após Continuar no resumo,
+    /// o modal some de novo até <c>StartNextRound</c> terminar, com bloqueio em tela cheia.</para>
     /// </remarks>
     public sealed class CoreTutorialBlackjackController : MonoBehaviour
     {
-        private const string DefaultRoundsFile = "tutorial_core_rounds.json";
+        private const string DefaultRoundsFile = TutorialContentPaths.CoreRounds;
         private const string SandboxDeckFile = "Easy/config_cards_easy_multiplication.json";
         private const int DamageMultiplierDisplay = 10;
+
+        private static readonly string[] DeferredPlayerStandTutorialStepIds =
+        {
+            "round1_press_stand",
+            "round2_press_stand",
+            "round3_press_stand"
+        };
 
         [Header("StreamingAssets")]
         [SerializeField] private string _roundsJsonFileName = DefaultRoundsFile;
@@ -68,7 +80,10 @@ namespace Tutorial.CoreTutorial
         [SerializeField] private float _enemyAfterCardMin = 0.8f;
         [SerializeField] private float _enemyAfterCardMax = 1.0f;
         [SerializeField] private float _compareRevealPause = 0.5f;
-        [SerializeField] private float _summaryHoldSeconds = 0.8f;
+        [Tooltip("Pausa curta depois de preencher o resumo no centro (ritmo visual).")]
+        [SerializeField] private float _summaryHoldSeconds = 2.3f;
+        [Tooltip("Tempo em que só o resumo fica no centro da mesa (sem modal do tutorial), para leitura antes do próximo passo.")]
+        [SerializeField] private float _battleCenterSummaryReadSeconds = 3.5f;
 
         [Header("Pós-combate")]
         [Tooltip("Cena para onde voltar ao clicar em ENCERRAR ou quando algum duelista chega a 0 HP.")]
@@ -83,6 +98,12 @@ namespace Tutorial.CoreTutorial
         private List<Card> _sandboxPool;
         private bool _battleOver;
         private bool _roundResolutionActive;
+        /// <summary>
+        /// Quando <see cref="RoundResolutionRoutine"/> chama <see cref="StartNextRound"/>, o
+        /// <c>StopAllCoroutines</c> aborta a própria corrotina antes do fim; o reapresentar do tutorial
+        /// corre no final de <see cref="StartNextRound"/> quando esta flag está ligada.
+        /// </summary>
+        private bool _reapplyTutorialAfterStartRound;
         private bool _sandboxMode;
         private string _centerFeedLine = "";
 
@@ -179,6 +200,16 @@ namespace Tutorial.CoreTutorial
 
             RefreshUi();
             EventBridge.TriggerEvent(TutorialCoreEventIds.NewRoundStarted);
+
+            if (_reapplyTutorialAfterStartRound)
+            {
+                _reapplyTutorialAfterStartRound = false;
+                if (_tutorialManager != null && _tutorialManager.IsRunning)
+                {
+                    _tutorialManager.SetSpotlightAndTooltipVisible(true);
+                    _tutorialManager.ReapplyCurrentStepPresentation();
+                }
+            }
         }
 
         private void OnHit()
@@ -224,6 +255,10 @@ namespace Tutorial.CoreTutorial
             if (_game == null || _game.IsRoundOver) return;
             ClearCenterFeedOnly();
 
+            if (_tutorialManager != null && _tutorialManager.IsRunning
+                && IsDeferredPlayerStandTutorialStep(_tutorialManager.CurrentStepId))
+                _tutorialManager.SetSpotlightAndTooltipVisible(false);
+
             try
             {
                 _game.PlayerStand();
@@ -246,7 +281,13 @@ namespace Tutorial.CoreTutorial
             }
             finally
             {
-                EventBridge.TriggerEvent(TutorialBlackjackEventIds.PlayerStand);
+                // `tutorial.bj.player_stand` nos passos "Parar" guiados é adiado para
+                // <see cref="MaybeAdvanceTutorialAfterStandResolved"/> (resumo na mesa pronto).
+                if (_tutorialManager == null || !_tutorialManager.IsRunning
+                    || !IsDeferredPlayerStandTutorialStep(_tutorialManager.CurrentStepId))
+                {
+                    EventBridge.TriggerEvent(TutorialBlackjackEventIds.PlayerStand);
+                }
             }
         }
 
@@ -350,7 +391,7 @@ namespace Tutorial.CoreTutorial
 
                 EventBridge.TriggerEvent(TutorialCoreEventIds.RoundSummaryShown);
 
-                // Espera mínima só para a UI "assentar".
+                // Espera curta para a UI assentar (+1,5s vs. valor antigo por defeito).
                 float t = 0f;
                 while (t < _summaryHoldSeconds)
                 {
@@ -358,14 +399,29 @@ namespace Tutorial.CoreTutorial
                     yield return null;
                 }
 
+                // Só texto no centro: o jogador lê o resumo da mesa antes do modal do tutorial avançar.
+                float read = Mathf.Max(0f, _battleCenterSummaryReadSeconds);
+                if (read > 0f)
+                    yield return new WaitForSeconds(read);
+
+                MaybeAdvanceTutorialAfterStandResolved();
+
                 // Enquanto o tutorial estiver explicando esta rodada (passo ContinueButton),
                 // a corrotina pausa. Quando o jogador clicar em Continuar, o tutorial avança e voltamos aqui.
                 yield return PauseIfTutorialExplaining();
+
+                // Transição resumo → próxima rodada: some o modal, deixa a corrotina / StartNextRound
+                // terminar com input bloqueado (blocker em tela cheia), depois reaplica o passo corrente.
+                _tutorialManager?.SetSpotlightAndTooltipVisible(false);
+                yield return null;
 
                 EventBridge.TriggerEvent(TutorialCoreEventIds.RoundContinue);
 
                 ClearBattleCenter();
                 ClearHandValueLabels();
+                // StartNextRound chama StopAllCoroutines e aborta esta corrotina; o tutorial volta
+                // no final de StartNextRound quando _reapplyTutorialAfterStartRound está true.
+                _reapplyTutorialAfterStartRound = true;
                 ResolvePostRoundFlow();
             }
             finally
@@ -386,6 +442,7 @@ namespace Tutorial.CoreTutorial
 
             if (_game.Enemy.Health <= 0 || _game.Player.Health <= 0)
             {
+                _reapplyTutorialAfterStartRound = false;
                 EndBattle();
                 return;
             }
@@ -417,6 +474,7 @@ namespace Tutorial.CoreTutorial
         {
             if (_battleOver) return;
             _battleOver = true;
+            _reapplyTutorialAfterStartRound = false;
             StopAllCoroutines();
             SetPlayerActionsEnabled(false);
             StartCoroutine(EndBattleRoutine());
@@ -546,27 +604,53 @@ namespace Tutorial.CoreTutorial
             txtBattleCenter.text = _centerFeedLine ?? "";
         }
 
+        private static bool IsDeferredPlayerStandTutorialStep(string stepId)
+        {
+            if (string.IsNullOrEmpty(stepId))
+                return false;
+            for (int i = 0; i < DeferredPlayerStandTutorialStepIds.Length; i++)
+            {
+                if (DeferredPlayerStandTutorialStepIds[i] == stepId)
+                    return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Avança o passo que espera <c>tutorial.bj.player_stand</c> só depois do resumo da rodada
+        /// estar na UI (inimigo + comparação terminados), para o texto não saltar antes da hora.
+        /// </summary>
+        private void MaybeAdvanceTutorialAfterStandResolved()
+        {
+            if (_tutorialManager == null || !_tutorialManager.IsRunning)
+                return;
+            if (!IsDeferredPlayerStandTutorialStep(_tutorialManager.CurrentStepId))
+                return;
+
+            _tutorialManager.SetSpotlightAndTooltipVisible(true);
+            EventBridge.TriggerEvent(TutorialBlackjackEventIds.PlayerStand);
+        }
+
         /// <summary>
         /// Se o <see cref="TutorialManager"/> estiver mostrando um passo com
         /// <see cref="TutorialAdvanceMode.ContinueButton"/>, pausa a corrotina atual até o jogador
-        /// clicar em Continuar. Isto evita que a UI do combate mude "por baixo" do tooltip antes
-        /// do jogador ter tempo de ler.
+        /// clicar em Continuar e o índice do passo avançar. Usa-se o índice (e não o <c>stepId</c>)
+        /// porque dois passos seguidos podem ser <c>ContinueButton</c> (ex.: resumo da rodada 1 →
+        /// setup da rodada 2): com <c>stepId</c> o laço terminava logo após o clique e a corrotina
+        /// escondia o tutorial antes de <c>StartNextRound</c>.
         /// </summary>
         private IEnumerator PauseIfTutorialExplaining()
         {
             if (_tutorialManager == null || !_tutorialManager.IsRunning) yield break;
-            int idx = _tutorialManager.CurrentStepIndex;
+            int snapshotIndex = _tutorialManager.CurrentStepIndex;
             var steps = _tutorialManager.Steps;
-            if (idx < 0 || steps == null || idx >= steps.Count) yield break;
-            var step = steps[idx];
+            if (snapshotIndex < 0 || steps == null || snapshotIndex >= steps.Count) yield break;
+            var step = steps[snapshotIndex];
             if (step == null || step.advanceMode != TutorialAdvanceMode.ContinueButton) yield break;
-
-            string snapshot = _tutorialManager.CurrentStepId;
-            if (string.IsNullOrEmpty(snapshot)) yield break;
 
             while (_tutorialManager != null
                    && _tutorialManager.IsRunning
-                   && _tutorialManager.CurrentStepId == snapshot)
+                   && _tutorialManager.CurrentStepIndex == snapshotIndex)
                 yield return null;
         }
 

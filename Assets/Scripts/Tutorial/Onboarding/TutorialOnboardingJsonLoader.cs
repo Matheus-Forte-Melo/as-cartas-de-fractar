@@ -21,6 +21,7 @@ namespace Tutorial.Onboarding
             public string advanceWhenEventId;
             public float autoAdvanceDelaySeconds;
             public float spotlightPadding;
+            public float spotlightHoleScale;
             public float tooltipOffsetX;
             public float tooltipOffsetY;
             public float tooltipPanelWidth;
@@ -75,7 +76,8 @@ namespace Tutorial.Onboarding
                     advanceMode = (TutorialAdvanceMode)Mathf.Clamp(sj.advanceMode, 0, 2),
                     advanceWhenEventId = sj.advanceWhenEventId ?? "",
                     autoAdvanceDelaySeconds = sj.autoAdvanceDelaySeconds,
-                    spotlightPadding = sj.spotlightPadding > 0 ? sj.spotlightPadding : 8f,
+                    spotlightPadding = Mathf.Approximately(sj.spotlightPadding, 0f) ? 8f : sj.spotlightPadding,
+                    spotlightHoleScale = Mathf.Approximately(sj.spotlightHoleScale, 0f) ? 1f : sj.spotlightHoleScale,
                     tooltipOffset = new Vector2(sj.tooltipOffsetX, sj.tooltipOffsetY),
                     tooltipPanelWidth = sj.tooltipPanelWidth,
                     tooltipPanelHeight = sj.tooltipPanelHeight

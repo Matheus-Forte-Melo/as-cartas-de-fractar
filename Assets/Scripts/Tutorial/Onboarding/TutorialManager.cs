@@ -270,11 +270,11 @@ namespace Tutorial.Onboarding
             }
             else
             {
-                _spotlight.SetHole(step.target, step.spotlightPadding);
+                _spotlight.SetHole(step.target, step.spotlightPadding, step.spotlightHoleScale);
                 if (step.blockEntireScreenInput)
                     _blocker.SetFullscreenBlock();
                 else
-                    _blocker.SetHole(step.target, step.spotlightPadding);
+                    _blocker.SetHole(step.target, step.spotlightPadding, step.spotlightHoleScale);
             }
 
             StopDelayIfAny();
@@ -286,6 +286,42 @@ namespace Tutorial.Onboarding
 
         public void SetTutorialLayersVisible(bool visible) =>
             SetAllLayersVisible(visible);
+
+        /// <summary>
+        /// Esconde só spotlight + tooltip (mantém o canvas ativo) e força o <see cref="TutorialBlocker"/>
+        /// em tela cheia — bloqueia cliques no jogo por baixo sem mostrar o modal didáctico.
+        /// Usado no <c>CoreTutorial</c> durante turno do inimigo / transição de rodada.
+        /// </summary>
+        public void SetSpotlightAndTooltipVisible(bool visible)
+        {
+            if (_spotlight != null)
+            {
+                if (!visible)
+                    _spotlight.Clear();
+                _spotlight.gameObject.SetActive(visible);
+            }
+
+            if (_tooltip != null)
+            {
+                if (!visible)
+                    _tooltip.Hide();
+                else
+                    _tooltip.gameObject.SetActive(true);
+            }
+
+            if (!visible)
+                _blocker?.SetFullscreenBlock();
+        }
+
+        /// <summary>Reaplica o passo corrente (tooltip/spotlight/blocker) sem mudar o índice.</summary>
+        public void ReapplyCurrentStepPresentation()
+        {
+            if (!_running || _steps == null)
+                return;
+            if (_stepIndex < 0 || _stepIndex >= _steps.Count)
+                return;
+            ApplyStep(_stepIndex);
+        }
 
         private IEnumerator DelayAdvance(float seconds)
         {

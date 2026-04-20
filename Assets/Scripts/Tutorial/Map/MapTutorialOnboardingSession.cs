@@ -1,5 +1,6 @@
 using System.Collections;
 using System.IO;
+using Tutorial;
 using Tutorial.Onboarding;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -10,8 +11,8 @@ using UnityEngine.SceneManagement;
 [DisallowMultipleComponent]
 public sealed class MapTutorialOnboardingSession : MonoBehaviour
 {
-    private const string StepsFile = "tutorial_map_steps.json";
-    private const string StringsFile = "tutorial_map_strings.json";
+    private const string StepsFile = TutorialContentPaths.MapSteps;
+    private const string StringsFile = TutorialContentPaths.MapStrings;
 
     private IEnumerator Start()
     {

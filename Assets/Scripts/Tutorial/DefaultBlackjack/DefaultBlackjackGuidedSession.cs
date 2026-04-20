@@ -1,5 +1,6 @@
 using System.IO;
 using Tutorial.Onboarding;
+using Tutorial;
 using UnityEngine;
 
 namespace Tutorial.DefaultBlackjack
@@ -10,9 +11,9 @@ namespace Tutorial.DefaultBlackjack
     /// </summary>
     public sealed class DefaultBlackjackGuidedSession : MonoBehaviour
     {
-        [SerializeField] private string _forcedTableJsonFileName = "tutorial_blackjack_guided_table.json";
-        [SerializeField] private string _stepsJsonFileName = "tutorial_blackjack_guided_steps.json";
-        [SerializeField] private string _stringsJsonFileName = "tutorial_blackjack_guided_strings.json";
+        [SerializeField] private string _forcedTableJsonFileName = TutorialContentPaths.BlackjackGuidedTable;
+        [SerializeField] private string _stepsJsonFileName = TutorialContentPaths.BlackjackGuidedSteps;
+        [SerializeField] private string _stringsJsonFileName = TutorialContentPaths.BlackjackGuidedStrings;
         [SerializeField] private TutorialManager _tutorialManager;
 
         private void Awake()

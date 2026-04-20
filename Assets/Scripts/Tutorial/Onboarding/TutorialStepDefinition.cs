@@ -37,8 +37,11 @@ namespace Tutorial.Onboarding
         [Tooltip("Altura do painel do tooltip (px). Deixe 0 para usar o default (160). Só aplica se largura também for > 0.")]
         public float tooltipPanelHeight;
 
-        [Tooltip("Expansão do buraco em torno do alvo (pixels por lado).")]
+        [Tooltip("Expansão do buraco em torno do alvo (pixels por lado). Positivo amplia; negativo encolhe (“padding reverso”).")]
         public float spotlightPadding = 8f;
+
+        [Tooltip("Escala do buraco em relação ao retângulo do alvo (largura e altura). 1 = igual ao alvo; 0,75 = 25% menor em cada eixo, centrado.")]
+        public float spotlightHoleScale = 1f;
 
         [Tooltip("Se verdadeiro com alvo: mantém o buraco visual no escurecimento, mas o bloqueador de input cobre a tela inteira (nada por baixo fica clicável — ex.: mapa).")]
         public bool blockEntireScreenInput;

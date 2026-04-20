@@ -64,10 +64,13 @@ namespace Tutorial.Onboarding
         /// <summary>
         /// Converte o retângulo do alvo (world) para espaço local do root do overlay.
         /// </summary>
+        /// <param name="padding">Uniforme por lado, aplicado depois da escala: positivo amplia o buraco, negativo encolhe (“padding reverso”).</param>
+        /// <param name="holeScale">1 = usa o retângulo do alvo; 0,75 = 25% menor em largura e altura (centrado). Valores ≤ 0 são tratados como 1.</param>
         public static bool TryGetHoleInRootLocalSpace(
             RectTransform target,
             RectTransform overlayRoot,
             float padding,
+            float holeScale,
             out Rect holeLocal)
         {
             holeLocal = default;
@@ -96,6 +99,15 @@ namespace Tutorial.Onboarding
                     return false;
                 min = Vector2.Min(min, local);
                 max = Vector2.Max(max, local);
+            }
+
+            float scale = holeScale <= 0f ? 1f : holeScale;
+            if (!Mathf.Approximately(scale, 1f))
+            {
+                Vector2 center = (min + max) * 0.5f;
+                Vector2 half = (max - min) * 0.5f * scale;
+                min = center - half;
+                max = center + half;
             }
 
             min -= Vector2.one * padding;

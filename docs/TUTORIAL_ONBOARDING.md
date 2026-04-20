@@ -27,6 +27,19 @@ Guia curto para quem for estender ou ligar novos tutoriais no projeto. O núcleo
 
 O loader resolve `targetPath` a partir do `RectTransform` raiz do jogo (normalmente o `Canvas` da cena).
 
+### Layout `StreamingAssets/TUTORIAL/`
+
+Todo o conteúdo JSON dos tutoriais fica sob **`Assets/StreamingAssets/TUTORIAL/`** (caminhos relativos à raiz de `StreamingAssets` também expostos em código em `Tutorial.TutorialContentPaths`):
+
+| Subpasta | Ficheiros |
+|----------|-----------|
+| **`TUTORIAL/blackjackguided/`** | `tutorial_blackjack_guided_table.json`, `tutorial_blackjack_guided_steps.json`, `tutorial_blackjack_guided_strings.json` |
+| **`TUTORIAL/defaultblackjack/`** | `tutorial_default_blackjack_deck.json`, `tutorial_default_blackjack_table.json`, `tutorial_default_blackjack_table_forced_example.json` (exemplo) |
+| **`TUTORIAL/map/`** | `tutorial_map_steps.json`, `tutorial_map_strings.json` |
+| **`TUTORIAL/core/`** | `tutorial_core_rounds.json`, `tutorial_core_steps.json`, `tutorial_core_strings.json` |
+
+Os caminhos relativos estão também em **`Tutorial.TutorialContentPaths`** (`Assets/Scripts/Tutorial/TutorialContentPaths.cs`) — use essas constantes ao adicionar novos loaders para evitar strings duplicadas.
+
 ## Eventos a partir do jogo
 
 Nos controllers, após ações relevantes, chamar por exemplo:
@@ -48,7 +61,7 @@ Os IDs estáveis do blackjack de tutorial estão em `TutorialBlackjackEventIds`.
 
 ## Referência de cena
 
-A cena `TutorialDefaultBlackjack` liga `DefaultBlackjackGuidedSession` + `TutorialManager` + UI guiada; mesa forçada e passos vêm dos JSON em `StreamingAssets` com prefixo `tutorial_blackjack_guided_*`. O componente **`GuidedBlackjackNarrative`** é adicionado em runtime pelo session para o passo `dealer_watch` (esconder overlay e forçar a vez da mesa).
+A cena `TutorialDefaultBlackjack` liga `DefaultBlackjackGuidedSession` + `TutorialManager` + UI guiada; mesa forçada e passos vêm de `StreamingAssets/TUTORIAL/blackjackguided/` (`tutorial_blackjack_guided_*`). O componente **`GuidedBlackjackNarrative`** é adicionado em runtime pelo session para o passo `dealer_watch` (esconder overlay e forçar a vez da mesa).
 
 ## Evento `tutorial.bj.dealer_turn_visual_done`
 
@@ -96,13 +109,13 @@ Depois do `MapTutorial`, clicar no nó `(0,0)` leva o jogador para `CoreTutorial
 | **`CoreTutorialGuidedUi`** | Cria/gerencia o botão **ENCERRAR** (canto superior direito, vermelho) — oculto durante as 3 rodadas guiadas, aparece quando `TutorialManager.CompletedOrSkipped` dispara (ou quando o tutorial já foi concluído antes). Também esconde o `BtnNewGame` herdado do clone do `Core`. |
 | **`TutorialCoreEventIds`** | Ids do `EventBridge`: `NewRoundStarted`, `EnemyTurnTaken`, `ReturnedToPlayerTurn`, `RoundSummaryShown`, `RoundContinue`, `BattleEnded`. |
 
-### JSON em `StreamingAssets`
+### JSON em `StreamingAssets/TUTORIAL/core/`
 
 | Ficheiro | Conteúdo |
 |----------|----------|
-| `tutorial_core_rounds.json` | `playerMaxHealth = 100`, `enemyMaxHealth = 100` (vida "normal" durante as rodadas guiadas), `sandboxHealth = 1000` (HP restaurado quando o combate entra em modo sandbox), `enemyStandThreshold = 17`, `damageMultiplier = 10` e `rounds[]` com 3 entradas. Cada rodada tem `playerOpening[2]`, `enemyOpening[2]` e `drawStack[]` (equações + flag `ace`). |
-| `tutorial_core_steps.json` | 15 passos. Botões (`Pedir`/`Parar`) avançam via `OnEvent`; **todos** os outros (intro, teoria, setup, observação do inimigo, resumos, sandbox) avançam via `ContinueButton` — é o que dá tempo ao jogador de ler antes da UI seguir em frente. |
-| `tutorial_core_strings.json` | Textos pt-BR dos tooltips (chaves `core_00_intro`, `core_00b_multi_theory`, `core_01_round1_setup`, …, `core_14_sandbox`). Linguagem direta, didática, com exemplos (`2 × 3 = 2 + 2 + 2 = 6`). |
+| `TUTORIAL/core/tutorial_core_rounds.json` | `playerMaxHealth = 100`, `enemyMaxHealth = 100` (vida "normal" durante as rodadas guiadas), `sandboxHealth = 1000` (HP restaurado quando o combate entra em modo sandbox), `enemyStandThreshold = 17`, `damageMultiplier = 10` e `rounds[]` com 3 entradas. Cada rodada tem `playerOpening[2]`, `enemyOpening[2]` e `drawStack[]` (equações + flag `ace`). |
+| `TUTORIAL/core/tutorial_core_steps.json` | 15 passos. Botões (`Pedir`/`Parar`) avançam via `OnEvent`; **todos** os outros (intro, teoria, setup, observação do inimigo, resumos, sandbox) avançam via `ContinueButton` — é o que dá tempo ao jogador de ler antes da UI seguir em frente. |
+| `TUTORIAL/core/tutorial_core_strings.json` | Textos pt-BR dos tooltips (chaves `core_00_intro`, `core_00b_multi_theory`, `core_01_round1_setup`, …, `core_14_sandbox`). Linguagem direta, didática, com exemplos (`2 × 3 = 2 + 2 + 2 = 6`). |
 
 ### Sincronização corrotina ↔ tutorial
 

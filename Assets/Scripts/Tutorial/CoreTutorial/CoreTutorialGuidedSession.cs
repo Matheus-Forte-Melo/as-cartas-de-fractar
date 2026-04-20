@@ -1,4 +1,5 @@
 using System.IO;
+using Tutorial;
 using Tutorial.Onboarding;
 using UnityEngine;
 
@@ -14,8 +15,8 @@ namespace Tutorial.CoreTutorial
     /// </remarks>
     public sealed class CoreTutorialGuidedSession : MonoBehaviour
     {
-        [SerializeField] private string _stepsJsonFileName = "tutorial_core_steps.json";
-        [SerializeField] private string _stringsJsonFileName = "tutorial_core_strings.json";
+        [SerializeField] private string _stepsJsonFileName = TutorialContentPaths.CoreSteps;
+        [SerializeField] private string _stringsJsonFileName = TutorialContentPaths.CoreStrings;
         [SerializeField] private TutorialManager _tutorialManager;
 
         private void Awake()

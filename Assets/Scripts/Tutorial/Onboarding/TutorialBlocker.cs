@@ -15,6 +15,7 @@ namespace Tutorial.Onboarding
         private RectTransform _root;
         private RectTransform _trackedTarget;
         private float _trackedPadding;
+        private float _trackedHoleScale = 1f;
 
         private void Awake()
         {
@@ -27,7 +28,8 @@ namespace Tutorial.Onboarding
         {
             if (_trackedTarget == null || _root == null)
                 return;
-            if (!TutorialFocusRingLayout.TryGetHoleInRootLocalSpace(_trackedTarget, _root, _trackedPadding, out Rect hole))
+            if (!TutorialFocusRingLayout.TryGetHoleInRootLocalSpace(
+                    _trackedTarget, _root, _trackedPadding, _trackedHoleScale, out Rect hole))
                 return;
             TutorialFocusRingLayout.ApplyFourBars(_root, _bars, hole);
         }
@@ -80,7 +82,7 @@ namespace Tutorial.Onboarding
                 _fullBlock.gameObject.SetActive(true);
         }
 
-        public void SetHole(RectTransform target, float padding)
+        public void SetHole(RectTransform target, float padding, float holeScale = 1f)
         {
             EnsureBars();
             if (_fullBlock != null)
@@ -94,8 +96,10 @@ namespace Tutorial.Onboarding
 
             _trackedTarget = target;
             _trackedPadding = padding;
+            _trackedHoleScale = holeScale <= 0f ? 1f : holeScale;
 
-            if (!TutorialFocusRingLayout.TryGetHoleInRootLocalSpace(target, _root, padding, out Rect hole))
+            if (!TutorialFocusRingLayout.TryGetHoleInRootLocalSpace(
+                    target, _root, padding, _trackedHoleScale, out Rect hole))
             {
                 SetFullscreenBlock();
                 return;
@@ -107,6 +111,7 @@ namespace Tutorial.Onboarding
         public void Clear()
         {
             _trackedTarget = null;
+            _trackedHoleScale = 1f;
             TutorialFocusRingLayout.HideBars(_bars);
             if (_fullBlock != null)
                 _fullBlock.gameObject.SetActive(false);

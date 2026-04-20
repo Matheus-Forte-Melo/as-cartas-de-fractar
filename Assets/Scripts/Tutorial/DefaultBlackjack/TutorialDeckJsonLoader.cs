@@ -6,7 +6,8 @@ using UnityEngine;
 namespace Tutorial.DefaultBlackjack
 {
     /// <summary>
-    /// Carrega <c>tutorial_default_blackjack_deck.json</c> (grupos = naipes, cartas com <c>value</c> inteiro e <c>ace</c> opcional).
+    /// Carrega o deck do tutorial (ex.: <c>TUTORIAL/defaultblackjack/tutorial_default_blackjack_deck.json</c>) —
+    /// grupos = naipes, cartas com <c>value</c> inteiro e <c>ace</c> opcional.
     /// </summary>
     public static class TutorialDeckJsonLoader
     {
