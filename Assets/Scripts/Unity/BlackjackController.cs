@@ -87,6 +87,11 @@ public class BlackjackController : MonoBehaviour
         btnStand.GetComponentInChildren<TMP_Text>().text = "Stand";
     }
 
+    private void OnDisable()
+    {
+        CancelInvoke(nameof(RunStopCoroutinesAndApplyNewRound));
+    }
+
     private void ResolveHandValueTextsIfMissing()
     {
         Canvas canvas = FindFirstObjectByType<Canvas>();
@@ -266,13 +271,73 @@ public class BlackjackController : MonoBehaviour
         }
     }
 
-    private void Start() => OnNewRound();
+    private void Start()
+    {
+        StartCoroutine(CoStartBattleAfterOptionalTheoryRevision());
+    }
 
+    private IEnumerator CoStartBattleAfterOptionalTheoryRevision()
+    {
+        // 1) Carrega todos os elementos da cena primeiro: cartas iniciais, textos de vida,
+        //    rótulos, feed central, etc. A wiki suprime o input do canvas quando aberta,
+        //    portanto nada do duelo corre até o jogador fechar o modal — mas já vê a mesa.
+        ApplyNewRoundStateBody(stopCoroutinesFirst: false);
+
+        // 2) Aguarda dois frames para o layout (uGUI + UI Toolkit) ficar estável antes de abrir.
+        yield return null;
+        yield return null;
+
+        // 3) Revisão automática: se o jogador já marcou "não mostrar novamente" para este tipo, sai.
+        TheoryWikiPage theoryPage = TheoryWikiPageMapping.FromMapNodeType(RunState.CurrentNodeType);
+        if (MapWikiAccess.IsRevisionSkippedForPage(theoryPage, _save))
+            yield break;
+
+        MapWikiAccess wiki = FindFirstObjectByType<MapWikiAccess>();
+        if (wiki == null) yield break;
+
+        wiki.OpenForRevision(theoryPage);
+
+        const float maxOpenSeconds = 60f;
+        float deadline = Time.realtimeSinceStartup + maxOpenSeconds;
+        while (wiki != null && wiki.IsOpen)
+        {
+            if (Time.realtimeSinceStartup >= deadline)
+            {
+                Debug.LogWarning("[BlackjackController] Wiki de revisão não foi fechada a tempo; a prosseguir para o duelo.");
+                wiki.Close();
+                break;
+            }
+
+            yield return null;
+        }
+    }
+
+    /// <summary>
+    /// Não chamar <see cref="StopAllCoroutines"/> diretamente a partir de uma coroutine neste
+    /// mesmo <see cref="MonoBehaviour"/> (ex.: <c>RoundResolutionRoutine</c>): o Unity pode
+    /// interromper a coroutine ativa antes do restante do fluxo. Usa-se <see cref="Invoke"/>
+    /// para correr no próximo ciclo de atualização.
+    /// </summary>
     private void OnNewRound()
     {
         if (_battleOver) return;
+        CancelInvoke(nameof(RunStopCoroutinesAndApplyNewRound));
+        Invoke(nameof(RunStopCoroutinesAndApplyNewRound), 0f);
+    }
 
-        StopAllCoroutines();
+    private void RunStopCoroutinesAndApplyNewRound()
+    {
+        if (_battleOver) return;
+        ApplyNewRoundStateBody(stopCoroutinesFirst: true);
+    }
+
+    private void ApplyNewRoundStateBody(bool stopCoroutinesFirst)
+    {
+        if (_battleOver) return;
+
+        if (stopCoroutinesFirst)
+            StopAllCoroutines();
+
         _roundResolutionActive = false;
         playerHand.Clear();
         enemyHand.Clear();

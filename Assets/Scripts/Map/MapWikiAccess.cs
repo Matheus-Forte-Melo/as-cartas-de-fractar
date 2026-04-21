@@ -25,6 +25,9 @@ namespace Map.Wiki
         /// <summary>Cena <c>Core</c>: wiki aberta — lógica de batalha (teclas, etc.) deve ignorar input.</summary>
         public static bool IsCoreBattleInputBlockedByWiki { get; private set; }
 
+        /// <summary>Estado do modal (aberto / fechado). Usado por quem precisa esperar o fecho.</summary>
+        public bool IsOpen => _isOpen;
+
         private static RectTransform _wikiOpenButtonRect;
 
         private const string OpenButtonObjectName = "WIKI_OpenButtonRoot";
@@ -50,6 +53,10 @@ namespace Map.Wiki
         [SerializeField]
         private List<string> tabIds = new()
         {
+            "math_add",
+            "math_sub",
+            "math_mul",
+            "math_div",
             "overview",
             "map",
             "combat",
@@ -57,10 +64,6 @@ namespace Map.Wiki
             "enemies",
             "shop_inventory",
             "controls",
-            "math_add",
-            "math_sub",
-            "math_mul",
-            "math_div",
         };
 
         [Tooltip("Aba selecionada ao abrir a wiki.")]
@@ -69,12 +72,23 @@ namespace Map.Wiki
         private UIDocument _doc;
         private VisualElement _overlay;
         private Button _closeBtn;
+        private Label _titleLabel;
+        private string _defaultTitleText;
+        private VisualElement _tabsContainer;
+        private VisualElement _revisionFooter;
+        private UnityEngine.UIElements.Toggle _revisionDontShowAgainToggle;
+        private Button _revisionProceedBtn;
+        private Action _revisionProceedHandler;
         private readonly Dictionary<string, Button> _tabButtons = new();
         private readonly Dictionary<string, VisualElement> _tabPages = new();
         private readonly List<(Button btn, Action handler)> _tabClickBindings = new();
         private string _activeTabId;
         private bool _isOpen;
         private bool _uiBound;
+
+        private bool _revisionMode;
+        private string _revisionTabId;
+        private TheoryWikiPage _revisionPage;
 
         private VisualElement _stretchRegisteredRoot;
         private EventCallback<AttachToPanelEvent> _wikiRootAttachedHandler;
@@ -93,10 +107,7 @@ namespace Map.Wiki
 
         private void OnEnable()
         {
-            TryBindUi();
-
-            if (createRuntimeOpenButton)
-                CreateOpenButton();
+            StartCoroutine(CoBindUiAfterOneFrame());
         }
 
         private void OnDisable()
@@ -107,10 +118,20 @@ namespace Map.Wiki
             UnbindUi();
         }
 
+        /// <summary>O <see cref="UIDocument"/> só expõe <c>rootVisualElement</c> depois do 1.º frame.</summary>
+        private IEnumerator CoBindUiAfterOneFrame()
+        {
+            yield return null;
+            TryBindUi();
+            if (createRuntimeOpenButton)
+                CreateOpenButton();
+        }
+
         private void Update()
         {
             // Fecha com Esc — projeto usa o Input System novo, sem Input legacy.
-            if (!_isOpen) return;
+            // Em modo revisão, apenas o botão "Prosseguir" fecha o modal.
+            if (!_isOpen || _revisionMode) return;
             Keyboard kb = Keyboard.current;
             if (kb != null && kb.escapeKey.wasPressedThisFrame)
                 Close();
@@ -148,6 +169,21 @@ namespace Map.Wiki
             _closeBtn = root.Q<Button>("WikiCloseBtn");
             if (_closeBtn != null)
                 _closeBtn.clicked += Close;
+
+            _titleLabel = root.Q<Label>("WikiTitle");
+            if (_titleLabel != null)
+                _defaultTitleText = _titleLabel.text;
+
+            // Sidebar + rodapé específico da revisão (visibilidade alterada em modo revisão).
+            _tabsContainer = root.Q<VisualElement>("WikiTabs");
+            _revisionFooter = root.Q<VisualElement>("WikiRevisionFooter");
+            _revisionDontShowAgainToggle = root.Q<UnityEngine.UIElements.Toggle>("WikiRevisionDontShowAgain");
+            _revisionProceedBtn = root.Q<Button>("WikiRevisionProceedBtn");
+            if (_revisionProceedBtn != null)
+            {
+                _revisionProceedHandler = OnRevisionProceedClicked;
+                _revisionProceedBtn.clicked += _revisionProceedHandler;
+            }
 
             _tabButtons.Clear();
             _tabPages.Clear();
@@ -263,6 +299,16 @@ namespace Map.Wiki
                 _closeBtn.clicked -= Close;
             _closeBtn = null;
 
+            _titleLabel = null;
+
+            if (_revisionProceedBtn != null && _revisionProceedHandler != null)
+                _revisionProceedBtn.clicked -= _revisionProceedHandler;
+            _revisionProceedBtn = null;
+            _revisionProceedHandler = null;
+            _revisionDontShowAgainToggle = null;
+            _revisionFooter = null;
+            _tabsContainer = null;
+
             foreach ((Button btn, Action handler) pair in _tabClickBindings)
                 pair.btn.clicked -= pair.handler;
             _tabClickBindings.Clear();
@@ -280,17 +326,43 @@ namespace Map.Wiki
             if (_overlay == null) TryBindUi();
             if (_overlay == null) return;
 
-            string target = string.IsNullOrEmpty(_activeTabId) ? defaultTabId : _activeTabId;
-            if (!_tabPages.ContainsKey(target) && _tabPages.Count > 0)
-            {
-                target = defaultTabId;
-                if (!_tabPages.ContainsKey(target))
-                {
-                    foreach (string any in _tabPages.Keys) { target = any; break; }
-                }
-            }
-
+            string target = ResolveTargetTabIdForOpen();
             SelectTab(target);
+            SetOverlayVisible(true);
+            _isOpen = true;
+        }
+
+        /// <summary>
+        /// Abre a wiki numa página de teoria concreta (enum <see cref="TheoryWikiPage"/>).
+        /// Se o id UXML não existir, usa <see cref="defaultTabId"/> (visão geral).
+        /// </summary>
+        public void Open(TheoryWikiPage theoryPage)
+        {
+            if (_overlay == null) TryBindUi();
+            if (_overlay == null) return;
+
+            string target = CoerceToBoundTabId(TheoryWikiPageMapping.ToTabId(theoryPage));
+            SelectTab(target);
+            SetOverlayVisible(true);
+            _isOpen = true;
+        }
+
+        /// <summary>
+        /// Modo "revisão de teoria": mostra a wiki com sidebar e X escondidos, bloqueada na aba
+        /// do tipo de duelo atual, com um rodapé (checkbox "Não mostrar novamente para tipo X"
+        /// e botão "Prosseguir"). Apenas esse botão fecha o modal.
+        /// </summary>
+        public void OpenForRevision(TheoryWikiPage theoryPage)
+        {
+            if (_overlay == null) TryBindUi();
+            if (_overlay == null) return;
+
+            _revisionMode = true;
+            _revisionPage = theoryPage;
+            _revisionTabId = CoerceToBoundTabId(TheoryWikiPageMapping.ToTabId(theoryPage));
+
+            SelectTab(_revisionTabId);
+            ApplyRevisionModeVisibility(true);
             SetOverlayVisible(true);
             _isOpen = true;
         }
@@ -298,6 +370,15 @@ namespace Map.Wiki
         public void Close()
         {
             if (_overlay == null) return;
+
+            if (_revisionMode)
+            {
+                PersistRevisionSkipPreferenceIfRequested();
+                ApplyRevisionModeVisibility(false);
+                _revisionMode = false;
+                _revisionTabId = null;
+            }
+
             SetOverlayVisible(false);
             _isOpen = false;
         }
@@ -307,7 +388,112 @@ namespace Map.Wiki
             if (_isOpen) Close(); else Open();
         }
 
+        /// <summary>
+        /// Indica se, para um dado tipo de duelo, o jogador já ativou o "não mostrar novamente".
+        /// Usado pelo <c>BlackjackController</c> para saltar a revisão automática.
+        /// </summary>
+        public static bool IsRevisionSkippedForPage(TheoryWikiPage theoryPage, SaveData save)
+        {
+            if (save == null || save.theoryRevisionSkippedTabIds == null) return false;
+            string tabId = TheoryWikiPageMapping.ToTabId(theoryPage);
+            return save.theoryRevisionSkippedTabIds.Contains(tabId);
+        }
+
+        private void OnRevisionProceedClicked()
+        {
+            Close();
+        }
+
+        private void ApplyRevisionModeVisibility(bool revisionActive)
+        {
+            if (_tabsContainer != null)
+                _tabsContainer.style.display = revisionActive ? DisplayStyle.None : DisplayStyle.Flex;
+
+            if (_closeBtn != null)
+                _closeBtn.style.display = revisionActive ? DisplayStyle.None : DisplayStyle.Flex;
+
+            if (_revisionFooter != null)
+                _revisionFooter.style.display = revisionActive ? DisplayStyle.Flex : DisplayStyle.None;
+
+            if (_titleLabel != null)
+            {
+                _titleLabel.text = revisionActive
+                    ? "Revisão"
+                    : (string.IsNullOrEmpty(_defaultTitleText) ? "Ajuda / Wiki" : _defaultTitleText);
+            }
+
+            if (_revisionDontShowAgainToggle != null)
+            {
+                _revisionDontShowAgainToggle.SetValueWithoutNotify(false);
+                if (revisionActive)
+                {
+                    string typeName = TheoryWikiPageMapping.DisplayName(_revisionPage);
+                    _revisionDontShowAgainToggle.label = $"Não mostrar novamente para {typeName}";
+                }
+            }
+        }
+
+        private void PersistRevisionSkipPreferenceIfRequested()
+        {
+            if (_revisionDontShowAgainToggle == null || !_revisionDontShowAgainToggle.value)
+                return;
+
+            string tabId = string.IsNullOrEmpty(_revisionTabId)
+                ? TheoryWikiPageMapping.ToTabId(_revisionPage)
+                : _revisionTabId;
+
+            try
+            {
+                SaveData save = SaveManager.Load();
+                save.theoryRevisionSkippedTabIds ??= new List<string>();
+                if (!save.theoryRevisionSkippedTabIds.Contains(tabId))
+                {
+                    save.theoryRevisionSkippedTabIds.Add(tabId);
+                    SaveManager.Save(save);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[MapWikiAccess] Falha a persistir 'não mostrar novamente' ({tabId}): {ex.Message}");
+            }
+        }
+
         // ---------- Interno ----------
+
+        private static bool IsCoreScene()
+        {
+            return string.Equals(SceneManager.GetActiveScene().name, "Core", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>Na Core, a aba inicial segue o tipo do duelo (<see cref="RunState.CurrentNodeType"/>).</summary>
+        private string ResolveTargetTabIdForOpen()
+        {
+            if (IsCoreScene())
+            {
+                TheoryWikiPage theory = TheoryWikiPageMapping.FromMapNodeType(RunState.CurrentNodeType);
+                return CoerceToBoundTabId(TheoryWikiPageMapping.ToTabId(theory));
+            }
+
+            string fromState = string.IsNullOrEmpty(_activeTabId) ? defaultTabId : _activeTabId;
+            return CoerceToBoundTabId(fromState);
+        }
+
+        private string CoerceToBoundTabId(string candidate)
+        {
+            if (_tabPages.ContainsKey(candidate))
+                return candidate;
+
+            if (_tabPages.ContainsKey(defaultTabId))
+                return defaultTabId;
+
+            if (_tabPages.Count > 0)
+            {
+                foreach (string any in _tabPages.Keys)
+                    return any;
+            }
+
+            return candidate;
+        }
 
         private void SelectTab(string id)
         {

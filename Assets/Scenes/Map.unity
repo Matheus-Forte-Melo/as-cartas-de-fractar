@@ -7393,6 +7393,10 @@ MonoBehaviour:
   openButtonAnchoredPosition: {x: -20, y: -90}
   openButtonSize: {x: 180, y: 54}
   tabIds:
+  - math_add
+  - math_sub
+  - math_mul
+  - math_div
   - overview
   - map
   - combat
@@ -7400,10 +7404,6 @@ MonoBehaviour:
   - enemies
   - shop_inventory
   - controls
-  - math_add
-  - math_sub
-  - math_mul
-  - math_div
   defaultTabId: overview
 --- !u!114 &1075994480
 MonoBehaviour:

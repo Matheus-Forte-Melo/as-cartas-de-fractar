@@ -17,7 +17,7 @@
             <ui:VisualElement class="wiki-modal">
 
                 <ui:VisualElement class="wiki-header">
-                    <ui:Label text="Ajuda / Wiki" class="wiki-title" />
+                    <ui:Label name="WikiTitle" text="Ajuda / Wiki" class="wiki-title" />
                     <ui:Button name="WikiCloseBtn" text="X" class="wiki-close-btn" />
                 </ui:VisualElement>
 
@@ -25,7 +25,17 @@
 
                     <ui:VisualElement name="WikiTabs" class="wiki-tabs">
                         <ui:ScrollView class="wiki-tabs-scroll" style="width: 100%; flex-grow: 1; flex-shrink: 1; flex-basis: 0; min-height: 0;">
-                            <ui:Label text="Gameplay" class="wiki-tabs-section-title wiki-tabs-section-title--first" />
+                            <ui:Label text="Teoria" class="wiki-tabs-section-title wiki-tabs-section-title--first" />
+                            <!-- TheoryWikiPage.Addition → WikiTab_math_add -->
+                            <ui:Button name="WikiTab_math_add" text="Adição" class="wiki-tab" />
+                            <!-- TheoryWikiPage.Subtraction → WikiTab_math_sub -->
+                            <ui:Button name="WikiTab_math_sub" text="Subtração" class="wiki-tab" />
+                            <!-- TheoryWikiPage.Multiplication → WikiTab_math_mul -->
+                            <ui:Button name="WikiTab_math_mul" text="Multiplicação" class="wiki-tab" />
+                            <!-- TheoryWikiPage.Division → WikiTab_math_div -->
+                            <ui:Button name="WikiTab_math_div" text="Divisão" class="wiki-tab" />
+                            <ui:VisualElement class="wiki-tabs-separator" />
+                            <ui:Label text="Gameplay" class="wiki-tabs-section-title" />
                             <ui:Button name="WikiTab_overview" text="Visão geral" class="wiki-tab wiki-tab--active" />
                             <ui:Button name="WikiTab_map" text="Mapa" class="wiki-tab" />
                             <ui:Button name="WikiTab_combat" text="Combate" class="wiki-tab" />
@@ -33,12 +43,6 @@
                             <ui:Button name="WikiTab_enemies" text="Operações" class="wiki-tab" />
                             <ui:Button name="WikiTab_shop_inventory" text="Loja e inventário" class="wiki-tab" />
                             <ui:Button name="WikiTab_controls" text="Controles" class="wiki-tab" />
-                            <ui:VisualElement class="wiki-tabs-separator" />
-                            <ui:Label text="Teoria" class="wiki-tabs-section-title" />
-                            <ui:Button name="WikiTab_math_add" text="Adição" class="wiki-tab" />
-                            <ui:Button name="WikiTab_math_sub" text="Subtração" class="wiki-tab" />
-                            <ui:Button name="WikiTab_math_mul" text="Multiplicação" class="wiki-tab" />
-                            <ui:Button name="WikiTab_math_div" text="Divisão" class="wiki-tab" />
                         </ui:ScrollView>
                     </ui:VisualElement>
 
@@ -119,131 +123,135 @@
                                 <ui:Label class="wiki-page-body" text="Equipamentos de ataque aumentam o dano que você causa quando o oponente perde a rodada. Isso é separado da dificuldade do duelo: a dificuldade deixa o inimigo mais forte e a recompensa maior; o ataque é o seu jeito de devolver na mesma moeda." />
                             </ui:VisualElement>
 
+                                                        <!-- TheoryWikiPage.Addition -->
                             <ui:VisualElement name="WikiPage_math_add" class="wiki-page" style="display: none;">
-                                <ui:Label class="wiki-page-title" text="Adição" />
-                                <ui:Label class="wiki-section-title wiki-section-title--first" text="Contas de adição" />
-                                <ui:Label class="wiki-page-body" text="Na adição, você deve juntar os valores." />
-                                <ui:Label class="wiki-section-title" text="Exemplo: 2 + 3" />
-                                <ui:Label class="wiki-page-body" text="Pegue o primeiro número: 2." />
-                                <ui:Label class="wiki-page-body" text="Some com o segundo número: 3." />
-                                <ui:Label class="wiki-page-body" text="O resultado é 5." />
-                                <ui:Label class="wiki-page-body" text="A adição serve para aumentar o valor. Sempre que aparecer o sinal +, você deve somar." />
-                                <ui:Label class="wiki-section-title" text="Contas de adição com vírgula" />
-                                <ui:Label class="wiki-page-body" text="Essas contas funcionam como a adição normal, mas com números decimais." />
-                                <ui:Label class="wiki-section-title" text="Exemplo: 1,5 + 2,5" />
-                                <ui:Label class="wiki-page-body" text="Junte os números normalmente." />
-                                <ui:Label class="wiki-page-body" text="Some a parte inteira com a parte inteira." />
-                                <ui:Label class="wiki-page-body" text="Some a parte da vírgula com a parte da vírgula." />
-                                <ui:Label class="wiki-page-body" text="O resultado é 4,0 ou simplesmente 4." />
-                                <ui:Label class="wiki-page-body" text="A vírgula mostra que o número não é inteiro. Mesmo assim, a regra continua a mesma: somar os valores." />
-                                <ui:Label class="wiki-page-body" text="Sempre deixe vírgula em cima de vírgula para fazer os cálculos:" />
-                                <ui:VisualElement name="WikiFigureAddDecimal" class="wiki-theory-figure wiki-theory-figure--add-decimal" picking-mode="Ignore" />
-                                <ui:Label class="wiki-page-body" text="Onde não tem número é o mesmo que ter 0 (zero)." />
-                                <ui:Label class="wiki-section-title" text="Nas cartas" />
-                                <ui:Label class="wiki-page-body" text="Em duelos de adição, uma carta pode aparecer como várias parcelas que somam ao valor da carta." />
+                            <ui:Label class="wiki-page-title" text="Adição" />
+                            <ui:Label class="wiki-section-title wiki-section-title--first" text="Contas de adição" />
+                            <ui:Label class="wiki-page-body" text="Na adição, você deve juntar os valores." />
+                            <ui:Label class="wiki-section-title" text="Exemplo: 2 + 3" />
+                            <ui:Label class="wiki-page-body" text="Pegue o primeiro número: 2." />
+                            <ui:Label class="wiki-page-body" text="Some com o segundo número: 3." />
+                            <ui:Label class="wiki-page-body" text="O resultado é 5." />
+                            <ui:Label class="wiki-page-body" text="A adição serve para aumentar o valor. Sempre que aparecer o sinal +, você deve somar." />
+                            <ui:Label class="wiki-section-title" text="Contas de adição com vírgula" />
+                            <ui:Label class="wiki-page-body" text="Essas contas funcionam como a adição normal, mas com números decimais." />
+                            <ui:Label class="wiki-section-title" text="Exemplo: 1,5 + 2,5" />
+                            <ui:Label class="wiki-page-body" text="Junte os números normalmente." />
+                            <ui:Label class="wiki-page-body" text="Some a parte inteira com a parte inteira." />
+                            <ui:Label class="wiki-page-body" text="Some a parte da vírgula com a parte da vírgula." />
+                            <ui:Label class="wiki-page-body" text="O resultado é 4,0 ou simplesmente 4." />
+                            <ui:Label class="wiki-page-body" text="A vírgula mostra que o número não é inteiro. Mesmo assim, a regra continua a mesma: somar os valores." />
+                            <ui:Label class="wiki-page-body" text="Sempre deixe vírgula em cima de vírgula para fazer os cálculos:" />
+                            <ui:VisualElement name="WikiFigureAddDecimal" class="wiki-theory-figure wiki-theory-figure--add-decimal" picking-mode="Ignore" />
+                            <ui:Label class="wiki-page-body" text="Onde não tem número é o mesmo que ter 0 (zero)." />
+                            <ui:Label class="wiki-section-title" text="Nas cartas" />
+                            <ui:Label class="wiki-page-body" text="Em duelos de adição, uma carta pode aparecer como várias parcelas que somam ao valor da carta." />
                             </ui:VisualElement>
 
+                            <!-- TheoryWikiPage.Subtraction -->
                             <ui:VisualElement name="WikiPage_math_sub" class="wiki-page" style="display: none;">
-                                <ui:Label class="wiki-page-title" text="Subtração" />
-                                <ui:Label class="wiki-section-title wiki-section-title--first" text="Contas de subtração" />
-                                <ui:Label class="wiki-page-body" text="Na subtração, você deve tirar uma quantidade de outra." />
-                                <ui:Label class="wiki-page-body" text="Ela mostra quanto sobra depois de retirar um valor." />
-                                <ui:Label class="wiki-section-title" text="Exemplo: 55 − 14" />
-                                <ui:Label class="wiki-page-body" text="Passo a passo:" />
-                                <ui:Label class="wiki-page-body" text="Coloque os números um embaixo do outro." />
-                                <ui:Label class="wiki-page-body" text="Alinhe as casas certas: unidade com unidade, dezena com dezena." />
-                                <ui:Label class="wiki-page-body" text="Comece sempre da direita para a esquerda." />
-                                <ui:Label class="wiki-page-body" text="Primeiro faça a conta das unidades." />
-                                <ui:Label class="wiki-page-body" text="Depois faça a conta das dezenas." />
-                                <ui:Label class="wiki-section-title" text="Exemplo montado" />
-                                <ui:VisualElement class="wiki-math-example">
-                                    <ui:Label class="wiki-math-example-line" text="55" />
-                                    <ui:Label class="wiki-math-example-line" text="- 14" />
-                                    <ui:Label class="wiki-math-example-line" text="----" />
-                                    <ui:Label class="wiki-math-example-line" text="41" />
-                                </ui:VisualElement>
-                                <ui:Label class="wiki-section-title" text="Como pensar" />
-                                <ui:Label class="wiki-page-body" text="5 − 4 = 1." />
-                                <ui:Label class="wiki-page-body" text="5 − 1 = 4." />
-                                <ui:Label class="wiki-page-body" text="Resultado final: 41." />
-                                <ui:Label class="wiki-section-title" text="Quando o número de cima é menor" />
-                                <ui:Label class="wiki-page-body" text="Às vezes a conta não dá para fazer direto." />
-                                <ui:Label class="wiki-section-title" text="Exemplo: 42 − 17" />
-                                <ui:Label class="wiki-page-body" text="Passo a passo:" />
-                                <ui:Label class="wiki-page-body" text="Veja as unidades: 2 − 7 não dá." />
-                                <ui:Label class="wiki-page-body" text="Então você pega 1 dezena emprestada do 4." />
-                                <ui:Label class="wiki-page-body" text="O 4 vira 3." />
-                                <ui:Label class="wiki-page-body" text="O 2 vira 12." />
-                                <ui:Label class="wiki-page-body" text="Agora faça 12 − 7 = 5." />
-                                <ui:Label class="wiki-page-body" text="Depois faça 3 − 1 = 2." />
-                                <ui:Label class="wiki-section-title" text="Exemplo montado" />
-                                <ui:VisualElement class="wiki-math-example">
-                                    <ui:Label class="wiki-math-example-line" text="42" />
-                                    <ui:Label class="wiki-math-example-line" text="- 17" />
-                                    <ui:Label class="wiki-math-example-line" text="----" />
-                                    <ui:Label class="wiki-math-example-line" text="25" />
-                                </ui:VisualElement>
-                                <ui:Label class="wiki-page-body" text="Resultado: 25." />
-                                <ui:Label class="wiki-section-title" text="Subtração com vírgula" />
-                                <ui:Label class="wiki-page-body" text="É a mesma lógica de sempre deixar as vírgulas uma em cima da outra para não errar e fazer a subtração normalmente." />
-                                <ui:Label class="wiki-section-title" text="Nas cartas" />
-                                <ui:Label class="wiki-page-body" text="Em duelos de subtração, a carta pode aparecer como cadeias com menos que fecham no valor da carta." />
+                            <ui:Label class="wiki-page-title" text="Subtração" />
+                            <ui:Label class="wiki-section-title wiki-section-title--first" text="Contas de subtração" />
+                            <ui:Label class="wiki-page-body" text="Na subtração, você deve tirar uma quantidade de outra." />
+                            <ui:Label class="wiki-page-body" text="Ela mostra quanto sobra depois de retirar um valor." />
+                            <ui:Label class="wiki-section-title" text="Exemplo: 55 − 14" />
+                            <ui:Label class="wiki-page-body" text="Passo a passo:" />
+                            <ui:Label class="wiki-page-body" text="Coloque os números um embaixo do outro." />
+                            <ui:Label class="wiki-page-body" text="Alinhe as casas certas: unidade com unidade, dezena com dezena." />
+                            <ui:Label class="wiki-page-body" text="Comece sempre da direita para a esquerda." />
+                            <ui:Label class="wiki-page-body" text="Primeiro faça a conta das unidades." />
+                            <ui:Label class="wiki-page-body" text="Depois faça a conta das dezenas." />
+                            <ui:Label class="wiki-section-title" text="Exemplo montado" />
+                            <ui:VisualElement class="wiki-math-example">
+                            <ui:Label class="wiki-math-example-line" text="55" />
+                            <ui:Label class="wiki-math-example-line" text="- 14" />
+                            <ui:Label class="wiki-math-example-line" text="----" />
+                            <ui:Label class="wiki-math-example-line" text="41" />
+                            </ui:VisualElement>
+                            <ui:Label class="wiki-section-title" text="Como pensar" />
+                            <ui:Label class="wiki-page-body" text="5 − 4 = 1." />
+                            <ui:Label class="wiki-page-body" text="5 − 1 = 4." />
+                            <ui:Label class="wiki-page-body" text="Resultado final: 41." />
+                            <ui:Label class="wiki-section-title" text="Quando o número de cima é menor" />
+                            <ui:Label class="wiki-page-body" text="Às vezes a conta não dá para fazer direto." />
+                            <ui:Label class="wiki-section-title" text="Exemplo: 42 − 17" />
+                            <ui:Label class="wiki-page-body" text="Passo a passo:" />
+                            <ui:Label class="wiki-page-body" text="Veja as unidades: 2 − 7 não dá." />
+                            <ui:Label class="wiki-page-body" text="Então você pega 1 dezena emprestada do 4." />
+                            <ui:Label class="wiki-page-body" text="O 4 vira 3." />
+                            <ui:Label class="wiki-page-body" text="O 2 vira 12." />
+                            <ui:Label class="wiki-page-body" text="Agora faça 12 − 7 = 5." />
+                            <ui:Label class="wiki-page-body" text="Depois faça 3 − 1 = 2." />
+                            <ui:Label class="wiki-section-title" text="Exemplo montado" />
+                            <ui:VisualElement class="wiki-math-example">
+                            <ui:Label class="wiki-math-example-line" text="42" />
+                            <ui:Label class="wiki-math-example-line" text="- 17" />
+                            <ui:Label class="wiki-math-example-line" text="----" />
+                            <ui:Label class="wiki-math-example-line" text="25" />
+                            </ui:VisualElement>
+                            <ui:Label class="wiki-page-body" text="Resultado: 25." />
+                            <ui:Label class="wiki-section-title" text="Subtração com vírgula" />
+                            <ui:Label class="wiki-page-body" text="É a mesma lógica de sempre deixar as vírgulas uma em cima da outra para não errar e fazer a subtração normalmente." />
+                            <ui:Label class="wiki-section-title" text="Nas cartas" />
+                            <ui:Label class="wiki-page-body" text="Em duelos de subtração, a carta pode aparecer como cadeias com menos que fecham no valor da carta." />
                             </ui:VisualElement>
 
+                            <!-- TheoryWikiPage.Multiplication -->
                             <ui:VisualElement name="WikiPage_math_mul" class="wiki-page" style="display: none;">
-                                <ui:Label class="wiki-page-title" text="Multiplicação" />
-                                <ui:Label class="wiki-section-title wiki-section-title--first" text="Contas de multiplicação" />
-                                <ui:Label class="wiki-page-body" text="Na multiplicação, você deve repetir um número várias vezes." />
-                                <ui:Label class="wiki-section-title" text="Exemplo: 3 × 4" />
-                                <ui:Label class="wiki-page-body" text="O número 3 será repetido 4 vezes." />
-                                <ui:Label class="wiki-page-body" text="Isso fica: 3 + 3 + 3 + 3." />
-                                <ui:Label class="wiki-page-body" text="O resultado é 12." />
-                                <ui:Label class="wiki-page-body" text="Outra forma de pensar é:" />
-                                <ui:Label class="wiki-page-body" text="3 × 4 significa 3 vezes 4 ou 4 vezes 3." />
-                                <ui:Label class="wiki-page-body" text="O resultado é o mesmo." />
-                                <ui:Label class="wiki-page-body" text="Quando aparecer o sinal ×, você deve multiplicar." />
-                                <ui:Label class="wiki-section-title" text="Contas de multiplicação com vírgula" />
-                                <ui:Label class="wiki-page-body" text="Na multiplicação com vírgula, você a fará normalmente ignorando a vírgula; apenas no final terá que contar as casas decimais atrás das vírgulas para adicionar no resultado." />
-                                <ui:VisualElement name="WikiFigureMultiDecimal" class="wiki-theory-figure wiki-theory-figure--multi-decimal" picking-mode="Ignore" />
-                                <ui:Label class="wiki-page-body" text="Pode ser colocado o 0 (zero) no lugar do + caso ajude na visualização." />
-                                <ui:Label class="wiki-section-title" text="Nas cartas" />
-                                <ui:Label class="wiki-page-body" text="Em duelos de multiplicação, a carta pode aparecer como fatores que multiplicam até o valor da carta." />
+                            <ui:Label class="wiki-page-title" text="Multiplicação" />
+                            <ui:Label class="wiki-section-title wiki-section-title--first" text="Contas de multiplicação" />
+                            <ui:Label class="wiki-page-body" text="Na multiplicação, você deve repetir um número várias vezes." />
+                            <ui:Label class="wiki-section-title" text="Exemplo: 3 × 4" />
+                            <ui:Label class="wiki-page-body" text="O número 3 será repetido 4 vezes." />
+                            <ui:Label class="wiki-page-body" text="Isso fica: 3 + 3 + 3 + 3." />
+                            <ui:Label class="wiki-page-body" text="O resultado é 12." />
+                            <ui:Label class="wiki-page-body" text="Outra forma de pensar é:" />
+                            <ui:Label class="wiki-page-body" text="3 × 4 significa 3 vezes 4 ou 4 vezes 3." />
+                            <ui:Label class="wiki-page-body" text="O resultado é o mesmo." />
+                            <ui:Label class="wiki-page-body" text="Quando aparecer o sinal ×, você deve multiplicar." />
+                            <ui:Label class="wiki-section-title" text="Contas de multiplicação com vírgula" />
+                            <ui:Label class="wiki-page-body" text="Na multiplicação com vírgula, você a fará normalmente ignorando a vírgula; apenas no final terá que contar as casas decimais atrás das vírgulas para adicionar no resultado." />
+                            <ui:VisualElement name="WikiFigureMultiDecimal" class="wiki-theory-figure wiki-theory-figure--multi-decimal" picking-mode="Ignore" />
+                            <ui:Label class="wiki-page-body" text="Pode ser colocado o 0 (zero) no lugar do + caso ajude na visualização." />
+                            <ui:Label class="wiki-section-title" text="Nas cartas" />
+                            <ui:Label class="wiki-page-body" text="Em duelos de multiplicação, a carta pode aparecer como fatores que multiplicam até o valor da carta." />
                             </ui:VisualElement>
 
+                            <!-- TheoryWikiPage.Division -->
                             <ui:VisualElement name="WikiPage_math_div" class="wiki-page" style="display: none;">
-                                <ui:Label class="wiki-page-title" text="Divisão e fração" />
-                                <ui:Label class="wiki-section-title wiki-section-title--first" text="Contas de divisão" />
-                                <ui:Label class="wiki-page-body" text="Na divisão, você deve separar um valor em partes iguais." />
-                                <ui:Label class="wiki-section-title" text="Exemplo: 8 ÷ 2" />
-                                <ui:Label class="wiki-page-body" text="Pegue o número 8." />
-                                <ui:Label class="wiki-page-body" text="Divida-o em 2 partes iguais." />
-                                <ui:Label class="wiki-page-body" text="Cada parte fica com 4." />
-                                <ui:Label class="wiki-page-body" text="Então, 8 ÷ 2 = 4." />
-                                <ui:Label class="wiki-page-body" text="Quando aparecer o sinal ÷ ou /, você deve dividir." />
-                                <ui:Label class="wiki-section-title" text="Frações" />
-                                <ui:Label class="wiki-page-body" text="Frações representam uma parte de um todo e, na prática, também podem ser entendidas como uma forma de divisão." />
-                                <ui:Label class="wiki-page-body" text="Uma fração é escrita com um número em cima e outro embaixo, separados por uma linha." />
-                                <ui:Label class="wiki-section-title" text="Exemplo: 3/4" />
-                                <ui:Label class="wiki-page-body" text="Para ler uma fração, você lê primeiro o número de cima e depois o de baixo:" />
-                                <ui:Label class="wiki-page-body" text="3/4 = três quartos." />
-                                <ui:Label class="wiki-page-body" text="1/2 = um meio." />
-                                <ui:Label class="wiki-page-body" text="5/6 = cinco sextos." />
-                                <ui:Label class="wiki-section-title" text="Na fração" />
-                                <ui:Label class="wiki-page-body" text="O número de cima é chamado de numerador;" />
-                                <ui:Label class="wiki-page-body" text="O número de baixo é chamado de denominador." />
-                                <ui:Label class="wiki-page-body" text="A ordem para interpretar a fração é sempre esta:" />
-                                <ui:Label class="wiki-page-body" text="Veja o número de cima." />
-                                <ui:Label class="wiki-page-body" text="Veja o número de baixo." />
-                                <ui:Label class="wiki-page-body" text="Entenda que o número de cima está sendo dividido pelo número de baixo." />
-                                <ui:Label class="wiki-section-title" text="Exemplo: 6/2" />
-                                <ui:Label class="wiki-page-body" text="Isso significa: 6 dividido por 2." />
-                                <ui:Label class="wiki-page-body" text="O resultado é 3." />
-                                <ui:Label class="wiki-page-body" text="Então, a fração funciona como uma divisão escrita de outra forma." />
-                                <ui:Label class="wiki-section-title" text="Contas de divisão com vírgula" />
-                                <ui:Label class="wiki-page-body" text="Na divisão com vírgula, você precisa igualar as casas decimais atrás da vírgula, multiplicando por 10 para os dois lados, pois o que você faz em um lado tem que ser feito no outro; assim que eliminar as vírgulas, poderá começar a divisão normalmente." />
-                                <ui:VisualElement name="WikiFigureDivDecimal" class="wiki-theory-figure wiki-theory-figure--div-decimal" picking-mode="Ignore" />
-                                <ui:Label class="wiki-section-title" text="Nas cartas" />
-                                <ui:Label class="wiki-page-body" text="Em duelos de divisão, a carta pode aparecer como divisões ou formas equivalentes que fecham no valor da carta." />
+                            <ui:Label class="wiki-page-title" text="Divisão e fração" />
+                            <ui:Label class="wiki-section-title wiki-section-title--first" text="Contas de divisão" />
+                            <ui:Label class="wiki-page-body" text="Na divisão, você deve separar um valor em partes iguais." />
+                            <ui:Label class="wiki-section-title" text="Exemplo: 8 ÷ 2" />
+                            <ui:Label class="wiki-page-body" text="Pegue o número 8." />
+                            <ui:Label class="wiki-page-body" text="Divida-o em 2 partes iguais." />
+                            <ui:Label class="wiki-page-body" text="Cada parte fica com 4." />
+                            <ui:Label class="wiki-page-body" text="Então, 8 ÷ 2 = 4." />
+                            <ui:Label class="wiki-page-body" text="Quando aparecer o sinal ÷ ou /, você deve dividir." />
+                            <ui:Label class="wiki-section-title" text="Frações" />
+                            <ui:Label class="wiki-page-body" text="Frações representam uma parte de um todo e, na prática, também podem ser entendidas como uma forma de divisão." />
+                            <ui:Label class="wiki-page-body" text="Uma fração é escrita com um número em cima e outro embaixo, separados por uma linha." />
+                            <ui:Label class="wiki-section-title" text="Exemplo: 3/4" />
+                            <ui:Label class="wiki-page-body" text="Para ler uma fração, você lê primeiro o número de cima e depois o de baixo:" />
+                            <ui:Label class="wiki-page-body" text="3/4 = três quartos." />
+                            <ui:Label class="wiki-page-body" text="1/2 = um meio." />
+                            <ui:Label class="wiki-page-body" text="5/6 = cinco sextos." />
+                            <ui:Label class="wiki-section-title" text="Na fração" />
+                            <ui:Label class="wiki-page-body" text="O número de cima é chamado de numerador;" />
+                            <ui:Label class="wiki-page-body" text="O número de baixo é chamado de denominador." />
+                            <ui:Label class="wiki-page-body" text="A ordem para interpretar a fração é sempre esta:" />
+                            <ui:Label class="wiki-page-body" text="Veja o número de cima." />
+                            <ui:Label class="wiki-page-body" text="Veja o número de baixo." />
+                            <ui:Label class="wiki-page-body" text="Entenda que o número de cima está sendo dividido pelo número de baixo." />
+                            <ui:Label class="wiki-section-title" text="Exemplo: 6/2" />
+                            <ui:Label class="wiki-page-body" text="Isso significa: 6 dividido por 2." />
+                            <ui:Label class="wiki-page-body" text="O resultado é 3." />
+                            <ui:Label class="wiki-page-body" text="Então, a fração funciona como uma divisão escrita de outra forma." />
+                            <ui:Label class="wiki-section-title" text="Contas de divisão com vírgula" />
+                            <ui:Label class="wiki-page-body" text="Na divisão com vírgula, você precisa igualar as casas decimais atrás da vírgula, multiplicando por 10 para os dois lados, pois o que você faz em um lado tem que ser feito no outro; assim que eliminar as vírgulas, poderá começar a divisão normalmente." />
+                            <ui:VisualElement name="WikiFigureDivDecimal" class="wiki-theory-figure wiki-theory-figure--div-decimal" picking-mode="Ignore" />
+                            <ui:Label class="wiki-section-title" text="Nas cartas" />
+                            <ui:Label class="wiki-page-body" text="Em duelos de divisão, a carta pode aparecer como divisões ou formas equivalentes que fecham no valor da carta." />
                             </ui:VisualElement>
 
                             <ui:VisualElement name="WikiPage_enemies" class="wiki-page" style="display: none;">
@@ -284,6 +292,15 @@
                         </ui:ScrollView>
                     </ui:VisualElement>
 
+                </ui:VisualElement>
+
+                <!-- Rodapé específico do fluxo "revisão de teoria" (abertura automática ao entrar no duelo).
+                     Fica oculto por omissão; MapWikiAccess.OpenForRevision(...) torna-o visível e preenche
+                     o rótulo do checkbox com o tipo atual. -->
+                <ui:VisualElement name="WikiRevisionFooter" class="wiki-revision-footer" style="display: none;">
+                    <ui:Toggle name="WikiRevisionDontShowAgain" class="wiki-revision-toggle"
+                               label="Não mostrar novamente para este tipo" />
+                    <ui:Button name="WikiRevisionProceedBtn" text="Prosseguir" class="wiki-revision-proceed-btn" />
                 </ui:VisualElement>
 
             </ui:VisualElement>

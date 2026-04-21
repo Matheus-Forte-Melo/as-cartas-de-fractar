@@ -26,6 +26,13 @@ public class SaveData
     /// <summary>Até 3 IDs de consumíveis (sem stack; mesma id pode repetir em slots diferentes).</summary>
     public List<string> consumableSlots = new();
     public List<SeedHistoryEntry> seedHistory = new();
+
+    /// <summary>
+    /// IDs de abas da wiki (<c>WikiTab_*</c>, ex.: <c>math_add</c>) para os quais a revisão
+    /// automática no início do duelo não deve mais aparecer — o jogador ativou o
+    /// "não mostrar novamente para tipo X" no rodapé do modal de revisão.
+    /// </summary>
+    public List<string> theoryRevisionSkippedTabIds = new();
 }
 
 [System.Serializable]
