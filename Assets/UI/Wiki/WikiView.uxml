@@ -137,9 +137,7 @@
                                 <ui:Label class="wiki-page-body" text="O resultado é 4,0 ou simplesmente 4." />
                                 <ui:Label class="wiki-page-body" text="A vírgula mostra que o número não é inteiro. Mesmo assim, a regra continua a mesma: somar os valores." />
                                 <ui:Label class="wiki-page-body" text="Sempre deixe vírgula em cima de vírgula para fazer os cálculos:" />
-                                <ui:VisualElement name="WikiPlaceholder_MathAddVirgula" class="wiki-image-placeholder">
-                                    <ui:Label class="wiki-image-placeholder-label" text="[Ilustração — alinhamento de vírgulas (doc: após este parágrafo)]" />
-                                </ui:VisualElement>
+                                <ui:VisualElement name="WikiFigureAddDecimal" class="wiki-theory-figure wiki-theory-figure--add-decimal" picking-mode="Ignore" />
                                 <ui:Label class="wiki-page-body" text="Onde não tem número é o mesmo que ter 0 (zero)." />
                                 <ui:Label class="wiki-section-title" text="Nas cartas" />
                                 <ui:Label class="wiki-page-body" text="Em duelos de adição, uma carta pode aparecer como várias parcelas que somam ao valor da carta." />
@@ -206,9 +204,7 @@
                                 <ui:Label class="wiki-page-body" text="Quando aparecer o sinal ×, você deve multiplicar." />
                                 <ui:Label class="wiki-section-title" text="Contas de multiplicação com vírgula" />
                                 <ui:Label class="wiki-page-body" text="Na multiplicação com vírgula, você a fará normalmente ignorando a vírgula; apenas no final terá que contar as casas decimais atrás das vírgulas para adicionar no resultado." />
-                                <ui:VisualElement name="WikiPlaceholder_MathMulVirgula" class="wiki-image-placeholder">
-                                    <ui:Label class="wiki-image-placeholder-label" text="[Ilustração — multiplicação com vírgula (doc: após este parágrafo)]" />
-                                </ui:VisualElement>
+                                <ui:VisualElement name="WikiFigureMultiDecimal" class="wiki-theory-figure wiki-theory-figure--multi-decimal" picking-mode="Ignore" />
                                 <ui:Label class="wiki-page-body" text="Pode ser colocado o 0 (zero) no lugar do + caso ajude na visualização." />
                                 <ui:Label class="wiki-section-title" text="Nas cartas" />
                                 <ui:Label class="wiki-page-body" text="Em duelos de multiplicação, a carta pode aparecer como fatores que multiplicam até o valor da carta." />
@@ -245,9 +241,7 @@
                                 <ui:Label class="wiki-page-body" text="Então, a fração funciona como uma divisão escrita de outra forma." />
                                 <ui:Label class="wiki-section-title" text="Contas de divisão com vírgula" />
                                 <ui:Label class="wiki-page-body" text="Na divisão com vírgula, você precisa igualar as casas decimais atrás da vírgula, multiplicando por 10 para os dois lados, pois o que você faz em um lado tem que ser feito no outro; assim que eliminar as vírgulas, poderá começar a divisão normalmente." />
-                                <ui:VisualElement name="WikiPlaceholder_MathDivVirgula" class="wiki-image-placeholder">
-                                    <ui:Label class="wiki-image-placeholder-label" text="[Ilustração — divisão com vírgula (doc: após este parágrafo)]" />
-                                </ui:VisualElement>
+                                <ui:VisualElement name="WikiFigureDivDecimal" class="wiki-theory-figure wiki-theory-figure--div-decimal" picking-mode="Ignore" />
                                 <ui:Label class="wiki-section-title" text="Nas cartas" />
                                 <ui:Label class="wiki-page-body" text="Em duelos de divisão, a carta pode aparecer como divisões ou formas equivalentes que fecham no valor da carta." />
                             </ui:VisualElement>

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
@@ -10,35 +11,35 @@ using Button = UnityEngine.UIElements.Button;
 namespace Map.Wiki
 {
     /// <summary>
-    /// Ajuda / Wiki do mapa — modal em UI Toolkit (UXML + USS, "HTML + CSS")
-    /// sobreposto sobre a cena <c>Map</c>. Abas laterais à esquerda, conteúdo
-    /// à direita; fecha pelo X ou pelo Esc. Textos alinhados ao <c>context.md</c>
-    /// e ao tutorial pedagógico (documento externo), ajustáveis no UXML.
+    /// Ajuda / Wiki — modal em UI Toolkit (UXML + USS). Usado no mapa e na batalha Core:
+    /// abas à esquerda, conteúdo à direita; fecha pelo X ou Esc.
     ///
-    /// Como usar na cena:
-    ///  - Ligar este componente a um GameObject com um <see cref="UIDocument"/>
-    ///    referenciando <c>Assets/UI/Wiki/WikiView.uxml</c> e uma
-    ///    <c>PanelSettings</c>.
-    ///  - <see cref="createRuntimeOpenButton"/> cria um botão "Ajuda" no
-    ///    <c>TransitionCanvas</c> da cena Map para abrir a wiki.
+    /// Como usar: GameObject com <see cref="UIDocument"/>, <c>WikiView.uxml</c> e <c>PanelSettings</c>.
+    /// Com <see cref="createRuntimeOpenButton"/>, o botão Ajuda é criado no canvas da UI
+    /// (<c>TransitionCanvas</c> no mapa, ou objeto <c>Canvas</c> na cena Core).
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(UIDocument))]
     public class MapWikiAccess : MonoBehaviour
     {
-        private const string OpenButtonObjectName = "WIKI_MapOpenButtonRoot";
+        /// <summary>Cena <c>Core</c>: wiki aberta — lógica de batalha (teclas, etc.) deve ignorar input.</summary>
+        public static bool IsCoreBattleInputBlockedByWiki { get; private set; }
+
+        private static RectTransform _wikiOpenButtonRect;
+
+        private const string OpenButtonObjectName = "WIKI_OpenButtonRoot";
         private const string ActiveTabClass = "wiki-tab--active";
         private const string TabButtonPrefix = "WikiTab_";
         private const string PagePrefix = "WikiPage_";
 
-        [Header("Botão de abrir (uGUI, no TransitionCanvas)")]
-        [Tooltip("Se verdadeiro, cria em runtime um botão 'Ajuda' no TransitionCanvas do mapa.")]
+        [Header("Botão de abrir (uGUI)")]
+        [Tooltip("Se verdadeiro, cria em runtime um botão 'Ajuda' no canvas da UI (TransitionCanvas ou Canvas).")]
         [SerializeField] private bool createRuntimeOpenButton = true;
 
         [Tooltip("Texto do botão de abrir a wiki.")]
         [SerializeField] private string openButtonLabel = "Ajuda";
 
-        [Tooltip("Posição ancorada (a partir do canto superior direito) do botão de abrir. Y mais negativo = mais para baixo.")]
+        [Tooltip("Posição ancorada (canto superior direito do canvas). Y mais negativo = mais para baixo.")]
         [SerializeField] private Vector2 openButtonAnchoredPosition = new(-20f, -90f);
 
         [Tooltip("Tamanho do botão de abrir.")]
@@ -79,6 +80,12 @@ namespace Map.Wiki
         private EventCallback<AttachToPanelEvent> _wikiRootAttachedHandler;
         private Coroutine _wikiStretchRoutine;
 
+        private Canvas _hostCanvas;
+        private CanvasGroup _coreCanvasGroup;
+        private bool _coreCanvasGroupSnapshotValid;
+        private bool _coreCanvasGroupInteractableSnapshot;
+        private bool _coreCanvasGroupBlocksRaycastsSnapshot;
+
         private void Awake()
         {
             _doc = GetComponent<UIDocument>();
@@ -94,6 +101,9 @@ namespace Map.Wiki
 
         private void OnDisable()
         {
+            ApplyCoreBattleInputSuppression(false);
+            IsCoreBattleInputBlockedByWiki = false;
+            _wikiOpenButtonRect = null;
             UnbindUi();
         }
 
@@ -326,21 +336,77 @@ namespace Map.Wiki
                 _doc.rootVisualElement.pickingMode =
                     visible ? PickingMode.Position : PickingMode.Ignore;
             }
+
+            ApplyCoreBattleInputSuppression(visible);
+        }
+
+        /// <summary>
+        /// Na cena Core, desliga interação do canvas da batalha (uGUI) e sinaliza o código
+        /// de blackjack para ignorar teclado/rato enquanto a wiki estiver aberta.
+        /// </summary>
+        private void ApplyCoreBattleInputSuppression(bool wikiOpen)
+        {
+            if (!string.Equals(SceneManager.GetActiveScene().name, "Core", StringComparison.OrdinalIgnoreCase))
+            {
+                IsCoreBattleInputBlockedByWiki = false;
+                return;
+            }
+
+            IsCoreBattleInputBlockedByWiki = wikiOpen;
+
+            Canvas canvas = _hostCanvas != null ? _hostCanvas : FindHostCanvasForWikiButton();
+            if (canvas == null)
+                return;
+
+            if (_coreCanvasGroup == null)
+            {
+                _coreCanvasGroup = canvas.GetComponent<CanvasGroup>();
+                if (_coreCanvasGroup == null)
+                    _coreCanvasGroup = canvas.gameObject.AddComponent<CanvasGroup>();
+            }
+
+            if (wikiOpen)
+            {
+                if (!_coreCanvasGroupSnapshotValid)
+                {
+                    _coreCanvasGroupInteractableSnapshot = _coreCanvasGroup.interactable;
+                    _coreCanvasGroupBlocksRaycastsSnapshot = _coreCanvasGroup.blocksRaycasts;
+                    _coreCanvasGroupSnapshotValid = true;
+                }
+
+                _coreCanvasGroup.interactable = false;
+                _coreCanvasGroup.blocksRaycasts = false;
+            }
+            else
+            {
+                if (_coreCanvasGroupSnapshotValid)
+                {
+                    _coreCanvasGroup.interactable = _coreCanvasGroupInteractableSnapshot;
+                    _coreCanvasGroup.blocksRaycasts = _coreCanvasGroupBlocksRaycastsSnapshot;
+                    _coreCanvasGroupSnapshotValid = false;
+                }
+            }
         }
 
         // ---------- Botão de abrir (uGUI) ----------
 
         private void CreateOpenButton()
         {
-            Canvas canvas = FindTransitionCanvasOrFirst();
+            Canvas canvas = FindHostCanvasForWikiButton();
             if (canvas == null)
             {
-                Debug.LogWarning("[MapWikiAccess] Nenhum Canvas encontrado — botão 'Ajuda' não criado.");
+                Debug.LogWarning("[MapWikiAccess] Nenhum Canvas encontrado — botão Ajuda não criado.");
                 return;
             }
 
-            if (canvas.transform.Find(OpenButtonObjectName) != null)
+            _hostCanvas = canvas;
+
+            Transform existing = canvas.transform.Find(OpenButtonObjectName);
+            if (existing != null)
+            {
+                _wikiOpenButtonRect = existing.GetComponent<RectTransform>();
                 return;
+            }
 
             var root = new GameObject(OpenButtonObjectName, typeof(RectTransform));
             root.transform.SetParent(canvas.transform, false);
@@ -388,9 +454,12 @@ namespace Map.Wiki
             var textOutline = textGo.AddComponent<UnityEngine.UI.Outline>();
             textOutline.effectColor = new Color(0f, 0f, 0f, 0.9f);
             textOutline.effectDistance = new Vector2(1f, -1f);
+
+            _wikiOpenButtonRect = rt;
         }
 
-        private static Canvas FindTransitionCanvasOrFirst()
+        /// <summary>Mapa: <c>TransitionCanvas</c>. Core (batalha): objeto <c>Canvas</c> principal.</summary>
+        private static Canvas FindHostCanvasForWikiButton()
         {
             Canvas[] canvases = FindObjectsByType<Canvas>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
             foreach (Canvas c in canvases)
@@ -398,7 +467,31 @@ namespace Map.Wiki
                 if (c.gameObject.name == "TransitionCanvas")
                     return c;
             }
+
+            foreach (Canvas c in canvases)
+            {
+                if (c.gameObject.name == "Canvas")
+                    return c;
+            }
+
             return canvases.Length > 0 ? canvases[0] : null;
+        }
+
+        /// <summary>
+        /// Clique com botão esquerdo neste frame cai na área do botão uGUI Ajuda (mapa/Core).
+        /// Usado na Core para não contar como "continuar rodada" ao abrir a wiki.
+        /// </summary>
+        public static bool IsPointerPressOnWikiOpenButton()
+        {
+            if (_wikiOpenButtonRect == null)
+                return false;
+            if (Mouse.current == null || !Mouse.current.leftButton.wasPressedThisFrame)
+                return false;
+
+            return RectTransformUtility.RectangleContainsScreenPoint(
+                _wikiOpenButtonRect,
+                Mouse.current.position.ReadValue(),
+                null);
         }
     }
 }

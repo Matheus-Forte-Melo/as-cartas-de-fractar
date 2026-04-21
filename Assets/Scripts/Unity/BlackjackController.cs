@@ -9,6 +9,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Blackjack.Core;
+using Map.Wiki;
 using Blackjack.Decks;
 using Items;
 using Tutorial.Onboarding;
@@ -110,6 +111,9 @@ public class BlackjackController : MonoBehaviour
 
     private void Update()
     {
+        if (ShouldIgnoreBattleInputBecauseWikiIsOpen())
+            return;
+
         if (!_battleOver && !_roundResolutionActive && !_usingConsumable && _game != null
             && _game.State == GameState.PlayerTurn && !_game.IsRoundOver)
         {
@@ -209,13 +213,33 @@ public class BlackjackController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Usado no fim da rodada (Update e <see cref="RoundResolutionRoutine"/>). A coroutine também
+    /// consulta input — por isso o bloqueio da wiki tem de estar aqui, não só no <c>Update</c>.
+    /// </summary>
     private static bool TryGetAnyInputDown()
     {
+        if (ShouldIgnoreBattleInputBecauseWikiIsOpen())
+            return false;
+
         if (Keyboard.current != null && Keyboard.current.anyKey.wasPressedThisFrame)
             return true;
+
         if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+        {
+            if (MapWikiAccess.IsPointerPressOnWikiOpenButton())
+                return false;
             return true;
+        }
+
         return false;
+    }
+
+    private static bool ShouldIgnoreBattleInputBecauseWikiIsOpen()
+    {
+        if (!string.Equals(SceneManager.GetActiveScene().name, "Core", System.StringComparison.OrdinalIgnoreCase))
+            return false;
+        return MapWikiAccess.IsCoreBattleInputBlockedByWiki;
     }
 
     private DeckConfig LoadDeckConfig()
