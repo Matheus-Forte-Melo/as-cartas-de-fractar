@@ -92,6 +92,8 @@ namespace Map.Wiki
 
         private VisualElement _stretchRegisteredRoot;
         private EventCallback<AttachToPanelEvent> _wikiRootAttachedHandler;
+        private EventCallback<GeometryChangedEvent> _wikiRootGeometryHandler;
+        private VisualElement _wikiRootGeometrySource;
         private Coroutine _wikiStretchRoutine;
 
         private Canvas _hostCanvas;
@@ -227,14 +229,41 @@ namespace Map.Wiki
             root.RegisterCallback(_wikiRootAttachedHandler);
 
             if (root.panel != null)
+            {
+                HookPanelResizeListener(root);
                 ScheduleWikiRootStretch(root);
+            }
         }
 
         private void OnWikiRootAttachedToPanel(AttachToPanelEvent evt)
         {
             if (evt.target is not VisualElement ve)
                 return;
+            HookPanelResizeListener(ve);
             ScheduleWikiRootStretch(ve);
+        }
+
+        private void HookPanelResizeListener(VisualElement root)
+        {
+            VisualElement source = root?.panel?.visualTree;
+            if (source == null || source == _wikiRootGeometrySource)
+                return;
+
+            UnhookPanelResizeListener();
+
+            _wikiRootGeometrySource = source;
+            _wikiRootGeometryHandler = evt => ApplyWikiRootSizeFromPanel(root);
+            source.RegisterCallback(_wikiRootGeometryHandler);
+        }
+
+        private void UnhookPanelResizeListener()
+        {
+            if (_wikiRootGeometrySource != null && _wikiRootGeometryHandler != null)
+            {
+                _wikiRootGeometrySource.UnregisterCallback(_wikiRootGeometryHandler);
+            }
+            _wikiRootGeometrySource = null;
+            _wikiRootGeometryHandler = null;
         }
 
         private void ScheduleWikiRootStretch(VisualElement root)
@@ -254,6 +283,7 @@ namespace Map.Wiki
         private void UnregisterWikiRootStretch()
         {
             StopWikiStretchRoutine();
+            UnhookPanelResizeListener();
 
             if (_stretchRegisteredRoot != null && _wikiRootAttachedHandler != null)
             {
@@ -276,16 +306,35 @@ namespace Map.Wiki
             if (root == null || root.panel == null)
                 return;
 
-            VisualElement panelRoot = root.panel.visualTree;
-            if (panelRoot == null)
-                return;
+            // Cobrir sempre o Game View inteiro — converte pixels do ecrã para coords do panel.
+            // Evita o caso em que o PanelSettings (scale with screen size, match, etc.) deixa o
+            // rootVisualElement mais estreito que o Game View e a overlay escura da wiki fica
+            // apenas na faixa central (visível, por ex., em aspects "Free" do Editor).
+            Vector2 topLeftPanel = RuntimePanelUtils.ScreenToPanel(root.panel, Vector2.zero);
+            Vector2 bottomRightPanel = RuntimePanelUtils.ScreenToPanel(
+                root.panel,
+                new Vector2(Screen.width, Screen.height));
 
-            Rect r = panelRoot.layout;
-            if (r.width < 2f || r.height < 2f)
-                return;
+            float width = Mathf.Abs(bottomRightPanel.x - topLeftPanel.x);
+            float height = Mathf.Abs(bottomRightPanel.y - topLeftPanel.y);
 
-            root.style.width = r.width;
-            root.style.height = r.height;
+            if (width < 2f || height < 2f)
+            {
+                // Fallback: método antigo caso o panel ainda não esteja pronto.
+                VisualElement panelRoot = root.panel.visualTree;
+                if (panelRoot == null) return;
+                Rect r = panelRoot.layout;
+                if (r.width < 2f || r.height < 2f) return;
+                topLeftPanel = Vector2.zero;
+                width = r.width;
+                height = r.height;
+            }
+
+            root.style.position = Position.Absolute;
+            root.style.left = topLeftPanel.x;
+            root.style.top = topLeftPanel.y;
+            root.style.width = width;
+            root.style.height = height;
         }
 
         private void UnbindUi()
