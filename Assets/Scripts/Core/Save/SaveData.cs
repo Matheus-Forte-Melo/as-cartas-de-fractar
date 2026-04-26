@@ -22,6 +22,7 @@ public class SaveData
 
     /// <summary>Passo do onboarding do combate (<c>core_onboarding</c>) no save tutorial.</summary>
     public int core_onboarding_step_index;
+    /// <summary>Itens de ataque e defesa comprados. O mesmo <c>id</c> pode repetir-se para acumular bónus.</summary>
     public List<string> ownedItemIds = new();
     /// <summary>Até 3 IDs de consumíveis (sem stack; mesma id pode repetir em slots diferentes).</summary>
     public List<string> consumableSlots = new();

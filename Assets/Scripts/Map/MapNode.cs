@@ -7,6 +7,8 @@ public enum MapNodeType
     Combat_Sub,
     Combat_Multi,
     Combat_Div,
+    /// <summary>Nó final Fractar — não entra no sorteio de tipos; inserido após a geração procedural.</summary>
+    Bossfight,
 }
 
 public enum CombatEquationDifficulty

@@ -19,7 +19,7 @@ Acrescentar um objeto no array `items` com os campos:
 | `description` | Texto do cartão / verso. |
 | `type` | `"attack"`, `"defense"` ou `"consumable"`. |
 | `price` | Custo em moedas. |
-| `icon` | Caminho relativo a `Resources`, sem extensão (ex.: `"Icons/Espada de Ouro"`). |
+| `icon` | Caminho relativo a `Resources`, sem extensão (ex.: `"Icons/pocao_pequena"`). |
 | `attackMultiplier` | Só relevante para `attack`: multiplicador de dano (ex.: `1.15`). |
 | `bonusHealth` | Só relevante para `defense`: bónus de vida máxima. |
 | `consumableEffect` | Só `consumable`: string do efeito (hoje: `"heal"`). |
@@ -39,13 +39,13 @@ Colocar o sprite em `Assets/Resources/Icons/` (ou subpasta) e garantir que o cam
 
 ### Ataque (`type: "attack"`)
 
-- Compra na loja → id vai para `SaveData.ownedItemIds`.
-- `PlayerItemStats.CalculateDamageMultiplier` multiplica pelos `attackMultiplier` de todos os itens de ataque possuídos.
+- Compra na loja → `SaveData.ownedItemIds.Add(id)`; o mesmo `id` pode repetir-se para acumular bónus.
+- `PlayerItemStats.CalculateDamageMultiplier` usa **soma aditiva do bónus**: `1 + Σ(attackMultiplier - 1)` por cada entrada ofensiva em `ownedItemIds` (ex.: bónus 0,15 + 0,35 + 0,50 = 1,00 → multiplicador total **×2,0**).
 
 ### Defesa (`type: "defense"`)
 
-- Compra → `ownedItemIds` + opcionalmente `bonusHealth` aplicado à vida no momento da compra (loja).
-- `PlayerItemStats.CalculateMaxHealth` soma `bonusHealth` de todos os itens de defesa possuídos.
+- Compra → `ownedItemIds` (pode repetir o mesmo id) + `bonusHealth` aplicado a `playerHealth` no momento da compra (loja).
+- `PlayerItemStats.CalculateMaxHealth` soma `bonusHealth` de **cada** entrada defensiva em `ownedItemIds`.
 
 ### Consumível (`type: "consumable"`)
 

@@ -1,6 +1,8 @@
 /// <summary>Nomes de cenas do fluxo principal e variantes tutorial (Build Settings).</summary>
 public static class GameFlowScenes
 {
+    public const string Menu = "Menu";
+
     public const string Map = "Map";
     public const string Core = "Core";
     public const string Store = "Store";

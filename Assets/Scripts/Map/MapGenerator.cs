@@ -34,6 +34,10 @@ public class MapGenerator : MonoBehaviour
     [Header("Node Type Distribution")]
     [SerializeField] private List<NodeTypeWeight> typeWeights = new();
 
+    [Header("Boss (Fractar) — só Map de campanha")]
+    [Tooltip("-1 = coluna central. Linha = <see cref=\"rows\"/> (abaixo do último nível procedural); todos os nós da linha rows-1 ligam a este nó.")]
+    [SerializeField] private int bossFightColumn = -1;
+
     [Header("Difficulty by map row (0-based index)")]
     [Tooltip("Quando ativo, recalcula os limites abaixo ao mudar Rows: divide o mapa em 3 faixas o mais iguais possível (resto distribuído nas primeiras faixas).")]
     [SerializeField] private bool autoEqualDifficultyRowBands = true;
@@ -100,6 +104,7 @@ public class MapGenerator : MonoBehaviour
         List<List<int>> paths = GeneratePaths();
         BuildGraph(paths);
         AssignNodeTypesAndDifficulty();
+        InsertBossFightNode();
     }
 
     private void ClearGraph()
@@ -118,7 +123,16 @@ public class MapGenerator : MonoBehaviour
         foreach (MapNodeType val in enumValues)
         {
             if (!typeWeights.Exists(w => w.type == val))
-                typeWeights.Add(new NodeTypeWeight { type = val, weight = 1f });
+            {
+                float w = val == MapNodeType.Bossfight ? 0f : 1f;
+                typeWeights.Add(new NodeTypeWeight { type = val, weight = w });
+            }
+        }
+
+        foreach (NodeTypeWeight w in typeWeights)
+        {
+            if (w.type == MapNodeType.Bossfight)
+                w.weight = 0f;
         }
     }
 
@@ -200,6 +214,40 @@ public class MapGenerator : MonoBehaviour
         }
 
         return paths;
+    }
+
+    /// <summary>
+    /// Uma linha final com um único nó <see cref="MapNodeType.Bossfight"/>; todos os nós da última linha procedural
+    /// (<c>rows - 1</c>) ganham aresta até ele. Não corre em <see cref="GameFlowScenes.MapTutorial"/>.
+    /// </summary>
+    private void InsertBossFightNode()
+    {
+        if (SceneManager.GetActiveScene().name == GameFlowScenes.MapTutorial)
+            return;
+
+        int bossRow = rows;
+        int bossCol = bossFightColumn >= 0
+            ? Mathf.Clamp(bossFightColumn, 0, columns - 1)
+            : Mathf.Clamp((columns - 1) / 2, 0, columns - 1);
+
+        MapNode boss = GetOrCreateNode(bossRow, bossCol);
+        boss.Type = MapNodeType.Bossfight;
+        boss.Difficulty = CombatEquationDifficulty.Hard;
+
+        int lastProceduralRow = rows - 1;
+        foreach (var kv in _graph.ToList())
+        {
+            (int r, int c) = kv.Key;
+            if (r != lastProceduralRow)
+                continue;
+            MapNode from = kv.Value;
+            if (from.Type == MapNodeType.Bossfight)
+                continue;
+
+            var edge = (r, c, bossRow, bossCol);
+            if (_connections.Add(edge))
+                from.Children.Add(boss);
+        }
     }
 
     // Usa o "Wireframe" paths para desenhar o grafo em tela
@@ -287,20 +335,28 @@ public class MapGenerator : MonoBehaviour
     private MapNodeType PickRandomType()
     {
         float totalWeight = CalculateTotalWeight();
-        if (totalWeight <= 0f) 
-            return default;
+        if (totalWeight <= 0f)
+            return MapNodeType.Combat_Add;
 
         float roll = Random.value * totalWeight;
         float cumulative = 0f;
-        
+
         foreach (var w in typeWeights)
         {
+            if (w.type == MapNodeType.Bossfight)
+                continue;
             cumulative += Mathf.Max(0f, w.weight);
             if (roll <= cumulative)
                 return w.type;
         }
 
-        return typeWeights[typeWeights.Count - 1].type;
+        for (int i = typeWeights.Count - 1; i >= 0; i--)
+        {
+            if (typeWeights[i].type != MapNodeType.Bossfight)
+                return typeWeights[i].type;
+        }
+
+        return MapNodeType.Combat_Add;
     }
 
     private float CalculateTotalWeight()
@@ -308,6 +364,8 @@ public class MapGenerator : MonoBehaviour
         float totalWeight = 0f;
         foreach (var w in typeWeights)
         {
+            if (w.type == MapNodeType.Bossfight)
+                continue;
             totalWeight += Mathf.Max(0f, w.weight);
         }
 

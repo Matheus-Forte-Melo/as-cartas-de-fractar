@@ -2406,7 +2406,7 @@ MonoBehaviour:
   - combat
   - difficulty
   - enemies
-  - shop_inventory
+  - economy
   - controls
   defaultTabId: overview
 --- !u!114 &527100003

@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 860724f1322fe10709d7315e15d56444
+guid: 306c951d89ad73cbd804715a093f04ba
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -7690335439021222541
-    second: shield_icon_0
+      213: 1509798467936456807
+    second: pocao_grande_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: shield_icon_0
+      name: pocao_grande_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 128
-        height: 128
+        x: 224
+        y: 36
+        width: 229
+        height: 301
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 375da81d9a0764590800000000000000
-      internalID: -7690335439021222541
+      spriteID: 76018c315b1e3f410800000000000000
+      internalID: 1509798467936456807
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      shield_icon_0: -7690335439021222541
+      pocao_grande_0: 1509798467936456807
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 92c8446311a33e679a1511f1b20957d0
+guid: 8d35d4dc794a4825c8ffd1c0c8e2c5b3
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6916751873420013278
-    second: potion_icon_0
+      213: 5255060797644983489
+    second: anel_inequacao_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: potion_icon_0
+      name: anel_inequacao_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 128
-        height: 128
+        x: 208
+        y: 77
+        width: 261
+        height: 226
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 221584151d2c200a0800000000000000
-      internalID: -6916751873420013278
+      spriteID: 1ccc5b4f3f9bde840800000000000000
+      internalID: 5255060797644983489
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      potion_icon_0: -6916751873420013278
+      anel_inequacao_0: 5255060797644983489
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

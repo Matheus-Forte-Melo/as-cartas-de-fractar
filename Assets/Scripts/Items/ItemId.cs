@@ -3,9 +3,13 @@ namespace Items
     public enum ItemId
     {
         None,
-        SwordGold,
-        ShieldSilver,
-        HealthPotion,
-        MagicAmulet
+        PotionSmall,
+        PotionLarge,
+        RingInequation,
+        TomesLinear,
+        StaffFractal,
+        AmuletProgressive,
+        ShieldHypotenuse,
+        TunicFractal
     }
 }

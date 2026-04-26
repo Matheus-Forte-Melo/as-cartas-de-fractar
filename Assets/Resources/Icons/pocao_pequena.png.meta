@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: e673c9471e3081cdf89f81462d1133a1
+guid: 5215634b12eb7d6be939bd9a6892ba50
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3615744542873261963
-    second: machado_0
+      213: -5783415954904474108
+    second: pocao_pequena_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: machado_0
+      name: pocao_pequena_0
       rect:
         serializedVersion: 2
-        x: 32
-        y: 30
-        width: 428
-        height: 419
+        x: 267
+        y: 55
+        width: 143
+        height: 259
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5786b7bce7b42ddc0800000000000000
-      internalID: -3615744542873261963
+      spriteID: 40e9793b4dd2dbfa0800000000000000
+      internalID: -5783415954904474108
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      machado_0: -3615744542873261963
+      pocao_pequena_0: -5783415954904474108
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

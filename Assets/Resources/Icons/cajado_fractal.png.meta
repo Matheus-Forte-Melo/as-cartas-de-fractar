@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 0b0b14ae45b03344e98473a45460fbc2
+guid: ca9682c92a6cffbee81a9f80396cb02d
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 847701054791183047
-    second: Espada de Ouro_0
+      213: 2011414854955900052
+    second: cajado_fractal_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -97,7 +97,7 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
-    buildTarget: WebGL
+    buildTarget: Android
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Espada de Ouro_0
+      name: cajado_fractal_0
       rect:
         serializedVersion: 2
-        x: 111
-        y: 10
-        width: 138
-        height: 340
+        x: 255
+        y: 0
+        width: 171
+        height: 325
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7ca6d863e93a3cb00800000000000000
-      internalID: 847701054791183047
+      spriteID: 49c1795572bf9eb10800000000000000
+      internalID: 2011414854955900052
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Espada de Ouro_0: 847701054791183047
+      cajado_fractal_0: 2011414854955900052
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -8,6 +8,15 @@ public static class StreamingAssetsDeckPaths
 {
     public static string BuildDeckPath(MapNodeType nodeType, CombatEquationDifficulty difficulty)
     {
+        // Boss (Fractar): deck por defeito — Easy + multiplicação (ficheiro estável no repo).
+        if (nodeType == MapNodeType.Bossfight)
+        {
+            return Path.Combine(
+                Application.streamingAssetsPath,
+                "Easy",
+                "config_cards_easy_multiplication.json");
+        }
+
         string folder = difficulty switch
         {
             CombatEquationDifficulty.Easy => "Easy",

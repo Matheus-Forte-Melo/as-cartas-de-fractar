@@ -34,6 +34,7 @@ namespace Map.Wiki
                 MapNodeType.Combat_Sub => TheoryWikiPage.Subtraction,
                 MapNodeType.Combat_Multi => TheoryWikiPage.Multiplication,
                 MapNodeType.Combat_Div => TheoryWikiPage.Division,
+                MapNodeType.Bossfight => TheoryWikiPage.Overview,
                 _ => TheoryWikiPage.Overview,
             };
         }

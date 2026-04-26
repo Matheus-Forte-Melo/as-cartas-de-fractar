@@ -186,15 +186,10 @@ namespace Store
                 itemIcon.style.backgroundImage = new StyleBackground(iconSprite);
 
             bool isConsumable = itemData.ItemType == ItemType.Consumable;
-            bool alreadyOwned = !isConsumable && _save.ownedItemIds != null && _save.ownedItemIds.Contains(itemData.id);
 
             if (buyButton != null)
             {
-                if (alreadyOwned)
-                {
-                    SetButtonPurchased(buyButton, "Comprado");
-                }
-                else if (isConsumable)
+                if (isConsumable)
                 {
                     if (ConsumableSlotCount >= MaxConsumableSlots)
                         SetButtonPurchased(buyButton, "Inventário cheio (3/3)");
@@ -203,6 +198,7 @@ namespace Store
                 }
                 else
                 {
+                    // Ataque/defesa: entradas repetidas em ownedItemIds acumulam bónus (ver PlayerItemStats).
                     buyButton.clicked += () => OnBuyItemClicked(itemData, buyButton);
                 }
             }
@@ -320,10 +316,8 @@ namespace Store
 
             Debug.Log($"[Store] Comprou: {_pendingItem.displayName} por {_pendingItem.price}. Saldo: {_save.coins}");
 
-            if (_pendingBuyButton != null)
-                SetButtonPurchased(_pendingBuyButton, "Comprado");
-
             CloseModal();
+            LoadStoreData();
         }
 
         private void OnBackButtonClicked()

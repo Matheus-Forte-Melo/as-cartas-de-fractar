@@ -41,7 +41,7 @@
                             <ui:Button name="WikiTab_combat" text="Combate" class="wiki-tab" />
                             <ui:Button name="WikiTab_difficulty" text="Dificuldade" class="wiki-tab" />
                             <ui:Button name="WikiTab_enemies" text="Operações" class="wiki-tab" />
-                            <ui:Button name="WikiTab_shop_inventory" text="Loja e inventário" class="wiki-tab" />
+                            <ui:Button name="WikiTab_economy" text="Economia" class="wiki-tab" />
                             <ui:Button name="WikiTab_controls" text="Controles" class="wiki-tab" />
                         </ui:ScrollView>
                     </ui:VisualElement>
@@ -53,8 +53,8 @@
                             <ui:VisualElement name="WikiPage_overview" class="wiki-page">
                                 <ui:Label class="wiki-page-title" text="Visão geral" />
                                 <ui:Label class="wiki-page-body" text="Você enfrenta duelos de blackjack em que cada carta vale uma equação. Sobe o mapa escolhendo duelos ligados uns aos outros, entra em combates e tenta levar a vida do oponente a zero antes da sua." />
-                                <ui:Label class="wiki-section-title wiki-section-title--first" text="Moedas" />
-                                <ui:Label class="wiki-page-body" text="Moedas ganhas ao vencer duelos entram no seu saldo e continuam com você nas próximas tentativas. Na loja você gasta em equipamento permanente (peças de ataque e de defesa) e em consumíveis que ficam em até três espaços reservados." />
+                                <ui:Label class="wiki-section-title wiki-section-title--first" text="Moedas e loja" />
+                                <ui:Label class="wiki-page-body" text="O saldo de moedas persiste entre tentativas. Para saber como ganhar moedas, abrir a loja, equipar ataque e defesa e usar consumíveis, abra a aba Economia." />
                                 <ui:Label class="wiki-section-title" text="Se perder a run" />
                                 <ui:Label class="wiki-page-body" text="Você volta ao começo do mapa com um novo traçado de caminhos, escolhe de novo a partir da primeira fileira e sua vida sobe até o máximo que seus equipamentos de defesa permitem. O saldo de moedas não é zerado." />
                                 <ui:Label class="wiki-section-title" text="Se vencer um duelo" />
@@ -69,7 +69,7 @@
                                 <ui:Label class="wiki-section-title" text="Fácil, médio e difícil" />
                                 <ui:Label class="wiki-page-body" text="O jogo divide a altura do mapa em três faixas. Quanto mais alto você sobe na torre desenhada, mais comum ficam duelos médios e difíceis. Na prática, quem está embaixo vê mais combates leves; quem chega no topo encara equações e inimigos mais pesados." />
                                 <ui:Label class="wiki-section-title" text="Clique e câmera" />
-                                <ui:Label class="wiki-page-body" text="Um toque conta como clique só se você soltar o dedo perto de onde apertou. Se estiver arrastando a visão ou girando a roda para mover a câmera, isso não escolhe duelo. Se o cursor estiver em cima de um menu ou botão (loja, ajuda), o clique fica com esse elemento e não com o mapa." />
+                                <ui:Label class="wiki-page-body" text="Um toque conta como clique só se você soltar o dedo perto de onde apertou. Se estiver arrastando a visão ou girando a roda para mover a câmera, isso não escolhe duelo. Se o cursor estiver em cima de um menu ou botão (por exemplo Ajuda), o clique fica com esse elemento e não com o mapa." />
                                 <ui:Label class="wiki-section-title" text="O que muda na tela" />
                                 <ui:Label class="wiki-page-body" text="Duelos que você não pode visitar ficam apagados. Onde você está pode ganhar destaque. A câmera só se move na vertical: arrastar ou rolar reposiciona a vista." />
                             </ui:VisualElement>
@@ -77,9 +77,46 @@
                             <ui:VisualElement name="WikiPage_combat" class="wiki-page" style="display: none;">
                                 <ui:Label class="wiki-page-title" text="Combate" />
                                 <ui:Label class="wiki-page-body" text="Cada rodada vai até alguém passar de 21, alguém parar e o outro mostrar carta melhor, ou as duas mãos empatarem no mesmo total. O limite usado nas contas de dano é sempre 21." />
-                                <ui:Label class="wiki-section-title wiki-section-title--first" text="Dano ao fim da rodada" />
+                                <ui:Label class="wiki-section-title wiki-section-title--first" text="Dificuldade do duelo: atributos e moedas" />
+                                <ui:Label class="wiki-page-body" text="Cada combate no mapa (exceto o boss final) é Fácil, Médio ou Difícil. Isso define a vida máxima do oponente, o multiplicador de dano aplicado a você quando você perde uma rodada, e as moedas somadas ao saldo quando você vence o duelo inteiro. Fractar (boss) usa valores próprios na última linha." />
+                                <ui:VisualElement class="wiki-table">
+                                    <ui:VisualElement class="wiki-table-row wiki-table-row--header">
+                                        <ui:Label text="Dificuldade" class="wiki-table-cell wiki-table-cell--dificuldade" />
+                                        <ui:Label text="Vida máx. do oponente" class="wiki-table-cell" />
+                                        <ui:Label text="Mult. dano a você (rodada perdida)" class="wiki-table-cell" />
+                                        <ui:Label text="Moedas ao vencer o duelo" class="wiki-table-cell wiki-table-cell--last" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="wiki-table-row wiki-table-row--data wiki-table-row--striped">
+                                        <ui:Label text="Fácil" class="wiki-table-cell wiki-table-cell--dificuldade" />
+                                        <ui:Label text="80" class="wiki-table-cell" />
+                                        <ui:Label text="1,0" class="wiki-table-cell" />
+                                        <ui:Label text="100" class="wiki-table-cell wiki-table-cell--last" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="wiki-table-row wiki-table-row--data">
+                                        <ui:Label text="Médio" class="wiki-table-cell wiki-table-cell--dificuldade" />
+                                        <ui:Label text="150" class="wiki-table-cell" />
+                                        <ui:Label text="1,5" class="wiki-table-cell" />
+                                        <ui:Label text="250" class="wiki-table-cell wiki-table-cell--last" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="wiki-table-row wiki-table-row--data wiki-table-row--striped">
+                                        <ui:Label text="Difícil" class="wiki-table-cell wiki-table-cell--dificuldade" />
+                                        <ui:Label text="300" class="wiki-table-cell" />
+                                        <ui:Label text="1,75" class="wiki-table-cell" />
+                                        <ui:Label text="500" class="wiki-table-cell wiki-table-cell--last" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="wiki-table-row wiki-table-row--data wiki-table-row--last">
+                                        <ui:Label text="Boss (Fractar)" class="wiki-table-cell wiki-table-cell--dificuldade" />
+                                        <ui:Label text="500" class="wiki-table-cell" />
+                                        <ui:Label text="2,0" class="wiki-table-cell" />
+                                        <ui:Label text="500" class="wiki-table-cell wiki-table-cell--last" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                                <ui:Label class="wiki-page-body" text="Números iguais ao código: vida e multiplicador de dano ao jogador — EnemyCombatBalance.GetEnemyMaxHealth / GetEnemyDamageMultiplier; moedas — BattleRewardResolver.GetCoinReward; boss — BossFightBalance.MaxHealth e DamageMultiplier." />
+                                <ui:Label class="wiki-page-body" text="O multiplicador da terceira coluna multiplica o dano base quando você perde a rodada (|sua mão − 21|, mínimo 1, × 10, arredondado — RoundDamageResolver)." />
+                                <ui:Label class="wiki-page-body" text="Esse multiplicador pesa mais no Médio e no Difícil do que no Fácil. Vencer Fractar concede 500 moedas (Hard em GetCoinReward), conclui a run e envia ao menu principal." />
+                                <ui:Label class="wiki-section-title" text="Dano ao fim da rodada" />
                                 <ui:Label class="wiki-page-body" text="Quem perde a rodada perde vida. O jogo mede quanto a mão do perdedor ficou longe de 21. Essa distância nunca conta como zero na hora do golpe: no mínimo vale 1. Multiplica por dez e arredonda: esse é o dano base." />
-                                <ui:Label class="wiki-page-body" text="Se quem apanhou foi o inimigo, o dano ainda é ampliado pelos seus equipamentos de ataque (cada peça multiplica junto com as outras). Se quem apanhou foi você, o dano sobe conforme a dificuldade daquele duelo: fácil sem extra, médio multiplica por um e meio, difícil multiplica por dois." />
+                                <ui:Label class="wiki-page-body" text="Se quem apanhou foi o inimigo, o dano é ampliado pelos seus equipamentos de ataque (bónus cumulativos ao multiplicador — ver aba Economia). Se quem apanhou foi você, o dano ainda é multiplicado conforme a linha da tabela acima para aquele duelo." />
                                 <ui:Label class="wiki-section-title" text="Empate" />
                                 <ui:Label class="wiki-page-body" text="Mesmo número nas duas mãos: ninguém perde vida naquela rodada." />
                                 <ui:Label class="wiki-section-title" text="Oponente" />
@@ -89,38 +126,14 @@
                             </ui:VisualElement>
 
                             <ui:VisualElement name="WikiPage_difficulty" class="wiki-page" style="display: none;">
-                                <ui:Label class="wiki-page-title" text="Dificuldade e recompensas" />
-                                <ui:Label class="wiki-page-body" text="Cada duelo é classificado como fácil, médio ou difícil. A tabela abaixo resume o que muda para você em cada nível: vida do oponente, quanto a sua derrota na rodada pesa, e moedas extras se você vencer o duelo inteiro." />
-                                <ui:Label class="wiki-section-title wiki-section-title--first" text="Valores por dificuldade" />
-                                <ui:VisualElement class="wiki-table">
-                                    <ui:VisualElement class="wiki-table-row wiki-table-row--header">
-                                        <ui:Label text="Dificuldade" class="wiki-table-cell wiki-table-cell--dificuldade" />
-                                        <ui:Label text="Vida do oponente" class="wiki-table-cell" />
-                                        <ui:Label text="Dano recebido se perder a rodada" class="wiki-table-cell" />
-                                        <ui:Label text="Moedas ao vencer o duelo" class="wiki-table-cell wiki-table-cell--last" />
-                                    </ui:VisualElement>
-                                    <ui:VisualElement class="wiki-table-row wiki-table-row--data wiki-table-row--striped">
-                                        <ui:Label text="Fácil" class="wiki-table-cell wiki-table-cell--dificuldade" />
-                                        <ui:Label text="80" class="wiki-table-cell" />
-                                        <ui:Label text="×1,0 (normal)" class="wiki-table-cell" />
-                                        <ui:Label text="+100" class="wiki-table-cell wiki-table-cell--last" />
-                                    </ui:VisualElement>
-                                    <ui:VisualElement class="wiki-table-row wiki-table-row--data">
-                                        <ui:Label text="Médio" class="wiki-table-cell wiki-table-cell--dificuldade" />
-                                        <ui:Label text="150" class="wiki-table-cell" />
-                                        <ui:Label text="×1,5" class="wiki-table-cell" />
-                                        <ui:Label text="+250" class="wiki-table-cell wiki-table-cell--last" />
-                                    </ui:VisualElement>
-                                    <ui:VisualElement class="wiki-table-row wiki-table-row--data wiki-table-row--striped wiki-table-row--last">
-                                        <ui:Label text="Difícil" class="wiki-table-cell wiki-table-cell--dificuldade" />
-                                        <ui:Label text="300" class="wiki-table-cell" />
-                                        <ui:Label text="×2,0" class="wiki-table-cell" />
-                                        <ui:Label text="+500" class="wiki-table-cell wiki-table-cell--last" />
-                                    </ui:VisualElement>
-                                </ui:VisualElement>
-                                <ui:Label class="wiki-page-body" text="O multiplicador de dano recebido só entra quando você perde a rodada: a mesma distância até 21 tira metade a mais de vida no médio e o dobro no difícil, em comparação com o fácil." />
-                                <ui:Label class="wiki-section-title" text="Seu golpe no oponente" />
-                                <ui:Label class="wiki-page-body" text="Equipamentos de ataque aumentam o dano que você causa quando o oponente perde a rodada. Isso é separado da dificuldade do duelo: a dificuldade deixa o inimigo mais forte e a recompensa maior; o ataque é o seu jeito de devolver na mesma moeda." />
+                                <ui:Label class="wiki-page-title" text="Dificuldade no mapa" />
+                                <ui:Label class="wiki-page-body" text="Cada duelo no mapa é classificado como fácil, médio ou difícil. Isso influencia a vida do oponente, o peso do dano quando você perde uma rodada e as moedas ganhas se vencer o duelo — todos os números estão na tabela da aba Combate." />
+                                <ui:Label class="wiki-section-title wiki-section-title--first" text="Faixas da torre" />
+                                <ui:Label class="wiki-page-body" text="O jogo divide a altura do mapa em faixas. Quanto mais alto você sobe, mais comuns ficam duelos médios e difíceis; em baixo predominam combates mais leves nas equações e nos atributos do oponente." />
+                                <ui:Label class="wiki-section-title" text="Confronto final — Fractar" />
+                                <ui:Label class="wiki-page-body" text="No topo há um único nó de boss. Fractar: 500 de vida, multiplicador 2,0 sobre o dano que você recebe ao perder uma rodada, 500 moedas na vitória (linha do boss na aba Combate ou Economia). Vencer conclui a run e regressa ao menu principal." />
+                                <ui:Label class="wiki-section-title" text="Moedas e loja" />
+                                <ui:Label class="wiki-page-body" text="Como gastar moedas, equipar itens e gerir consumíveis está na aba Economia." />
                             </ui:VisualElement>
 
                                                         <!-- TheoryWikiPage.Addition -->
@@ -267,17 +280,54 @@
                                 <ui:Label class="wiki-page-body" text="Cartas tendem a aparecer como divisões ou formas parecidas." />
                             </ui:VisualElement>
 
-                            <ui:VisualElement name="WikiPage_shop_inventory" class="wiki-page" style="display: none;">
-                                <ui:Label class="wiki-page-title" text="Loja e inventário" />
-                                <ui:Label class="wiki-section-title wiki-section-title--first wiki-section-title--after-title-only" text="Como abrir a loja" />
-                                <ui:Label class="wiki-page-body" text="No mapa, use o botão roxo da loja. De lá você compra itens com moedas e volta ao mapa quando quiser." />
-                                <ui:Label class="wiki-section-title" text="Ataque e defesa" />
-                                <ui:Label class="wiki-page-body" text="Peças de ataque ficam com você para sempre e aumentam o dano que você causa ao oponente quando ele perde uma rodada. Várias peças multiplicam o efeito entre si. Peças de defesa aumentam sua vida máxima; ao comprar uma, sua vida atual também sobe na mesma hora." />
+                            <ui:VisualElement name="WikiPage_economy" class="wiki-page" style="display: none;">
+                                <ui:Label class="wiki-page-title" text="Economia" />
+                                <ui:Label class="wiki-page-body" text="Moedas são o recurso persistente entre runs: ao perder uma tentativa o mapa reinicia, mas o saldo não é zerado. Ao vencer um duelo, o jogo soma ao saldo exatamente as moedas da linha da dificuldade daquele combate (BattleRewardResolver)." />
+                                <ui:Label class="wiki-section-title wiki-section-title--first" text="Dificuldade do duelo: inimigo e moedas" />
+                                <ui:Label class="wiki-page-body" text="Para cada nó de combate (não boss), a dificuldade define a vida máxima do oponente, o multiplicador aplicado ao dano que você recebe ao perder uma rodada, e as moedas ganhas ao vencer o duelo inteiro. Mesma tabela que na aba Combate." />
+                                <ui:VisualElement class="wiki-table">
+                                    <ui:VisualElement class="wiki-table-row wiki-table-row--header">
+                                        <ui:Label text="Dificuldade" class="wiki-table-cell wiki-table-cell--dificuldade" />
+                                        <ui:Label text="Vida máx. do oponente" class="wiki-table-cell" />
+                                        <ui:Label text="Mult. dano a você (rodada perdida)" class="wiki-table-cell" />
+                                        <ui:Label text="Moedas ao vencer" class="wiki-table-cell wiki-table-cell--last" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="wiki-table-row wiki-table-row--data wiki-table-row--striped">
+                                        <ui:Label text="Fácil" class="wiki-table-cell wiki-table-cell--dificuldade" />
+                                        <ui:Label text="80" class="wiki-table-cell" />
+                                        <ui:Label text="1,0" class="wiki-table-cell" />
+                                        <ui:Label text="100" class="wiki-table-cell wiki-table-cell--last" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="wiki-table-row wiki-table-row--data">
+                                        <ui:Label text="Médio" class="wiki-table-cell wiki-table-cell--dificuldade" />
+                                        <ui:Label text="150" class="wiki-table-cell" />
+                                        <ui:Label text="1,5" class="wiki-table-cell" />
+                                        <ui:Label text="250" class="wiki-table-cell wiki-table-cell--last" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="wiki-table-row wiki-table-row--data wiki-table-row--striped">
+                                        <ui:Label text="Difícil" class="wiki-table-cell wiki-table-cell--dificuldade" />
+                                        <ui:Label text="300" class="wiki-table-cell" />
+                                        <ui:Label text="1,75" class="wiki-table-cell" />
+                                        <ui:Label text="500" class="wiki-table-cell wiki-table-cell--last" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="wiki-table-row wiki-table-row--data wiki-table-row--last">
+                                        <ui:Label text="Boss (Fractar)" class="wiki-table-cell wiki-table-cell--dificuldade" />
+                                        <ui:Label text="500" class="wiki-table-cell" />
+                                        <ui:Label text="2,0" class="wiki-table-cell" />
+                                        <ui:Label text="500" class="wiki-table-cell wiki-table-cell--last" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                                <ui:Label class="wiki-page-body" text="O multiplicador da terceira coluna aplica-se ao dano base da rodada quando você perde (distância à mão vencedora em relação a 21, mínimo 1, × 10 — RoundDamageResolver)." />
+                                <ui:Label class="wiki-page-body" text="Fonte: EnemyCombatBalance (HP e mult. de dano ao jogador), BattleRewardResolver (moedas), BossFightBalance (Fractar). Vitória no boss chama ApplyVictoryRewards(save, Hard), daí 500 moedas." />
+                                <ui:Label class="wiki-section-title" text="Loja" />
+                                <ui:Label class="wiki-page-body" text="No mapa, use o botão roxo da loja (atalho de desenvolvimento até existir hub definitivo). Na loja você gasta moedas em itens do catálogo e volta ao mapa pelo botão Voltar." />
+                                <ui:Label class="wiki-section-title" text="Equipamento de ataque" />
+                                <ui:Label class="wiki-page-body" text="Cada item ofensivo comprado soma um bónus ao multiplicador de dano que você aplica ao oponente quando ele perde uma rodada: o total é 1 mais a soma de (multiplicador do item − 1) para todas as cópias na sua posse. Você pode comprar o mesmo item várias vezes; nomes, efeitos e preços vêm do catálogo do jogo." />
+                                <ui:Label class="wiki-section-title" text="Equipamento de defesa" />
+                                <ui:Label class="wiki-page-body" text="Cada peça defensiva comprada aumenta sua vida máxima pelo valor indicado e cura na hora o mesmo montante na vida atual. Várias compras do mesmo item acumulam." />
                                 <ui:Label class="wiki-section-title" text="Consumíveis" />
-                                <ui:Label class="wiki-page-body" text="Podem ser comprados na loja quando você tiver espaço. O inventário reserva três espaços numerados mentalmente como 1, 2 e 3 (atalhos 1, 2 e 3 no teclado). Cada espaço guarda um item; o mesmo tipo pode aparecer em mais de um espaço." />
-                                <ui:Label class="wiki-page-body" text="No seu turno no duelo, as teclas 1, 2 e 3 usam o item do espaço correspondente. Consumíveis podem recuperar vida até o seu máximo atual. Depois de usar, o espaço fica vazio e o item some do inventário." />
-                                <ui:Label class="wiki-section-title" text="Regras na loja" />
-                                <ui:Label class="wiki-page-body" text="Com os três espaços cheios, não dá para comprar outro consumível até você usar um no duelo. Equipamento de ataque ou defesa que você já comprou aparece como indisponível para recompra." />
+                                <ui:Label class="wiki-page-body" text="Você tem até três espaços de inventário (pense neles como 1, 2 e 3). Com espaço livre, uma compra na loja coloca o item num slot. No seu turno no duelo, as teclas 1, 2 e 3 usam o consumível daquele slot; a cura respeita a vida máxima atual. Depois de usar, o slot fica vazio." />
+                                <ui:Label class="wiki-page-body" text="Com os três espaços cheios, não dá para comprar outro consumível até você usar um na batalha." />
                             </ui:VisualElement>
 
                             <ui:VisualElement name="WikiPage_controls" class="wiki-page" style="display: none;">

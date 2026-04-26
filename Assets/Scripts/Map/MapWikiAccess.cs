@@ -62,7 +62,7 @@ namespace Map.Wiki
             "combat",
             "difficulty",
             "enemies",
-            "shop_inventory",
+            "economy",
             "controls",
         };
 
@@ -141,6 +141,25 @@ namespace Map.Wiki
 
         // ---------- Bind / Unbind ----------
 
+        /// <summary>
+        /// Abas antigas no Inspector (ex.: <c>shop_inventory</c> renomeada para <c>economy</c>) —
+        /// evita warning e abas sem par UXML em cenas gravadas antes da migração.
+        /// </summary>
+        private void SanitizeLegacyTabIds()
+        {
+            if (tabIds == null) return;
+            for (int i = 0; i < tabIds.Count; i++)
+            {
+                if (string.Equals(tabIds[i], "shop_inventory", StringComparison.Ordinal))
+                    tabIds[i] = "economy";
+            }
+        }
+
+        private void OnValidate()
+        {
+            SanitizeLegacyTabIds();
+        }
+
         private void TryBindUi()
         {
             if (_doc == null) _doc = GetComponent<UIDocument>();
@@ -149,6 +168,8 @@ namespace Map.Wiki
 
             if (_uiBound)
                 return;
+
+            SanitizeLegacyTabIds();
 
             VisualElement root = _doc.rootVisualElement;
 

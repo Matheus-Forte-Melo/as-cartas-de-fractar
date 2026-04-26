@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: a13a4c1c9ae467f4bbd44a83425e011e
+guid: 0575d45bccd2d764fb794b16a0a1cc5c
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2745828390607466614
-    second: Escudo de Prata_0
+      213: 7578755795485287413
+    second: tunica_fractal_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -97,7 +97,7 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
-    buildTarget: WebGL
+    buildTarget: Android
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Escudo de Prata_0
+      name: tunica_fractal_0
       rect:
         serializedVersion: 2
-        x: 49
-        y: 24
-        width: 305
-        height: 443
+        x: 158
+        y: 11
+        width: 362
+        height: 345
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a8fc8a370abd4e9d0800000000000000
-      internalID: -2745828390607466614
+      spriteID: 5f36555fd362d2960800000000000000
+      internalID: 7578755795485287413
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Escudo de Prata_0: -2745828390607466614
+      tunica_fractal_0: 7578755795485287413
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

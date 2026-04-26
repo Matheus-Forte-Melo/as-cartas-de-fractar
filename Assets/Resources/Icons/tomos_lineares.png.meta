@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 184ab884958c38fc487d601b0e8bcd7c
+guid: f6fe2130a9f7f3800ac5b0d7e9da0b12
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 637149415771533701
-    second: sword_icon_0
+      213: -1246355047367603851
+    second: tomos_lineares_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: sword_icon_0
+      name: tomos_lineares_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 128
-        height: 128
+        x: 52
+        y: 16
+        width: 570
+        height: 321
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 581f8e3940c97d800800000000000000
-      internalID: 637149415771533701
+      spriteID: 57983a910be04bee0800000000000000
+      internalID: -1246355047367603851
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      sword_icon_0: 637149415771533701
+      tomos_lineares_0: -1246355047367603851
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

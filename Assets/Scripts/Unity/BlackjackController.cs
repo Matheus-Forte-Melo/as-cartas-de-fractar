@@ -75,10 +75,19 @@ public class BlackjackController : MonoBehaviour
         _game.Player.DamageMultiplier = PlayerItemStats.CalculateDamageMultiplier(_save);
 
         CombatEquationDifficulty combatDifficulty = RunState.CurrentCombatDifficulty;
-        int enemyHp = EnemyCombatBalance.GetEnemyMaxHealth(combatDifficulty);
-        _game.Enemy.MaxHealth = enemyHp;
-        _game.Enemy.Health = enemyHp;
-        _game.Enemy.DamageMultiplier = EnemyCombatBalance.GetEnemyDamageMultiplier(combatDifficulty);
+        if (RunState.CurrentNodeType == MapNodeType.Bossfight)
+        {
+            _game.Enemy.MaxHealth = BossFightBalance.MaxHealth;
+            _game.Enemy.Health = BossFightBalance.MaxHealth;
+            _game.Enemy.DamageMultiplier = BossFightBalance.DamageMultiplier;
+        }
+        else
+        {
+            int enemyHp = EnemyCombatBalance.GetEnemyMaxHealth(combatDifficulty);
+            _game.Enemy.MaxHealth = enemyHp;
+            _game.Enemy.Health = enemyHp;
+            _game.Enemy.DamageMultiplier = EnemyCombatBalance.GetEnemyDamageMultiplier(combatDifficulty);
+        }
 
         btnHit.onClick.AddListener(OnHit);
         btnStand.onClick.AddListener(OnStand);
@@ -286,6 +295,10 @@ public class BlackjackController : MonoBehaviour
         // 2) Aguarda dois frames para o layout (uGUI + UI Toolkit) ficar estável antes de abrir.
         yield return null;
         yield return null;
+
+        // Boss final: sem revisão de teoria automática.
+        if (RunState.CurrentNodeType == MapNodeType.Bossfight)
+            yield break;
 
         // 3) Revisão automática: se o jogador já marcou "não mostrar novamente" para este tipo, sai.
         TheoryWikiPage theoryPage = TheoryWikiPageMapping.FromMapNodeType(RunState.CurrentNodeType);
@@ -656,6 +669,39 @@ public class BlackjackController : MonoBehaviour
 
     private IEnumerator EndBattleRoutine(bool playerWon)
     {
+        if (playerWon && RunState.CurrentNodeType == MapNodeType.Bossfight)
+        {
+            ClearHandValueLabels();
+            RunState.LastBattleResult = BattleResult.Won;
+
+            SaveData save = SaveManager.Load();
+            save.playerHealth = _game.Player.Health;
+            int coinsEarned = BattleRewardResolver.ApplyVictoryRewards(save, CombatEquationDifficulty.Hard);
+            save.currentRun++;
+            save.currentSeed = Random.Range(int.MinValue, int.MaxValue);
+            save.seedHistory.Add(new SeedHistoryEntry
+            {
+                run = save.currentRun,
+                seed = save.currentSeed
+            });
+            save.playerRow = -1;
+            save.playerCol = -1;
+            save.playerHealth = PlayerItemStats.CalculateMaxHealth(save);
+            SaveManager.Save(save);
+
+            if (txtBattleCenter != null)
+            {
+                txtBattleCenter.text =
+                    $"<b>Vitória final</b>\n\nFractar foi derrotado.\n+{coinsEarned} moedas\n\n<i>Run concluída — a seguir: menu principal</i>";
+            }
+
+            PostVictoryReturnFlow.RunAfterVictoriousBattle();
+
+            yield return new WaitForSeconds(2f);
+            SceneManager.LoadScene(GameFlowScenes.Menu);
+            yield break;
+        }
+
         if (playerWon)
         {
             ClearHandValueLabels();
