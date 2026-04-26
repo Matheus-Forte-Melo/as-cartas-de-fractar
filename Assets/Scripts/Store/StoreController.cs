@@ -65,6 +65,21 @@ namespace Store
 
         private int ConsumableSlotCount => _save.consumableSlots?.Count ?? 0;
 
+        /// <summary>
+        /// Consumível: já está num slot. Ataque/defesa: id já em <c>ownedItemIds</c>.
+        /// </summary>
+        private bool IsItemAlreadyOwned(ItemDefinition item)
+        {
+            if (item.ItemType == ItemType.Consumable)
+            {
+                EnsureConsumableList();
+                return _save.consumableSlots.Contains(item.id);
+            }
+
+            _save.ownedItemIds ??= new List<string>();
+            return _save.ownedItemIds.Contains(item.id);
+        }
+
         private void InitializeUI()
         {
             root = uiDocument.rootVisualElement;
@@ -193,14 +208,15 @@ namespace Store
                 {
                     if (ConsumableSlotCount >= MaxConsumableSlots)
                         SetButtonPurchased(buyButton, "Inventário cheio (3/3)");
+                    else if (IsItemAlreadyOwned(itemData))
+                        SetButtonPurchased(buyButton, "Já no inventário");
                     else
                         buyButton.clicked += () => OnBuyItemClicked(itemData, buyButton);
                 }
+                else if (IsItemAlreadyOwned(itemData))
+                    SetButtonPurchased(buyButton, "Já adquirido");
                 else
-                {
-                    // Ataque/defesa: entradas repetidas em ownedItemIds acumulam bónus (ver PlayerItemStats).
                     buyButton.clicked += () => OnBuyItemClicked(itemData, buyButton);
-                }
             }
 
             if (infoButton != null && cardRoot != null)
@@ -249,6 +265,19 @@ namespace Store
                 return;
             }
 
+            if (IsItemAlreadyOwned(itemData))
+            {
+                modalTitle.text = isConsumable ? "Já no inventário" : "Já adquirido";
+                modalMessage.text = isConsumable
+                    ? "Você já possui este consumível. Use-o numa batalha antes de comprar outro."
+                    : "Este item já foi adquirido na loja.";
+                modalMessage.AddToClassList("error");
+                modalCancelBtn.style.display = DisplayStyle.Flex;
+                modalConfirmBtn.style.display = DisplayStyle.None;
+                modalCancelBtn.text = "Fechar";
+                return;
+            }
+
             if (_save.coins >= itemData.price)
             {
                 modalTitle.text = "Confirmar Compra";
@@ -285,9 +314,9 @@ namespace Store
             if (_pendingItem.ItemType == ItemType.Consumable)
             {
                 EnsureConsumableList();
-                if (ConsumableSlotCount >= MaxConsumableSlots)
+                if (ConsumableSlotCount >= MaxConsumableSlots || IsItemAlreadyOwned(_pendingItem))
                 {
-                    Debug.LogWarning("[Store] Tentativa de compra de consumível com inventário cheio.");
+                    Debug.LogWarning("[Store] Compra de consumível rejeitada (inventário cheio ou item já possuído).");
                     CloseModal();
                     return;
                 }
@@ -301,6 +330,13 @@ namespace Store
 
                 CloseModal();
                 LoadStoreData();
+                return;
+            }
+
+            if (IsItemAlreadyOwned(_pendingItem))
+            {
+                Debug.LogWarning("[Store] Compra rejeitada — item permanente já adquirido.");
+                CloseModal();
                 return;
             }
 
