@@ -2379,6 +2379,8 @@ MonoBehaviour:
   painelMenuInicial: {fileID: 1314851331}
   painelOpcoes: {fileID: 1608042631}
   painelPerguntaTutorial: {fileID: 0}
+  introVideoStreamingPath: Cutscenes/inicio.mp4
+  introVideoClip: {fileID: 0}
 --- !u!4 &1445906028
 Transform:
   m_ObjectHideFlags: 0

@@ -1,6 +1,8 @@
+using Menus;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.Video;
 
 public class MenuPrincipalManager : MonoBehaviour
 {
@@ -13,6 +15,13 @@ public class MenuPrincipalManager : MonoBehaviour
     [SerializeField] private GameObject painelOpcoes;
     [Tooltip("Opcional. Se vazio, o painel é criado em runtime no primeiro Canvas.")]
     [SerializeField] private GameObject painelPerguntaTutorial;
+
+    [Header("Cutscene de intro")]
+    [Tooltip("Path relativo a Assets/StreamingAssets/ do vídeo de intro reproduzido uma única vez ao clicar em Jogar.")]
+    [SerializeField] private string introVideoStreamingPath = "Cutscenes/inicio.mp4";
+
+    [Tooltip("Opcional. Se preenchido, prevalece sobre o path da StreamingAssets. Útil quando o ficheiro pode ser importado como VideoClip (alguns codecs falham no Editor do Linux).")]
+    [SerializeField] private VideoClip introVideoClip;
 
     private void Start()
     {
@@ -32,7 +41,7 @@ public class MenuPrincipalManager : MonoBehaviour
         if (p.main_tutorial_completed)
         {
             SaveManager.ActiveContext = SaveContext.Campaign;
-            SceneManager.LoadScene(nomeDoLevelDeJogo);
+            LoadGameplaySceneWithIntro(nomeDoLevelDeJogo);
             return;
         }
 
@@ -41,20 +50,20 @@ public class MenuPrincipalManager : MonoBehaviour
             SaveManager.ActiveContext = SaveContext.Tutorial;
             if (!p.guided_blackjack_completed)
             {
-                SceneManager.LoadScene(cenaTutorialInicial);
+                LoadGameplaySceneWithIntro(cenaTutorialInicial);
                 return;
             }
 
             // Map e Core ainda na cadeia tutorial → volta ao MapTutorial; o nó (0,0) leva ao CoreTutorial.
             if (!p.map_onboarding_completed || !p.core_onboarding_completed)
             {
-                SceneManager.LoadScene(GameFlowScenes.MapTutorial);
+                LoadGameplaySceneWithIntro(GameFlowScenes.MapTutorial);
                 return;
             }
 
             SaveManager.SetMainTutorialCompleted(true);
             SaveManager.ActiveContext = SaveContext.Campaign;
-            SceneManager.LoadScene(nomeDoLevelDeJogo);
+            LoadGameplaySceneWithIntro(nomeDoLevelDeJogo);
             return;
         }
 
@@ -73,7 +82,7 @@ public class MenuPrincipalManager : MonoBehaviour
         p.tutorial_chain_started = true;
         SaveManager.SaveProfile(p);
         SaveManager.ActiveContext = SaveContext.Tutorial;
-        SceneManager.LoadScene(cenaTutorialInicial);
+        LoadGameplaySceneWithIntro(cenaTutorialInicial);
     }
 
     public void TutorialPromptRecusar()
@@ -82,7 +91,33 @@ public class MenuPrincipalManager : MonoBehaviour
             painelPerguntaTutorial.SetActive(false);
         SaveManager.SetMainTutorialCompleted(true);
         SaveManager.ActiveContext = SaveContext.Campaign;
-        SceneManager.LoadScene(nomeDoLevelDeJogo);
+        LoadGameplaySceneWithIntro(nomeDoLevelDeJogo);
+    }
+
+    /// <summary>
+    /// Carrega cena de jogo. Na primeira vez do perfil (<c>intro_video_seen=false</c>) intercala
+    /// <see cref="introVideoClip"/> (ou <c>StreamingAssets/intro.mp4</c> se não houver clip ligado);
+    /// o <see cref="IntroVideoPlayer"/> faz o <see cref="SceneManager.LoadScene"/> final.
+    /// A flag é gravada antes da reprodução para não repetir mesmo se o jogo for fechado a meio.
+    /// </summary>
+    private void LoadGameplaySceneWithIntro(string destinationScene)
+    {
+        MainProfileData p = SaveManager.LoadProfile();
+        if (!p.intro_video_seen)
+        {
+            p.intro_video_seen = true;
+            SaveManager.SaveProfile(p);
+
+            if (introVideoClip != null)
+                IntroVideoPlayer.Spawn(destinationScene, introVideoClip);
+            else if (!string.IsNullOrWhiteSpace(introVideoStreamingPath))
+                IntroVideoPlayer.Spawn(destinationScene, introVideoStreamingPath);
+            else
+                IntroVideoPlayer.Spawn(destinationScene);
+            return;
+        }
+
+        SceneManager.LoadScene(destinationScene);
     }
 
     private void TryBuildTutorialPrompt()

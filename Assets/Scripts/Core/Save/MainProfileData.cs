@@ -15,4 +15,7 @@ public class MainProfileData
 
     /// <summary>True depois de clicar em Sim no modal (entra na cadeia tutorial). Usado para não repetir o modal ao voltar ao menu.</summary>
     public bool tutorial_chain_started;
+
+    /// <summary>Vídeo de intro (StreamingAssets/intro.mp4) já reproduzido — não toca de novo nos próximos cliques em Jogar.</summary>
+    public bool intro_video_seen;
 }

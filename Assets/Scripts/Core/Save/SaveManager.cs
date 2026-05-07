@@ -181,6 +181,13 @@ public static class SaveManager
         SaveProfile(p);
     }
 
+    public static void SetIntroVideoSeen(bool seen)
+    {
+        var p = LoadProfile();
+        p.intro_video_seen = seen;
+        SaveProfile(p);
+    }
+
     /// <summary>Zera o passo no save tutorial após concluir o onboarding.</summary>
     public static void ClearTutorialStepIndexAfterCompletion()
     {
