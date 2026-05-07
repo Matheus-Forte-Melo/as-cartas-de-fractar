@@ -7,6 +7,7 @@ using UnityEngine.Video;
 public class MenuPrincipalManager : MonoBehaviour
 {
     private const string RuntimeTutorialPromptName = "MenuTutorialPromptRoot";
+    private const string RunCompleteThanksRootName = "MenuRunCompleteThanksRoot";
 
     [SerializeField] private string nomeDoLevelDeJogo = "Map";
     [SerializeField] private string cenaTutorialInicial = GameFlowScenes.TutorialDefaultBlackjack;
@@ -27,6 +28,9 @@ public class MenuPrincipalManager : MonoBehaviour
     {
         SaveManager.ApplySceneNameContextHint();
         SaveManager.EnsureMainTutorialCompletedKeyInSaveFile();
+
+        if (MainMenuTransitionState.ConsumeRunCompleteThanks())
+            ShowRunCompleteThanksOverlay();
 
         if (painelPerguntaTutorial == null)
             TryBuildTutorialPrompt();
@@ -170,6 +174,58 @@ public class MenuPrincipalManager : MonoBehaviour
 
         painelPerguntaTutorial = root;
         painelPerguntaTutorial.SetActive(false);
+    }
+
+    private void ShowRunCompleteThanksOverlay()
+    {
+        Canvas canvas = FindFirstObjectByType<Canvas>();
+        if (canvas == null)
+        {
+            Debug.LogWarning("[MenuPrincipalManager] Canvas ausente — agradecimento pós-run omitido.");
+            return;
+        }
+
+        if (canvas.transform.Find(RunCompleteThanksRootName) != null)
+        {
+            Destroy(canvas.transform.Find(RunCompleteThanksRootName).gameObject);
+        }
+
+        var root = new GameObject(RunCompleteThanksRootName, typeof(RectTransform));
+        root.transform.SetParent(canvas.transform, false);
+        var rootRt = root.GetComponent<RectTransform>();
+        rootRt.anchorMin = Vector2.zero;
+        rootRt.anchorMax = Vector2.one;
+        rootRt.offsetMin = Vector2.zero;
+        rootRt.offsetMax = Vector2.zero;
+
+        var dim = root.AddComponent<Image>();
+        dim.color = new Color(0f, 0f, 0f, 0.6f);
+        dim.raycastTarget = true;
+
+        var panel = new GameObject("Panel", typeof(RectTransform), typeof(Image));
+        panel.transform.SetParent(root.transform, false);
+        var panelRt = panel.GetComponent<RectTransform>();
+        panelRt.anchorMin = panelRt.anchorMax = new Vector2(0.5f, 0.5f);
+        panelRt.sizeDelta = new Vector2(560f, 360f);
+        panel.GetComponent<Image>().color = new Color(0.1f, 0.12f, 0.18f, 0.98f);
+
+        CreateText(panel.transform, "Title", "Obrigado por jogar!", 26, TextAnchor.UpperCenter,
+            new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -20f), new Vector2(500f, 48f));
+
+        GameObject bodyGo = CreateText(panel.transform, "Body",
+            "Você concluiu a prova de fractar e ascendeu como um lacaio um tanto especial...\n\n" +
+            "Esperamos que tenha gostado desta pequena jornada. Fizemos o jogo com muita dedicação e, apesar de não termos " +
+            "domínio total das ferramentas usadas, conseguimos entregar o núcleo do que envisionamos desde o início.\n\n" +
+            "Seu progresso nesta sessão foi encerrado; na próxima vez que adentrar a torre, começa uma nova jornada!",
+            17, TextAnchor.MiddleCenter,
+            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 14f), new Vector2(500f, 248f));
+        var bodyTx = bodyGo.GetComponent<Text>();
+        bodyTx.horizontalOverflow = HorizontalWrapMode.Wrap;
+        bodyTx.verticalOverflow = VerticalWrapMode.Overflow;
+
+        void Dismiss() => Destroy(root);
+
+        CreateButton(panel.transform, "BtnContinuar", "Continuar", new Vector2(0f, -152f), Dismiss);
     }
 
     private static GameObject CreateText(Transform parent, string name, string msg, int fontSize, TextAnchor align,

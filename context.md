@@ -573,3 +573,9 @@ Revisão do fluxo Default → Map → Core após feedback. O tutorial do combate
 ### 2026-05-07 — Boss Fractar: 600 HP
 
 - **`BossFightBalance.MaxHealth`:** 500 → **600**; tabelas/copy na wiki (`WikiView.uxml`, linhas Boss) alinhadas.
+
+### 2026-05-07 — Vitória no boss: wipe de save + agradecimento no menu
+
+- Após o vídeo final (ou a espera se não houver vídeo), **antes** de `LoadScene(Menu)`: `MainMenuTransitionState.RequestRunCompleteThanks()`, `RunState.ClearVolatileBattleContext()`, `SaveManager.Delete()` (apaga perfiles + campanha + tutorial + legado + `.migrated.bak`, repõe `_migrationChecked`).
+- **`MenuPrincipalManager.Start`:** se `ConsumeRunCompleteThanks()`, mostra overlay uGUI com mensagem de agradecimento e **Continuar** (`Destroy` do painel).
+- Ficheiros: `MainMenuTransitionState.cs`, `BlackjackController.BossOutroCompleteAndGoToMenu`, `SaveManager.Delete` alargado, `RunState.ClearVolatileBattleContext`.

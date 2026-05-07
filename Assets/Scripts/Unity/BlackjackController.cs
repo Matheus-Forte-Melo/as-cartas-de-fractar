@@ -13,7 +13,6 @@ using Map.Wiki;
 using Blackjack.Decks;
 using Items;
 using Tutorial.Onboarding;
-using Video;
 
 // Serve como intermediário entre UI Unity (do jogador) e Código (da lógica do 21 e do inimigo).
 // Define ações para os botões e exibe feedback na tela conforme estado
@@ -705,19 +704,14 @@ public class BlackjackController : MonoBehaviour
 
             if (!string.IsNullOrWhiteSpace(bossVictoryVideoStreamingPath))
             {
-                string path = bossVictoryVideoStreamingPath.Trim();
-                FullscreenVideoOverlay.Play(new FullscreenVideoOverlay.PlayRequest(
-                    clip: null,
-                    streamingRelativePath: path,
-                    canvasSortingOrder: 32700,
-                    holdToSkipSeconds: bossVictoryVideoHoldSkipSeconds,
-                    skipHintText: null,
-                    onCompleted: () => SceneManager.LoadScene(GameFlowScenes.Menu)));
+                BossOutroFlow.BeginReturnToMenuWithOutroVideo(
+                    bossVictoryVideoStreamingPath.Trim(),
+                    bossVictoryVideoHoldSkipSeconds);
             }
             else
             {
                 yield return new WaitForSeconds(2f);
-                SceneManager.LoadScene(GameFlowScenes.Menu);
+                BossOutroFlow.ExecutePostOutroTransition();
             }
 
             yield break;

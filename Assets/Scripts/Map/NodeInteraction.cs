@@ -82,6 +82,8 @@ public class NodeInteraction : MonoBehaviour
     {
         if (!Application.isPlaying) return;
 
+        TryDevTriggerBossOutroFlowFromMap();
+
         var mouse = Mouse.current;
         if (mouse == null) return;
 
@@ -203,6 +205,22 @@ public class NodeInteraction : MonoBehaviour
         if (txtTransitionMessage != null)
             txtTransitionMessage.gameObject.SetActive(false);
         RunState.LastBattleResult = BattleResult.None;
+    }
+
+    /// <summary>
+    /// TODO(remover após testes): <b>Shift+F12</b> na cena Map — mesmo fluxo que vitória no
+    /// boss (vídeo <c>Cutscenes/fim.mp4</c> + wipe + menu com agradecimento).
+    /// </summary>
+    private void TryDevTriggerBossOutroFlowFromMap()
+    {
+        if (SceneManager.GetActiveScene().name != GameFlowScenes.Map)
+            return;
+        var kb = Keyboard.current;
+        if (kb == null) return;
+        if (!kb.leftShiftKey.isPressed && !kb.rightShiftKey.isPressed) return;
+        if (!kb.f12Key.wasPressedThisFrame) return;
+
+        BossOutroFlow.BeginReturnToMenuWithOutroVideo("Cutscenes/fim.mp4", 1f);
     }
 
 }

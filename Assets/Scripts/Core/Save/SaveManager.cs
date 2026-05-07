@@ -125,9 +125,11 @@ public static class SaveManager
     public static void Delete()
     {
         TryDelete(LegacySavePath);
+        TryDelete(LegacyBackupPath);
         TryDelete(ProfilePath);
         TryDelete(CampaignPath);
         TryDelete(TutorialPath);
+        _migrationChecked = false;
         Debug.Log("[SaveManager] Saves deletados.");
     }
 
