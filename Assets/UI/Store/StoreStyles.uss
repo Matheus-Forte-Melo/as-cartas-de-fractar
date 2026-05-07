@@ -9,6 +9,7 @@ Label, Button {
 
 .store-container {
     flex-grow: 1;
+    position: relative;
     background-color: rgb(10, 10, 15); /* Very dark fallback */
     background-image: url('/Assets/Art/Store/MagicDungeonBackground.png');
     -unity-background-image-tint-color: rgb(100, 100, 120); /* Dark, bluish tint to reduce contrast and make items pop */
@@ -17,11 +18,28 @@ Label, Button {
     align-items: center;
 }
 
+/* Cabeçalho fixo (saldo + consumíveis + Voltar) sempre acima do ScrollView.
+   Posição absoluta para sair do flex (caso contrário, BringToFront empurraria
+   o cabeçalho para o fundo da coluna). Ordem de pintura é forçada via
+   StoreController.ApplyStoreLayerOrder (BringToFront). */
 .store-header {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
     flex-direction: row;
     justify-content: space-between;
+    background-color: rgba(10, 10, 15, 0.96);
+    padding-top: 4px;
+    padding-bottom: 8px;
+}
+
+.store-items-scroll {
+    flex-grow: 1;
+    flex-shrink: 1;
     width: 100%;
-    margin-bottom: 30px;
+    min-height: 0;
+    /* padding-top dinâmico = altura do header (definido em StoreController). */
 }
 
 .store-title-container {
@@ -238,7 +256,6 @@ Label, Button {
 }
 .buy-btn-container.purchased .buy-btn-label {
     color: rgb(150, 150, 150);
-    text-shadow: none;
 }
 .buy-btn-container.purchased .buy-btn-glow {
     background-color: transparent;

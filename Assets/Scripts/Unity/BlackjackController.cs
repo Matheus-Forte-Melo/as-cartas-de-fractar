@@ -13,6 +13,7 @@ using Map.Wiki;
 using Blackjack.Decks;
 using Items;
 using Tutorial.Onboarding;
+using Video;
 
 // Serve como intermediário entre UI Unity (do jogador) e Código (da lógica do 21 e do inimigo).
 // Define ações para os botões e exibe feedback na tela conforme estado
@@ -40,6 +41,11 @@ public class BlackjackController : MonoBehaviour
     [Header("UI - Botões")]
     public Button btnHit;
     public Button btnStand;
+
+    [Header("Vitória boss final (Fractar)")]
+    [Tooltip("Relativo à pasta StreamingAssets. Se vazio, após vitória não há vídeo — apenas breve espera e menu.")]
+    [SerializeField] private string bossVictoryVideoStreamingPath = "Cutscenes/fim.mp4";
+    [SerializeField] private float bossVictoryVideoHoldSkipSeconds = 1f;
 
     private BlackjackGame _game;
     private SaveData _save;
@@ -692,13 +698,28 @@ public class BlackjackController : MonoBehaviour
             if (txtBattleCenter != null)
             {
                 txtBattleCenter.text =
-                    $"<b>Vitória final</b>\n\nFractar foi derrotado.\n+{coinsEarned} moedas\n\n<i>Run concluída — a seguir: menu principal</i>";
+                    $"<b>Vitória final</b>\n\nFractar foi derrotado.\n+{coinsEarned} moedas\n\n<i>Run concluída — vídeo final ou menu principal</i>";
             }
 
             PostVictoryReturnFlow.RunAfterVictoriousBattle();
 
-            yield return new WaitForSeconds(2f);
-            SceneManager.LoadScene(GameFlowScenes.Menu);
+            if (!string.IsNullOrWhiteSpace(bossVictoryVideoStreamingPath))
+            {
+                string path = bossVictoryVideoStreamingPath.Trim();
+                FullscreenVideoOverlay.Play(new FullscreenVideoOverlay.PlayRequest(
+                    clip: null,
+                    streamingRelativePath: path,
+                    canvasSortingOrder: 32700,
+                    holdToSkipSeconds: bossVictoryVideoHoldSkipSeconds,
+                    skipHintText: null,
+                    onCompleted: () => SceneManager.LoadScene(GameFlowScenes.Menu)));
+            }
+            else
+            {
+                yield return new WaitForSeconds(2f);
+                SceneManager.LoadScene(GameFlowScenes.Menu);
+            }
+
             yield break;
         }
 

@@ -7,7 +7,7 @@
     <ui:Style src="StoreStyles.uss" />
 
     <ui:VisualElement class="store-container">
-        <ui:VisualElement class="store-header">
+        <ui:VisualElement name="StoreHeader" class="store-header">
             <ui:VisualElement name="StoreTitleContainer" class="store-title-container" />
             <ui:VisualElement class="header-right">
                 <ui:VisualElement style="flex-direction: column; align-items: flex-end;">
@@ -21,7 +21,7 @@
             </ui:VisualElement>
         </ui:VisualElement>
         
-        <ui:ScrollView style="width: 100%; flex-grow: 1;">
+        <ui:ScrollView name="StoreItemsScroll" class="store-items-scroll" style="width: 100%; flex-grow: 1; flex-shrink: 1; min-height: 0;">
             <ui:VisualElement name="ItemsGrid" class="items-grid">
                 <!-- Items will be instantiated here dynamically -->
             </ui:VisualElement>

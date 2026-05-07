@@ -106,7 +106,7 @@
                                     </ui:VisualElement>
                                     <ui:VisualElement class="wiki-table-row wiki-table-row--data wiki-table-row--last">
                                         <ui:Label text="Boss (Fractar)" class="wiki-table-cell wiki-table-cell--dificuldade" />
-                                        <ui:Label text="500" class="wiki-table-cell" />
+                                        <ui:Label text="600" class="wiki-table-cell" />
                                         <ui:Label text="2,0" class="wiki-table-cell" />
                                         <ui:Label text="500" class="wiki-table-cell wiki-table-cell--last" />
                                     </ui:VisualElement>
@@ -131,7 +131,7 @@
                                 <ui:Label class="wiki-section-title wiki-section-title--first" text="Faixas da torre" />
                                 <ui:Label class="wiki-page-body" text="O jogo divide a altura do mapa em faixas. Quanto mais alto você sobe, mais comuns ficam duelos médios e difíceis; em baixo predominam combates mais leves nas equações e nos atributos do oponente." />
                                 <ui:Label class="wiki-section-title" text="Confronto final — Fractar" />
-                                <ui:Label class="wiki-page-body" text="No topo há um único nó de boss. Fractar: 500 de vida, multiplicador 2,0 sobre o dano que você recebe ao perder uma rodada, 500 moedas na vitória (linha do boss na aba Combate ou Economia). Vencer conclui a run e regressa ao menu principal." />
+                                <ui:Label class="wiki-page-body" text="No topo há um único nó de boss. Fractar: 600 de vida, multiplicador 2,0 sobre o dano que você recebe ao perder uma rodada, 500 moedas na vitória (linha do boss na aba Combate ou Economia). Vencer conclui a run e regressa ao menu principal." />
                                 <ui:Label class="wiki-section-title" text="Moedas e loja" />
                                 <ui:Label class="wiki-page-body" text="Como gastar moedas, equipar itens e gerir consumíveis está na aba Economia." />
                             </ui:VisualElement>
@@ -312,7 +312,7 @@
                                     </ui:VisualElement>
                                     <ui:VisualElement class="wiki-table-row wiki-table-row--data wiki-table-row--last">
                                         <ui:Label text="Boss (Fractar)" class="wiki-table-cell wiki-table-cell--dificuldade" />
-                                        <ui:Label text="500" class="wiki-table-cell" />
+                                        <ui:Label text="600" class="wiki-table-cell" />
                                         <ui:Label text="2,0" class="wiki-table-cell" />
                                         <ui:Label text="500" class="wiki-table-cell wiki-table-cell--last" />
                                     </ui:VisualElement>

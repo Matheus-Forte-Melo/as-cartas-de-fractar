@@ -550,7 +550,7 @@ Revisão do fluxo Default → Map → Core após feedback. O tutorial do combate
 
 - **Mapa:** `MapNodeType.Bossfight` em `MapNode.cs`; `MapGenerator` após `AssignNodeTypesAndDifficulty` chama `InsertBossFightNode()` (omitido em `MapTutorial`): linha extra `row == rows`, coluna `bossFightColumn` (-1 = centro); todos os nós `(rows-1, *)` ligam ao boss. `Bossfight` com peso **0** no sorteio (`SyncTypeWeights` força peso 0; `PickRandomType` / `CalculateTotalWeight` ignoram o tipo).
 - **Visual:** `BossFightNodeVisual` + campo em `MapVisualizer` (cor, `Sprite` ícone, `nodeScale`); label **Fractar (Boss final)**.
-- **Combate:** `BossFightBalance` (500 HP, dano ×2); `BlackjackController.Awake` aplica para `RunState.CurrentNodeType == Bossfight`; revisão automática da wiki **não** abre no boss. `StreamingAssetsDeckPaths` devolve `Easy/config_cards_easy_multiplication.json` para o boss.
+- **Combate:** `BossFightBalance` (600 HP, dano ×2); `BlackjackController.Awake` aplica para `RunState.CurrentNodeType == Bossfight`; revisão automática da wiki **não** abre no boss. `StreamingAssetsDeckPaths` devolve `Boss/config_cards_boss.json` para o boss.
 - **Dificuldade global:** `EnemyCombatBalance.GetEnemyDamageMultiplier(Hard)` = **1,75** (antes 2).
 - **Vitória no boss:** `BattleRewardResolver` com `Hard` (+500 moedas); reset de posição/seed/`currentRun` como na derrota; `SceneManager.LoadScene(GameFlowScenes.Menu)`. Constante `GameFlowScenes.Menu`.
 - **Wiki:** `WikiPage_difficulty` — linha Difícil ×1,75; nova linha Boss + secção Fractar; texto do multiplicador ajustado. (Em 2026-04-23 a tabela numérica passou para a aba Combate; ver entrada «Catálogo da loja» no mesmo dia para Economia.)
@@ -565,3 +565,11 @@ Revisão do fluxo Default → Map → Core após feedback. O tutorial do combate
 - **`SaveData.ownedItemIds`:** comentário de documentação sobre repetição de `id`.
 - **Arte:** removidos placeholders antigos `potion_icon.png`, `shield_icon.png`, `sword_icon.png`, `amulet_icon.png`; ícones actuais com nomes em ficheiro sem espaços sob `Resources/Icons/`.
 - **Wiki (`WikiView.uxml` + `MapWikiAccess` + cenas Map/Core):** nova aba **Economia** (`WikiTab_economy` / `WikiPage_economy`) concentra moedas, loja, equipamento e consumíveis; removida a aba **Loja e inventário**. A aba **Combate** passa a ter a **tabela** de dificuldade (vida do oponente, mult. de dano ao jogador ao perder a rodada, moedas na vitória, incluindo boss); a aba **Dificuldade** fica narrativa + remissão à tabela da aba Combate. **Visão geral** remete à Economia em vez de detalhar a loja. Tabelas alinhadas a `EnemyCombatBalance`, `BattleRewardResolver` e `BossFightBalance`; **`MapWikiAccess.SanitizeLegacyTabIds`** + `OnValidate` convertem `shop_inventory` → `economy` em `tabIds` antigos do Inspector.
+
+### 2026-05-07 — Baralho do boss: `Boss/config_cards_boss.json`
+
+- **`StreamingAssetsDeckPaths`:** confronto `MapNodeType.Bossfight` passa a resolver `StreamingAssets/Boss/config_cards_boss.json` em vez de `Easy/config_cards_easy_multiplication.json`. O nó de boss mantém `CombatEquationDifficulty.Hard` no mapa (recompensas/`BattleRewardResolver`); apenas a fonte do JSON de cartas mudou.
+
+### 2026-05-07 — Boss Fractar: 600 HP
+
+- **`BossFightBalance.MaxHealth`:** 500 → **600**; tabelas/copy na wiki (`WikiView.uxml`, linhas Boss) alinhadas.

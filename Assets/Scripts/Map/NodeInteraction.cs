@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using Tutorial.Onboarding;
@@ -13,9 +12,8 @@ public class NodeInteraction : MonoBehaviour
     [SerializeField] private MapVisualizer mapVisualizer;
     [SerializeField] private Camera mainCamera;
 
-    [Header("Transition Message")]
+    [Tooltip("Opcional. Se existir na cena, é desativado ao entrar no mapa (sem mensagens pós-batalha).")]
     [SerializeField] private TMP_Text txtTransitionMessage;
-    [SerializeField] private float messageDuration = 2.5f;
 
     private SaveData _save;
     private Vector2 _pressPosition;
@@ -202,34 +200,9 @@ public class NodeInteraction : MonoBehaviour
 
     private void HandleTransitionMessage()
     {
-        if (txtTransitionMessage == null) return;
-
-        switch (RunState.LastBattleResult)
-        {
-            case BattleResult.Won:
-                txtTransitionMessage.text = "Você ganhou, pode prosseguir";
-                txtTransitionMessage.gameObject.SetActive(true);
-                StartCoroutine(HideMessageAfterDelay());
-                break;
-
-            case BattleResult.Lost:
-                txtTransitionMessage.text = "Você perdeu, voltando ao início...";
-                txtTransitionMessage.gameObject.SetActive(true);
-                StartCoroutine(HideMessageAfterDelay());
-                break;
-
-            default:
-                txtTransitionMessage.gameObject.SetActive(false);
-                break;
-        }
-
+        if (txtTransitionMessage != null)
+            txtTransitionMessage.gameObject.SetActive(false);
         RunState.LastBattleResult = BattleResult.None;
     }
 
-    private IEnumerator HideMessageAfterDelay()
-    {
-        yield return new WaitForSeconds(messageDuration);
-        if (txtTransitionMessage != null)
-            txtTransitionMessage.gameObject.SetActive(false);
-    }
 }
