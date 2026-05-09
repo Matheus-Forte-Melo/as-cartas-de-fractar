@@ -1,0 +1,95 @@
+{
+  "steps": [
+    {
+      "stepId": "map_nav",
+      "targetPath": "",
+      "stringKey": "map_00",
+      "advanceMode": 2,
+      "advanceWhenEventId": "",
+      "autoAdvanceDelaySeconds": 0,
+      "spotlightPadding": 10,
+      "tooltipOffsetX": 0,
+      "tooltipOffsetY": 0,
+      "tooltipPanelWidth": 760,
+      "tooltipPanelHeight": 300
+    },
+    {
+      "stepId": "map_phases",
+      "targetPath": "",
+      "stringKey": "map_01",
+      "advanceMode": 2,
+      "advanceWhenEventId": "",
+      "autoAdvanceDelaySeconds": 0,
+      "spotlightPadding": 10,
+      "tooltipOffsetX": 0,
+      "tooltipOffsetY": 0,
+      "tooltipPanelWidth": 760,
+      "tooltipPanelHeight": 300
+    },
+    {
+      "stepId": "map_colors",
+      "targetPath": "",
+      "stringKey": "map_02",
+      "advanceMode": 2,
+      "advanceWhenEventId": "",
+      "autoAdvanceDelaySeconds": 0,
+      "spotlightPadding": 10,
+      "tooltipOffsetX": 0,
+      "tooltipOffsetY": 0,
+      "tooltipPanelWidth": 760,
+      "tooltipPanelHeight": 300
+    },
+    {
+      "stepId": "map_symbols",
+      "targetPath": "",
+      "stringKey": "map_03",
+      "advanceMode": 2,
+      "advanceWhenEventId": "",
+      "autoAdvanceDelaySeconds": 0,
+      "spotlightPadding": 10,
+      "tooltipOffsetX": 0,
+      "tooltipOffsetY": 0,
+      "tooltipPanelWidth": 760,
+      "tooltipPanelHeight": 300
+    },
+    {
+      "stepId": "map_climb",
+      "targetPath": "",
+      "stringKey": "map_04",
+      "advanceMode": 2,
+      "advanceWhenEventId": "",
+      "autoAdvanceDelaySeconds": 0,
+      "spotlightPadding": 10,
+      "tooltipOffsetX": 0,
+      "tooltipOffsetY": 0,
+      "tooltipPanelWidth": 760,
+      "tooltipPanelHeight": 300
+    },
+    {
+      "stepId": "map_journey",
+      "targetPath": "",
+      "stringKey": "map_05",
+      "advanceMode": 2,
+      "advanceWhenEventId": "",
+      "autoAdvanceDelaySeconds": 0,
+      "spotlightPadding": 10,
+      "tooltipOffsetX": 0,
+      "tooltipOffsetY": 0,
+      "tooltipPanelWidth": 760,
+      "tooltipPanelHeight": 300
+    },
+    {
+      "stepId": "map_spotlight",
+      "targetPath": "",
+      "stringKey": "map_spotlight_placeholder",
+      "advanceMode": 2,
+      "advanceWhenEventId": "",
+      "autoAdvanceDelaySeconds": 0,
+      "spotlightPadding": 16,
+      "tooltipOffsetX": 0,
+      "tooltipOffsetY": 0,
+      "tooltipPanelWidth": 760,
+      "tooltipPanelHeight": 300
+    }
+  ]
+}

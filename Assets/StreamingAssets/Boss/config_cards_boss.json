@@ -1,0 +1,68 @@
+{
+  "groups": [
+    {
+      "label": "HardMultiplication3",
+      "cards": [
+        { "equation": "4 * 0.25" },
+        { "equation": "8 * 0.25" },
+        { "equation": "4 * 0.75" },
+        { "equation": "8 * 0.5" },
+        { "equation": "4 * 1.25" },
+        { "equation": "8 * 0.75" },
+        { "equation": "4 * 1.75" },
+        { "equation": "16 * 0.5" },
+        { "equation": "12 * 0.75" },
+        { "equation": "8 * 1.25" },
+        { "equation": "4 * 2.75", "ace": false }
+      ]
+    },
+    {
+      "label": "HardSubtraction1",
+      "cards": [
+        { "equation": "12.5 - 11.5" },
+        { "equation": "88.88 - 86.88" },
+        { "equation": "72.3 - 69.3" },
+        { "equation": "52.08 - 48.08" },
+        { "equation": "22.5 - 17.5" },
+        { "equation": "89.89 - 83.89" },
+        { "equation": "73.9 - 66.9" },
+        { "equation": "46.46 - 38.46" },
+        { "equation": "48.48 - 39.48" },
+        { "equation": "36.7 - 26.7" },
+        { "equation": "70.8 - 59.8", "ace": false }
+      ]
+    },
+    {
+      "label": "MediumDivision8",
+      "cards": [
+        { "equation": "8 / 8" },
+        { "equation": "16 / 8" },
+        { "equation": "24 / 8" },
+        { "equation": "32 / 8" },
+        { "equation": "40 / 8" },
+        { "equation": "48 / 8" },
+        { "equation": "56 / 8" },
+        { "equation": "64 / 8" },
+        { "equation": "72 / 8" },
+        { "equation": "80 / 8" },
+        { "equation": "88 / 8", "ace": false }
+      ]
+    },
+    {
+      "label": "HardAddition4",
+      "cards": [
+        { "equation": "0.24 + 0.76" },
+        { "equation": "0.35 + 1.65" },
+        { "equation": "0.84 + 2.16" },
+        { "equation": "1.95 + 2.05" },
+        { "equation": "2.25 + 2.75" },
+        { "equation": "3.67 + 2.33" },
+        { "equation": "1.66 + 5.34" },
+        { "equation": "3.08 + 4.92" },
+        { "equation": "1.27 + 7.73" },
+        { "equation": "1.05 + 8.95" },
+        { "equation": "6.73 + 4.27", "ace": false }
+      ]
+    }
+  ]
+}

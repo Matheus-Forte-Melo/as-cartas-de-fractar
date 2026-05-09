@@ -9,8 +9,10 @@ using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Blackjack.Core;
+using Map.Wiki;
 using Blackjack.Decks;
 using Items;
+using Tutorial.Onboarding;
 
 // Serve como intermediário entre UI Unity (do jogador) e Código (da lógica do 21 e do inimigo).
 // Define ações para os botões e exibe feedback na tela conforme estado
@@ -38,6 +40,11 @@ public class BlackjackController : MonoBehaviour
     [Header("UI - Botões")]
     public Button btnHit;
     public Button btnStand;
+
+    [Header("Vitória boss final (Fractar)")]
+    [Tooltip("Relativo à pasta StreamingAssets. Se vazio, após vitória não há vídeo — apenas breve espera e menu.")]
+    [SerializeField] private string bossVictoryVideoStreamingPath = "Cutscenes/fim.mp4";
+    [SerializeField] private float bossVictoryVideoHoldSkipSeconds = 1f;
 
     private BlackjackGame _game;
     private SaveData _save;
@@ -73,16 +80,30 @@ public class BlackjackController : MonoBehaviour
         _game.Player.DamageMultiplier = PlayerItemStats.CalculateDamageMultiplier(_save);
 
         CombatEquationDifficulty combatDifficulty = RunState.CurrentCombatDifficulty;
-        int enemyHp = EnemyCombatBalance.GetEnemyMaxHealth(combatDifficulty);
-        _game.Enemy.MaxHealth = enemyHp;
-        _game.Enemy.Health = enemyHp;
-        _game.Enemy.DamageMultiplier = EnemyCombatBalance.GetEnemyDamageMultiplier(combatDifficulty);
+        if (RunState.CurrentNodeType == MapNodeType.Bossfight)
+        {
+            _game.Enemy.MaxHealth = BossFightBalance.MaxHealth;
+            _game.Enemy.Health = BossFightBalance.MaxHealth;
+            _game.Enemy.DamageMultiplier = BossFightBalance.DamageMultiplier;
+        }
+        else
+        {
+            int enemyHp = EnemyCombatBalance.GetEnemyMaxHealth(combatDifficulty);
+            _game.Enemy.MaxHealth = enemyHp;
+            _game.Enemy.Health = enemyHp;
+            _game.Enemy.DamageMultiplier = EnemyCombatBalance.GetEnemyDamageMultiplier(combatDifficulty);
+        }
 
         btnHit.onClick.AddListener(OnHit);
         btnStand.onClick.AddListener(OnStand);
 
         btnHit.GetComponentInChildren<TMP_Text>().text = "Hit";
         btnStand.GetComponentInChildren<TMP_Text>().text = "Stand";
+    }
+
+    private void OnDisable()
+    {
+        CancelInvoke(nameof(RunStopCoroutinesAndApplyNewRound));
     }
 
     private void ResolveHandValueTextsIfMissing()
@@ -109,6 +130,9 @@ public class BlackjackController : MonoBehaviour
 
     private void Update()
     {
+        if (ShouldIgnoreBattleInputBecauseWikiIsOpen())
+            return;
+
         if (!_battleOver && !_roundResolutionActive && !_usingConsumable && _game != null
             && _game.State == GameState.PlayerTurn && !_game.IsRoundOver)
         {
@@ -208,13 +232,33 @@ public class BlackjackController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Usado no fim da rodada (Update e <see cref="RoundResolutionRoutine"/>). A coroutine também
+    /// consulta input — por isso o bloqueio da wiki tem de estar aqui, não só no <c>Update</c>.
+    /// </summary>
     private static bool TryGetAnyInputDown()
     {
+        if (ShouldIgnoreBattleInputBecauseWikiIsOpen())
+            return false;
+
         if (Keyboard.current != null && Keyboard.current.anyKey.wasPressedThisFrame)
             return true;
+
         if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+        {
+            if (MapWikiAccess.IsPointerPressOnWikiOpenButton())
+                return false;
             return true;
+        }
+
         return false;
+    }
+
+    private static bool ShouldIgnoreBattleInputBecauseWikiIsOpen()
+    {
+        if (!string.Equals(SceneManager.GetActiveScene().name, "Core", System.StringComparison.OrdinalIgnoreCase))
+            return false;
+        return MapWikiAccess.IsCoreBattleInputBlockedByWiki;
     }
 
     private DeckConfig LoadDeckConfig()
@@ -241,13 +285,77 @@ public class BlackjackController : MonoBehaviour
         }
     }
 
-    private void Start() => OnNewRound();
+    private void Start()
+    {
+        StartCoroutine(CoStartBattleAfterOptionalTheoryRevision());
+    }
 
+    private IEnumerator CoStartBattleAfterOptionalTheoryRevision()
+    {
+        // 1) Carrega todos os elementos da cena primeiro: cartas iniciais, textos de vida,
+        //    rótulos, feed central, etc. A wiki suprime o input do canvas quando aberta,
+        //    portanto nada do duelo corre até o jogador fechar o modal — mas já vê a mesa.
+        ApplyNewRoundStateBody(stopCoroutinesFirst: false);
+
+        // 2) Aguarda dois frames para o layout (uGUI + UI Toolkit) ficar estável antes de abrir.
+        yield return null;
+        yield return null;
+
+        // Boss final: sem revisão de teoria automática.
+        if (RunState.CurrentNodeType == MapNodeType.Bossfight)
+            yield break;
+
+        // 3) Revisão automática: se o jogador já marcou "não mostrar novamente" para este tipo, sai.
+        TheoryWikiPage theoryPage = TheoryWikiPageMapping.FromMapNodeType(RunState.CurrentNodeType);
+        if (MapWikiAccess.IsRevisionSkippedForPage(theoryPage, _save))
+            yield break;
+
+        MapWikiAccess wiki = FindFirstObjectByType<MapWikiAccess>();
+        if (wiki == null) yield break;
+
+        wiki.OpenForRevision(theoryPage);
+
+        const float maxOpenSeconds = 60f;
+        float deadline = Time.realtimeSinceStartup + maxOpenSeconds;
+        while (wiki != null && wiki.IsOpen)
+        {
+            if (Time.realtimeSinceStartup >= deadline)
+            {
+                Debug.LogWarning("[BlackjackController] Wiki de revisão não foi fechada a tempo; a prosseguir para o duelo.");
+                wiki.Close();
+                break;
+            }
+
+            yield return null;
+        }
+    }
+
+    /// <summary>
+    /// Não chamar <see cref="StopAllCoroutines"/> diretamente a partir de uma coroutine neste
+    /// mesmo <see cref="MonoBehaviour"/> (ex.: <c>RoundResolutionRoutine</c>): o Unity pode
+    /// interromper a coroutine ativa antes do restante do fluxo. Usa-se <see cref="Invoke"/>
+    /// para correr no próximo ciclo de atualização.
+    /// </summary>
     private void OnNewRound()
     {
         if (_battleOver) return;
+        CancelInvoke(nameof(RunStopCoroutinesAndApplyNewRound));
+        Invoke(nameof(RunStopCoroutinesAndApplyNewRound), 0f);
+    }
 
-        StopAllCoroutines();
+    private void RunStopCoroutinesAndApplyNewRound()
+    {
+        if (_battleOver) return;
+        ApplyNewRoundStateBody(stopCoroutinesFirst: true);
+    }
+
+    private void ApplyNewRoundStateBody(bool stopCoroutinesFirst)
+    {
+        if (_battleOver) return;
+
+        if (stopCoroutinesFirst)
+            StopAllCoroutines();
+
         _roundResolutionActive = false;
         playerHand.Clear();
         enemyHand.Clear();
@@ -255,57 +363,73 @@ public class BlackjackController : MonoBehaviour
         ClearHandValueLabels();
         _game.NewRound();
         RefreshUI();
+
+        EventBridge.TriggerEvent(TutorialBlackjackEventIds.NewRound);
     }
 
     private void OnHit()
     {
         ClearCenterFeedOnly();
-        _game.PlayerHit();
-        SyncCards();
-
-        if (_game.State == GameState.PlayerBust)
+        try
         {
+            _game.PlayerHit();
+            SyncCards();
+
+            if (_game.State == GameState.PlayerBust)
+            {
+                RefreshUI();
+                return;
+            }
+
+            if (_game.State == GameState.Comparing)
+            {
+                SetPlayerActionsEnabled(false);
+                StartCoroutine(CompareHandsRoutine());
+                return;
+            }
+
+            if (_game.State == GameState.EnemyTurn)
+            {
+                SetPlayerActionsEnabled(false);
+                StartCoroutine(EnemyTurnRoutine());
+                return;
+            }
+
             RefreshUI();
-            return;
         }
-
-        if (_game.State == GameState.Comparing)
+        finally
         {
-            SetPlayerActionsEnabled(false);
-            StartCoroutine(CompareHandsRoutine());
-            return;
+            EventBridge.TriggerEvent(TutorialBlackjackEventIds.PlayerHit);
         }
-
-        if (_game.State == GameState.EnemyTurn)
-        {
-            SetPlayerActionsEnabled(false);
-            StartCoroutine(EnemyTurnRoutine());
-            return;
-        }
-
-        RefreshUI();
     }
 
     private void OnStand()
     {
         ClearCenterFeedOnly();
-        _game.PlayerStand();
-
-        if (_game.State == GameState.Comparing)
+        try
         {
-            SetPlayerActionsEnabled(false);
-            StartCoroutine(CompareHandsRoutine());
-            return;
-        }
+            _game.PlayerStand();
 
-        if (_game.State == GameState.EnemyTurn)
+            if (_game.State == GameState.Comparing)
+            {
+                SetPlayerActionsEnabled(false);
+                StartCoroutine(CompareHandsRoutine());
+                return;
+            }
+
+            if (_game.State == GameState.EnemyTurn)
+            {
+                SetPlayerActionsEnabled(false);
+                StartCoroutine(EnemyTurnRoutine());
+                return;
+            }
+
+            RefreshUI();
+        }
+        finally
         {
-            SetPlayerActionsEnabled(false);
-            StartCoroutine(EnemyTurnRoutine());
-            return;
+            EventBridge.TriggerEvent(TutorialBlackjackEventIds.PlayerStand);
         }
-
-        RefreshUI();
     }
 
     private IEnumerator EnemyTurnRoutine()
@@ -465,6 +589,8 @@ public class BlackjackController : MonoBehaviour
             while (_waitingRoundContinue)
                 yield return null;
 
+            EventBridge.TriggerEvent(TutorialBlackjackEventIds.RoundContinue);
+
             ClearBattleCenter();
             ClearHandValueLabels();
             ResolvePostRoundFlow();
@@ -548,6 +674,49 @@ public class BlackjackController : MonoBehaviour
 
     private IEnumerator EndBattleRoutine(bool playerWon)
     {
+        if (playerWon && RunState.CurrentNodeType == MapNodeType.Bossfight)
+        {
+            ClearHandValueLabels();
+            RunState.LastBattleResult = BattleResult.Won;
+
+            SaveData save = SaveManager.Load();
+            save.playerHealth = _game.Player.Health;
+            int coinsEarned = BattleRewardResolver.ApplyVictoryRewards(save, CombatEquationDifficulty.Hard);
+            save.currentRun++;
+            save.currentSeed = Random.Range(int.MinValue, int.MaxValue);
+            save.seedHistory.Add(new SeedHistoryEntry
+            {
+                run = save.currentRun,
+                seed = save.currentSeed
+            });
+            save.playerRow = -1;
+            save.playerCol = -1;
+            save.playerHealth = PlayerItemStats.CalculateMaxHealth(save);
+            SaveManager.Save(save);
+
+            if (txtBattleCenter != null)
+            {
+                txtBattleCenter.text =
+                    $"<b>Vitória final</b>\n\nFractar foi derrotado.\n+{coinsEarned} moedas\n\n<i>Run concluída — vídeo final ou menu principal</i>";
+            }
+
+            PostVictoryReturnFlow.RunAfterVictoriousBattle();
+
+            if (!string.IsNullOrWhiteSpace(bossVictoryVideoStreamingPath))
+            {
+                BossOutroFlow.BeginReturnToMenuWithOutroVideo(
+                    bossVictoryVideoStreamingPath.Trim(),
+                    bossVictoryVideoHoldSkipSeconds);
+            }
+            else
+            {
+                yield return new WaitForSeconds(2f);
+                BossOutroFlow.ExecutePostOutroTransition();
+            }
+
+            yield break;
+        }
+
         if (playerWon)
         {
             ClearHandValueLabels();
@@ -591,7 +760,7 @@ public class BlackjackController : MonoBehaviour
         }
 
         yield return new WaitForSeconds(2f);
-        SceneManager.LoadScene("Map");
+        SceneManager.LoadScene(GameFlowScenes.CurrentMap);
     }
 
     private void SyncCards()

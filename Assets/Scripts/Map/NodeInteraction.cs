@@ -1,6 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Tutorial.Onboarding;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -12,9 +12,8 @@ public class NodeInteraction : MonoBehaviour
     [SerializeField] private MapVisualizer mapVisualizer;
     [SerializeField] private Camera mainCamera;
 
-    [Header("Transition Message")]
+    [Tooltip("Opcional. Se existir na cena, é desativado ao entrar no mapa (sem mensagens pós-batalha).")]
     [SerializeField] private TMP_Text txtTransitionMessage;
-    [SerializeField] private float messageDuration = 2.5f;
 
     private SaveData _save;
     private Vector2 _pressPosition;
@@ -53,6 +52,22 @@ public class NodeInteraction : MonoBehaviour
         _save = SaveManager.Load();
         HandleTransitionMessage();
         ApplyVisualAccessibility();
+        AttachMapTutorialNodePulseIfNeeded();
+    }
+
+    /// <summary>Adiciona o pulso no nó (0,0) enquanto o jogador ainda não escolheu uma fase em <c>MapTutorial</c>.</summary>
+    private void AttachMapTutorialNodePulseIfNeeded()
+    {
+        if (SceneManager.GetActiveScene().name != GameFlowScenes.MapTutorial)
+            return;
+        if (_save.playerRow != -1 || _save.playerCol != -1)
+            return;
+        if (mapVisualizer == null)
+            return;
+        if (!mapVisualizer.TryGetNodeTransform(0, 0, out Transform nodeTf) || nodeTf == null)
+            return;
+        if (nodeTf.GetComponent<MapTutorialNodePulse>() == null)
+            nodeTf.gameObject.AddComponent<MapTutorialNodePulse>();
     }
 
     private void ApplyVisualAccessibility()
@@ -66,6 +81,8 @@ public class NodeInteraction : MonoBehaviour
     private void Update()
     {
         if (!Application.isPlaying) return;
+
+        TryDevTriggerBossOutroFlowFromMap();
 
         var mouse = Mouse.current;
         if (mouse == null) return;
@@ -126,7 +143,12 @@ public class NodeInteraction : MonoBehaviour
     public bool IsAccessible(MapNode node)
     {
         if (_save.playerRow == -1 && _save.playerCol == -1)
+        {
+            // No tutorial do mapa, só o nó (0,0) é selecionável na primeira escolha.
+            if (SceneManager.GetActiveScene().name == GameFlowScenes.MapTutorial)
+                return node.Row == 0 && node.Col == 0;
             return node.Row == 0;
+        }
 
         return mapGenerator.ConnectionSet.Contains((
             _save.playerRow, _save.playerCol,
@@ -140,10 +162,14 @@ public class NodeInteraction : MonoBehaviour
 
         if (_save.playerRow == -1 && _save.playerCol == -1)
         {
+            bool tutorial = SceneManager.GetActiveScene().name == GameFlowScenes.MapTutorial;
             foreach (var node in mapGenerator.Graph.Values)
             {
-                if (node.Row == 0)
-                    accessible.Add((node.Row, node.Col));
+                if (node.Row != 0)
+                    continue;
+                if (tutorial && node.Col != 0)
+                    continue;
+                accessible.Add((node.Row, node.Col));
             }
         }
         else
@@ -167,39 +193,34 @@ public class NodeInteraction : MonoBehaviour
         _save.playerCol = node.Col;
         SaveManager.Save(_save);
 
-        SceneManager.LoadScene("Core");
+        // Permite ao TutorialManager (em MapTutorial) marcar a etapa de spotlight como concluída
+        // antes da transição de cena.
+        EventBridge.TriggerEvent(TutorialMapEventIds.NodeSelected);
+
+        SceneManager.LoadScene(GameFlowScenes.CurrentCore);
     }
 
     private void HandleTransitionMessage()
     {
-        if (txtTransitionMessage == null) return;
-
-        switch (RunState.LastBattleResult)
-        {
-            case BattleResult.Won:
-                txtTransitionMessage.text = "Você ganhou, pode prosseguir";
-                txtTransitionMessage.gameObject.SetActive(true);
-                StartCoroutine(HideMessageAfterDelay());
-                break;
-
-            case BattleResult.Lost:
-                txtTransitionMessage.text = "Você perdeu, voltando ao início...";
-                txtTransitionMessage.gameObject.SetActive(true);
-                StartCoroutine(HideMessageAfterDelay());
-                break;
-
-            default:
-                txtTransitionMessage.gameObject.SetActive(false);
-                break;
-        }
-
+        if (txtTransitionMessage != null)
+            txtTransitionMessage.gameObject.SetActive(false);
         RunState.LastBattleResult = BattleResult.None;
     }
 
-    private IEnumerator HideMessageAfterDelay()
+    /// <summary>
+    /// TODO(remover após testes): <b>Shift+F12</b> na cena Map — mesmo fluxo que vitória no
+    /// boss (vídeo <c>Cutscenes/fim.mp4</c> + wipe + menu com agradecimento).
+    /// </summary>
+    private void TryDevTriggerBossOutroFlowFromMap()
     {
-        yield return new WaitForSeconds(messageDuration);
-        if (txtTransitionMessage != null)
-            txtTransitionMessage.gameObject.SetActive(false);
+        if (SceneManager.GetActiveScene().name != GameFlowScenes.Map)
+            return;
+        var kb = Keyboard.current;
+        if (kb == null) return;
+        if (!kb.leftShiftKey.isPressed && !kb.rightShiftKey.isPressed) return;
+        if (!kb.f12Key.wasPressedThisFrame) return;
+
+        BossOutroFlow.BeginReturnToMenuWithOutroVideo("Cutscenes/fim.mp4", 1f);
     }
+
 }

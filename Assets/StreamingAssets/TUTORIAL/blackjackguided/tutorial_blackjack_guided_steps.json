@@ -1,0 +1,114 @@
+{
+  "steps": [
+    {
+      "stepId": "intro_goal",
+      "targetPath": "",
+      "stringKey": "bj_guided_00",
+      "advanceMode": 2,
+      "advanceWhenEventId": "",
+      "autoAdvanceDelaySeconds": 0,
+      "spotlightPadding": 10,
+      "tooltipOffsetX": 0,
+      "tooltipOffsetY": 0
+    },
+    {
+      "stepId": "card_values",
+      "targetPath": "",
+      "stringKey": "bj_guided_01",
+      "advanceMode": 2,
+      "advanceWhenEventId": "",
+      "autoAdvanceDelaySeconds": 0,
+      "spotlightPadding": 10,
+      "tooltipOffsetX": 0,
+      "tooltipOffsetY": 0
+    },
+    {
+      "stepId": "dealer_hole",
+      "targetPath": "DealerHand",
+      "stringKey": "bj_guided_02",
+      "advanceMode": 2,
+      "advanceWhenEventId": "",
+      "autoAdvanceDelaySeconds": 0,
+      "spotlightPadding": 12,
+      "tooltipOffsetX": 0,
+      "tooltipOffsetY": 0
+    },
+    {
+      "stepId": "player_eleven",
+      "targetPath": "PlayerHand",
+      "stringKey": "bj_guided_03",
+      "advanceMode": 2,
+      "advanceWhenEventId": "",
+      "autoAdvanceDelaySeconds": 0,
+      "spotlightPadding": 12,
+      "tooltipOffsetX": 0,
+      "tooltipOffsetY": 0
+    },
+    {
+      "stepId": "press_hit",
+      "targetPath": "BtnHit",
+      "stringKey": "bj_guided_04",
+      "advanceMode": 0,
+      "advanceWhenEventId": "tutorial.bj.player_hit",
+      "autoAdvanceDelaySeconds": 0,
+      "spotlightPadding": 10,
+      "tooltipOffsetX": 0,
+      "tooltipOffsetY": 0
+    },
+    {
+      "stepId": "after_hit",
+      "targetPath": "",
+      "stringKey": "bj_guided_04b",
+      "advanceMode": 2,
+      "advanceWhenEventId": "",
+      "autoAdvanceDelaySeconds": 0,
+      "spotlightPadding": 10,
+      "tooltipOffsetX": 0,
+      "tooltipOffsetY": 0
+    },
+    {
+      "stepId": "press_stand",
+      "targetPath": "BtnStand",
+      "stringKey": "bj_guided_05",
+      "advanceMode": 0,
+      "advanceWhenEventId": "tutorial.bj.player_stand",
+      "autoAdvanceDelaySeconds": 0,
+      "spotlightPadding": 10,
+      "tooltipOffsetX": 0,
+      "tooltipOffsetY": 0
+    },
+    {
+      "stepId": "dealer_watch",
+      "targetPath": "",
+      "stringKey": "bj_guided_05b",
+      "advanceMode": 0,
+      "advanceWhenEventId": "tutorial.bj.dealer_turn_visual_done",
+      "autoAdvanceDelaySeconds": 0,
+      "spotlightPadding": 10,
+      "tooltipOffsetX": 0,
+      "tooltipOffsetY": 0
+    },
+    {
+      "stepId": "outcome_explain",
+      "targetPath": "",
+      "stringKey": "bj_guided_06",
+      "advanceMode": 2,
+      "advanceWhenEventId": "",
+      "autoAdvanceDelaySeconds": 0,
+      "spotlightPadding": 10,
+      "tooltipOffsetX": 0,
+      "tooltipOffsetY": 0
+    },
+    {
+      "stepId": "wrap_free_play",
+      "targetPath": "",
+      "stringKey": "bj_guided_07",
+      "advanceMode": 2,
+      "advanceWhenEventId": "",
+      "autoAdvanceDelaySeconds": 0,
+      "spotlightPadding": 10,
+      "tooltipOffsetX": 0,
+      "tooltipOffsetY": 0
+    }
+  ]
+}

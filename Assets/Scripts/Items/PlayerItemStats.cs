@@ -9,6 +9,10 @@ namespace Items
     {
         public const int BaseHealth = 100;
 
+        /// <summary>
+        /// Vida máxima = base + soma de <c>bonusHealth</c> de cada entrada defensiva em <c>ownedItemIds</c>
+        /// (o mesmo id pode repetir-se para acumular).
+        /// </summary>
         public static int CalculateMaxHealth(SaveData save)
         {
             int bonus = 0;
@@ -26,21 +30,26 @@ namespace Items
             return BaseHealth + bonus;
         }
 
+        /// <summary>
+        /// Bónus de dano cumulativo: cada item de ataque em <c>ownedItemIds</c> (incluindo repetições do mesmo id)
+        /// contribui com <c>attackMultiplier - 1</c>; o total é <c>1 + soma</c>. Ex.: 1,15 + 1,35 + 1,50 → ×2,0.
+        /// </summary>
         public static float CalculateDamageMultiplier(SaveData save)
         {
-            float multiplier = 1f;
+            float bonusSum = 0f;
 
-            if (save.ownedItemIds == null) return multiplier;
+            if (save.ownedItemIds == null) return 1f;
 
             foreach (string id in save.ownedItemIds)
             {
                 var item = ItemCatalog.Get(id);
                 if (item == null) continue;
-                if (item.ItemType == ItemType.Attack)
-                    multiplier *= item.attackMultiplier;
+                if (item.ItemType != ItemType.Attack) continue;
+                float m = item.attackMultiplier;
+                if (m > 1f) bonusSum += m - 1f;
             }
 
-            return multiplier;
+            return 1f + bonusSum;
         }
     }
 }

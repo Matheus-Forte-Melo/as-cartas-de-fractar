@@ -26,10 +26,14 @@ namespace Items
 
         public ItemId ItemId => id switch
         {
-            "sword_gold" => ItemId.SwordGold,
-            "shield_silver" => ItemId.ShieldSilver,
-            "health_potion" => ItemId.HealthPotion,
-            "magic_amulet" => ItemId.MagicAmulet,
+            "potion_small" => ItemId.PotionSmall,
+            "potion_large" => ItemId.PotionLarge,
+            "ring_inequation" => ItemId.RingInequation,
+            "tomes_linear" => ItemId.TomesLinear,
+            "staff_fractal" => ItemId.StaffFractal,
+            "amulet_progressive" => ItemId.AmuletProgressive,
+            "shield_hypotenuse" => ItemId.ShieldHypotenuse,
+            "tunic_fractal" => ItemId.TunicFractal,
             _ => ItemId.None
         };
 

@@ -1,0 +1,15 @@
+{
+  "useForcedTable": true,
+  "shuffleRemaining": false,
+  "playerOpening": [
+    { "suit": "Copas", "value": 9, "ace": false },
+    { "suit": "Paus", "value": 2, "ace": false }
+  ],
+  "dealerOpening": [
+    { "suit": "Ouros", "value": 10, "ace": false },
+    { "suit": "Espadas", "value": 7, "ace": false }
+  ],
+  "drawStack": [
+    { "suit": "Espadas", "value": 9, "ace": false }
+  ]
+}

@@ -192,6 +192,7 @@ Tema escuro e místico, runas e símbolos matemáticos, luzes azuis/cianas. Mesa
 
 ## 9. Progressão e Hub
 
+- **`SaveData.main_tutorial_completed`** e **`main_tutorial_step_index`:** no `save.json` para o tutorial principal (onboarding guiado). Com **`main_tutorial_completed`** `true`, o `TutorialManager` **não** auto-inicia o fluxo (se `_respectCompletedFlag` estiver ligado). Ao concluir ou pular, grava **`main_tutorial_completed = true`**. **`ResetTutorialProgress()`** volta o passo a 0 e **`main_tutorial_completed`** a `false`. Detalhe em **`docs/TUTORIAL_ONBOARDING.md`**.
 - Moedas atemporais persistem entre runs
 - Hub com melhorias permanentes básicas compráveis antes de cada run
 - Mapa com nós semi-randomizados (majoritariamente duelos e loot)
@@ -267,7 +268,7 @@ Tema escuro e místico, runas e símbolos matemáticos, luzes azuis/cianas. Mesa
 
 - Renomeada cena `MapPrototype.unity` → `Map.unity`. Adicionadas cenas `Map` e `Core` ao `EditorBuildSettings.asset`.
 - Criado sistema de save em JSON (`Application.persistentDataPath/save.json`):
-  - `Assets/Scripts/Core/Save/SaveData.cs` — dados persistidos: `currentRun`, `playerRow`/`playerCol`, `coins`, `currentSeed`, `playerHealth`, `seedHistory`.
+  - `Assets/Scripts/Core/Save/SaveData.cs` — dados persistidos: `currentRun`, `playerRow`/`playerCol`, `coins`, `currentSeed`, `playerHealth`, `main_tutorial_completed`, `main_tutorial_step_index`, `seedHistory`.
   - `SeedHistoryEntry` — no mesmo ficheiro que `SaveData`.
   - `Assets/Scripts/Core/Save/SaveManager.cs` — classe estática com `Load()`, `Save()`, `Delete()`. Cria defaults seguros no primeiro load (run=1, pos=(-1,-1), seed aleatória, health=100).
 - Criado `Assets/Scripts/Core/Utils/RunState.cs` — classe estática para transporte de dados voláteis entre cenas (`CurrentNodeType`, `CurrentCombatDifficulty`, `LastBattleResult`).
@@ -360,17 +361,17 @@ Core/
 #### Sistema de itens (`Assets/Scripts/Items/`)
 
 - **`ItemType.cs`:** enum `Attack`, `Defense`, `Consumable`.
-- **`ItemId.cs`:** enum `SwordGold`, `ShieldSilver`, `HealthPotion`, `MagicAmulet`.
+- **`ItemId.cs`:** enum alinhado ao catálogo actual (ver entrada **2026-04-23 — Catálogo da loja**).
 - **`ItemDefinition.cs`** + **`ItemCatalogData`:** classes `[Serializable]` com `id`, `displayName`, `description`, `type`, `price`, `icon`, `attackMultiplier`, `bonusHealth`, `consumableEffect`, `consumableValue`. Mapeamento `type` → `ItemType` e `id` → `ItemId` via switch expression; **`ParseConsumableAction()`** mapeia `consumableEffect` (ex. `heal`) → **`ConsumableActionType`**.
 - **`ConsumableActionType.cs`:** enum `None`, `Heal`.
 - **`ConsumableBattleEffects.cs`:** `TryApply(ItemDefinition, Duelist player, out message)` — hoje só **Heal** usando `consumableValue` (cura até `MaxHealth`).
 - **`ItemCatalog.cs`:** classe estática; carrega `StreamingAssets/Items/item_catalog.json` (lazy, indexado por `id`). Expõe `All` e `Get(string id)`.
-- **`PlayerItemStats.cs`:** `CalculateMaxHealth(SaveData)` = `100 + soma bonusHealth dos defense owned`; `CalculateDamageMultiplier(SaveData)` = `produto attackMultiplier dos attack owned`.
-- **JSON:** `Assets/StreamingAssets/Items/item_catalog.json` com 4 itens de exemplo (Espada de Ouro, Escudo de Prata, Poção de Vida, Amuleto Mágico).
+- **`PlayerItemStats.cs`:** `CalculateMaxHealth` = `100 + soma bonusHealth` por cada entrada defensiva em `ownedItemIds` (ids repetidos acumulam). `CalculateDamageMultiplier` = `1 + soma (attackMultiplier - 1)` por entrada ofensiva (acumulação aditiva do bónus; ex.: anel 1,15 + tomos 1,35 + cajado 1,5 → ×2,0).
+- **JSON:** `item_catalog.json` — ver entrada **2026-04-23** para a lista actual de itens.
 
 #### Save (`Assets/Scripts/Core/Save/SaveData.cs`)
 
-- **`ownedItemIds`:** apenas itens **attack** e **defense** comprados na loja (ativos na run).
+- **`ownedItemIds`:** itens **attack** e **defense** comprados na loja; o mesmo `id` pode aparecer **várias vezes** para acumular bónus.
 - **`consumableSlots`:** até **3** IDs de consumíveis, **sem stack** (o mesmo `id` pode aparecer em slots distintos). Não entra em `ownedItemIds`.
 - **Na derrota:** `save.playerHealth = PlayerItemStats.CalculateMaxHealth(save)` (antes era hardcoded 100).
 
@@ -388,7 +389,7 @@ Core/
 
 #### Recompensas (`Assets/Scripts/Core/Blackjack/Rewards/BattleRewardResolver.cs`)
 
-- **`GetCoinReward`:** Easy=10, Medium=50, Hard=100.
+- **`GetCoinReward`:** Easy=100, Medium=250, Hard=500 (valores em `BattleRewardResolver`).
 - **`ApplyVictoryRewards(SaveData, CombatEquationDifficulty)`:** soma moedas ao save. Retorna quantidade.
 - Chamado em `BlackjackController.EndBattleRoutine` na vitória, **antes** de `SaveManager.Save`. UI mostra `+N moedas`.
 - **Extensível:** ponto de adição para drops de itens consumíveis no futuro.
@@ -396,7 +397,7 @@ Core/
 #### Loja (`Assets/Scripts/Store/StoreController.cs`)
 
 - **`ItemCatalog`** + `SaveData.coins`. **`MaxConsumableSlots` = 3** (constante na loja).
-- **Attack/Defense:** compra → `ownedItemIds` + defense aplica `bonusHealth` em `playerHealth`.
+- **Attack/Defense:** compra → `ownedItemIds.Add(id)` (pode repetir o mesmo id) + defesa aplica `bonusHealth` em `playerHealth` no momento da compra; grelha da loja recarrega após confirmar.
 - **Consumíveis:** compra → só `consumableSlots.Add(id)` se `Count < 3`; **não** grava em `ownedItemIds`. Cabeçalho **`Consumíveis: N/3`** (`ConsumableSlotsLabel` no UXML). Com 3/3: botões dos consumíveis **“Inventário cheio (3/3)”**; modal de confirmação bloqueado com mensagem para usar na batalha primeiro.
 - **UI:** `StoreView.uxml` + `StoreStyles.uss` (classe `.consumable-slots-label`). Fundo e ícones como antes.
 - **Botão Voltar:** `SceneManager.LoadScene("Map")`.
@@ -436,11 +437,10 @@ Art/Store/
 └── MagicDungeonBackground.png
 
 Resources/Icons/
-├── Espada de Ouro.png
-├── Escudo de Prata.png
-├── Poção de Vida.png
-├── Amuleto Mágico.png
-└── CoinFrames/ (1-6.png)
+├── pocao_pequena.png, pocao_grande.png
+├── anel_inequacao.png, tomos_lineares.png, cajado_fractal.png
+├── amuleto_progressivo.png, escudo_hipotenusa.png, tunica_fractal.png
+└── CoinFrames/ (1-6.png), moeda.gif
 
 Scenes/
 └── Store.unity
@@ -461,7 +461,7 @@ Scenes/
 
 ### 2026-04-09 — Consumíveis (poção, save, loja, uso em combate)
 
-- **`SaveData.consumableSlots`**, máximo 3; poção no JSON: `heal` + `consumableValue` 50.
+- **`SaveData.consumableSlots`**, máximo 3; poções no JSON: `heal` + `consumableValue` (100 / 250 conforme o item).
 - **Loja:** contador N/3; compra não usa `ownedItemIds` para consumíveis.
 - **Combate:** atalhos numéricos 1–3; feedback em `txtBattleCenter`; item removido do save após uso.
 
@@ -475,3 +475,107 @@ Scenes/
 - **`TransitionCanvas`:** `sortingOrder` elevado (50) para a UI do mapa ficar por cima do conteúdo que competir por input.
 - **Checklist de remoção:** (1) tirar o componente da cena `Map`; (2) apagar `TemporaryMapStoreAccess.cs` + `.meta`; (3) `grep` por `LoadScene("Store")` e garantir entrada única pelo fluxo definitivo; (4) apagar **`TEMP_MapShopButtonRoot`** da hierarquia se existir após testes em Play Mode.
 - **GDD:** em **§2.1** / **§9** a loja na run segue **cortada**; isto é só **atalho de desenvolvimento**.
+
+### 2026-04-13 — Tutorial principal no save + doc de onboarding
+
+- **`SaveData.main_tutorial_completed`** e **`main_tutorial_step_index`:** persistidos em `save.json`; o `TutorialManager` não usa PlayerPrefs. `SaveManager.EnsureMainTutorialCompletedKeyInSaveFile()` na entrada da cena garante `main_tutorial_completed` no JSON com `false` se faltar.
+- **`GuidedBlackjackNarrative` + evento `tutorial.bj.dealer_turn_visual_done`:** fluxo guiado (mesa após Parar).
+- **Documentação:** [`docs/TUTORIAL_ONBOARDING.md`](docs/TUTORIAL_ONBOARDING.md) — `TutorialManager`, JSON, `EventBridge`, save.
+
+### 2026-04-16 — Onboarding do mapa (MapTutorial): UX, texto e registo técnico
+
+- **`TutorialManager`** (`Assets/Scripts/Tutorial/Onboarding/TutorialManager.cs`): removidos o botão runtime **«Pular treino»** (canto superior direito), o `WireSkipIfPresent` e o atalho **Escape** que chamavam `SkipEntireTutorial()` — o fluxo de skip deixava saves/estado inconsistentes. O método `SkipEntireTutorial()` mantém-se público por compatibilidade, mas **não** há mais UI nem input padrão associados.
+- **Tamanho do modal por passo (JSON):** campos `tooltipPanelWidth` / `tooltipPanelHeight` em cada entrada de `tutorial_*_steps.json`. Se ambos forem &gt; 0, o `TooltipUI` aplica esse `sizeDelta`; caso contrário **520×160** (`TooltipUI.DefaultPanelWidth/Height`). O mapa e o Core usam **760×300** nos JSON (substitui o antigo flag `UseExpandedTooltipPanelNext`).
+- **`TutorialStepDefinition.blockEntireScreenInput`:** flag adicionada para forçar bloqueio em ecrã inteiro mesmo com alvo definido (não usado actualmente, mantido para futuras secções estritamente narrativas).
+- **`MapGenerator.GeneratePaths`:** em `GameFlowScenes.MapTutorial`, o **primeiro caminho** começa sempre na **coluna 0**, garantindo o nó **(0,0)** no grafo.
+- **Restrição de clique no `MapTutorial`:** `NodeInteraction.IsAccessible` / `GetAccessibleNodeKeys` só consideram **(0,0)** como acessível enquanto o jogador estiver em `playerRow=-1` na cena `MapTutorial`. `MapVisualizer.ApplyAccessibility` baixa o alpha dos não-acessíveis para `inaccessibleAlpha`, logo (0,0) é o único totalmente opaco; clicar em qualquer outro é ignorado.
+- **Pulso no nó clicável:** `MapTutorialNodePulse` é anexado em `NodeInteraction.Start` ao `Transform` do nó (0,0) enquanto `playerRow=-1` em `MapTutorial`. Componente auto-contido: pulsa a escala em `LateUpdate` (amplitude 18%, ~3.6 rad/s), restaura a escala base em `OnDisable`, sem dependências do fluxo de tutorial.
+- **`MapTutorialOnboardingSession`** ficou minimalista: regista os passos do JSON, substitui o texto de `map_spotlight` com **tipo + dificuldade do nó (0,0) + “Continuar”**, e cria o `TutorialManager`. Sem `target`, sem bridge, sem pulso — o tooltip é centrado e avança por **botão Continuar** (modo do JSON, valor 2). Texto base do `map_00` actualizado em `TUTORIAL/map/tutorial_map_strings.json`.
+- **Tracking de alvo em tempo real (utilitário, não usado neste passo):** `SpotlightOverlay` e `TutorialBlocker` recalculam o recorte em `LateUpdate` enquanto há alvo activo, e `TutorialWorldTargetBridge.Configure` posiciona o rect no mesmo frame via `UpdateFollowNow()` — fica disponível para futuros passos que precisem destacar elementos do mundo.
+- **`TutorialMapEventIds.NodeSelected`** disparado em `NodeInteraction.SelectNode` antes de `LoadScene(GameFlowScenes.CurrentCore)` — fica disponível para qualquer passo que queira avançar no clique de um nó (não usado pelo passo final actual, que avança via Continuar).
+- **Constante de semente:** `TutorialMapConstants.GenerationSeed` em `Assets/Scripts/Map/TutorialMapConstants.cs` — o `MapGenerator` em `GameFlowScenes.MapTutorial` força esta seed no `Awake`, garantindo o mesmo layout entre sessões do tutorial.
+- **Ficheiros de conteúdo:** passos em `Assets/StreamingAssets/TUTORIAL/map/tutorial_map_steps.json`; strings base em `TUTORIAL/map/tutorial_map_strings.json` (o texto rico do spotlight continua a ser sobrescrito em runtime pelo passo acima).
+
+### 2026-04-16 — Onboarding do combate (`CoreTutorial`): terceira e última etapa da cadeia
+
+Terceira etapa guiada, acedida clicando no nó (0,0) do `MapTutorial` (graças à seed determinística, o nó é sempre **Combate de Multiplicação — Fácil**). Ensina turnos alternados e regra de dano com 3 rodadas riggadas: **1 derrota** didáctica + **2 vitórias** por bust do inimigo. Ao terminar, o fluxo devolve ao `Menu`, **sem prompt de tutorial**.
+
+- **Isolamento por cena:** a cena `CoreTutorial.unity` deixou de usar o `BlackjackController` de produção — o script foi swappado (GUID `a62713aa...` → `4a3f2e1d...`) por `Tutorial.CoreTutorial.CoreTutorialBlackjackController`. O tutorial **não** toca em `SaveManager`/`RunState`/`PlayerItemStats`/`EnemyCombatBalance`/`BattleRewardResolver`/`PostVictoryReturnFlow`.
+- **Lógica de jogo:** `CoreTutorialBlackjackGame` replica o `BlackjackGame` mantendo **a alternância de turnos** (cada Hit passa a vez ao inimigo; EnemyAct devolve a vez ao jogador). Reusa-se `Duelist`, `Enemy`, `GameState`, `RoundDamageResolver` e a UI (`CardHandDisplay`, `CardView`). O `RoundStartBalance` é pulado — as mãos de abertura são exatamente as do rig.
+- **Baralho rigado:** `CoreTutorialDeck` substitui o `Deck` do core para eliminar o `Shuffle`; `LoadSequence(topFirst)` define a ordem exacta (`P0, E0, P1, E1, draws...`). Rig completo em `Assets/StreamingAssets/TUTORIAL/core/tutorial_core_rounds.json`:
+  - **Round 1** — P `2×3 + 1×5` (= 11) + Hit compra `1×5` → 16; E `3×3 + 5×2` (= 19) passa. `EnemyWin`, player perde **(21−16) × 10 = 50** HP.
+  - **Round 2** — P `2×5 + 3×3` (= 19) stand; E `3×3 + 1×7` (= 16) é forçado a comprar (<17), saca `2×5 = 10` → **26 bust**, perde 50 HP.
+  - **Round 3** — mesmo padrão: P 20, E 16→26 bust. Enemy HP → 0, combate acaba.
+- **Eventos didácticos:** `Assets/Scripts/Tutorial/Onboarding/TutorialCoreEventIds.cs` — `NewRoundStarted`, `EnemyTurnTaken` (após cada acção do inimigo), `ReturnedToPlayerTurn`, `RoundSummaryShown`, `RoundContinue` (clique/tecla para seguir depois do resumo) e `BattleEnded`. O controller dispara-os em pontos exactos e os passos `TUTORIAL/core/tutorial_core_steps.json` avançam sobre eles.
+- **Passos (14):** `TUTORIAL/core/tutorial_core_steps.json` + textos em `TUTORIAL/core/tutorial_core_strings.json`. Alternância entre **continue button** (intro + setup de cada rodada) e **OnEvent** (pressionar Hit/Stand, observar turno do inimigo, ler resumo). Alvos: nomes `BtnHit`/`BtnStand` resolvidos por busca recursiva no Canvas.
+- **Save:** `MainProfileData.core_onboarding_completed` (global) + `SaveData.core_onboarding_step_index` (retomada). Novos helpers em `SaveManager` (`SetCoreOnboardingCompleted`, `Load/Save/ClearCoreOnboardingStepIndex`). `TutorialProgressTracker` trata `TutorialIds.CoreOnboarding` — ao concluir, marca também `main_tutorial_completed = true`, fechando a cadeia. O `MapOnboarding` deixou de marcar `main_tutorial_completed` (essa bandeira agora é exclusiva do fim do `CoreTutorial`).
+- **Cadeia do menu:** `MenuPrincipalManager.Jogar` passa a considerar `core_onboarding_completed`; entre `map_onboarding_completed` e `core_onboarding_completed` falsos, devolve o jogador ao `MapTutorial` (onde o nó (0,0) continua a ser o único clicável).
+- **Pós-combate:** `CoreTutorialBlackjackController.EndBattleRoutine` persiste o progresso via tracker, força `SaveManager.ActiveContext = Campaign` e carrega a cena `Menu` (2,5 s de pausa no ecrã de vitória). Como `main_tutorial_completed == true`, o modal de tutorial **não** reabre e o `Jogar` seguinte vai direto ao `Map` da campanha.
+- **Cena:** além do swap do controller, foi adicionado um GameObject raiz `CoreTutorialOnboarding` com `CoreTutorialGuidedSession` (execution order `-500`) + `TutorialManager` (`_tutorialId = core_onboarding`, `_respectCompletedFlag = 1`) + `CoreTutorialGuidedUi` (desativa o `BtnNewGame` herdado do clone).
+- **Ficheiros criados:** `Assets/Scripts/Tutorial/CoreTutorial/{CoreTutorialDeck,CoreTutorialRoundRig,CoreTutorialBlackjackGame,CoreTutorialBlackjackController,CoreTutorialGuidedSession,CoreTutorialGuidedUi}.cs`; `Assets/Scripts/Tutorial/Onboarding/TutorialCoreEventIds.cs`; `Assets/StreamingAssets/TUTORIAL/core/{tutorial_core_rounds,tutorial_core_steps,tutorial_core_strings}.json`.
+- **Ficheiros tocados:** `Assets/Scripts/Core/Save/{MainProfileData,SaveData,SaveManager}.cs`; `Assets/Scripts/Tutorial/Onboarding/{TutorialIds,TutorialProgressTracker}.cs`; `Assets/Scripts/Menus/MenuPrincipalManager.cs`; `Assets/Scenes/CoreTutorial.unity`.
+
+### 2026-04-16 — `CoreTutorial`: HP 1000, sandbox livre, botão ENCERRAR, sincronização de corrotinas e revisão pt-BR
+
+Revisão do fluxo Default → Map → Core após feedback. O tutorial do combate deixa de ser "só 3 rodadas e fim" e passa a oferecer um **modo livre** para o jogador praticar à vontade.
+
+- **Linguagem pt-BR, direta e didática.** Todos os textos de `Assets/StreamingAssets/TUTORIAL/core/tutorial_core_strings.json` foram reescritos em português brasileiro com explicações curtas e exemplos concretos. Inclui um novo passo **teoria da multiplicação** (`core_00b_multi_theory`) antes da primeira rodada, explicando multiplicação como soma repetida (`2 × 3 = 2 + 2 + 2 = 6`, etc.).
+- **HP 1000/1000 no combate tutorial.** `TUTORIAL/core/tutorial_core_rounds.json` sobe `playerMaxHealth` e `enemyMaxHealth` para 1000 (o rig das 3 rodadas continua a aplicar 50 de dano cada — fim das rodadas guiadas: P 950 / E 900). Sobra HP de sobra para o sandbox.
+- **Modo sandbox.** Quando o controller precisa duma 4ª rodada em diante, entra em sandbox: `CoreTutorialDeck.LoadShuffled` (Fisher-Yates) usa o pool lido de `Assets/StreamingAssets/Easy/config_cards_easy_multiplication.json` (via `DeckConfig.Load`). O HUD passa a mostrar "Rodada N (treino livre)".
+- **Botão ENCERRAR.** Novo botão vermelho no canto superior direito (`CoreTutorialGuidedUi` cria em runtime se não existir). Fica oculto durante as 3 rodadas guiadas e aparece quando `TutorialManager.CompletedOrSkipped` dispara. Clique → `CoreTutorialBlackjackController.EndBattle()` → persiste `core_onboarding_completed = true` e `main_tutorial_completed = true`, força `ActiveContext = Campaign` e carrega `Menu`. Morte em sandbox (HP 0 em qualquer lado) também chama `EndBattle`.
+- **Sincronização tutorial ↔ corrotina.** Problema original: passos ligados a eventos de corrotina (`EnemyTurnTaken`, `RoundSummaryShown`) avançavam antes do jogador ter tempo de ler, pois o evento disparava 0.8–2 s após o início da explicação. Solução: o passo passa a `advanceMode = 2` (ContinueButton) e a corrotina chama `CoreTutorialBlackjackController.PauseIfTutorialExplaining()` logo após disparar o feedback visual. Este helper consulta a nova propriedade pública `TutorialManager.CurrentStepId` (adicionada ao manager) e faz `yield return null` enquanto o passo atual for `ContinueButton` e ainda não avançou. Resultado: a UI do combate congela no último estado visível até o jogador clicar em **Continuar** no tooltip.
+- **Passos atualizados (15).** `TUTORIAL/core/tutorial_core_steps.json` inclui agora: `intro_combat`, `multi_theory` (novo), `round1_setup`, `round1_press_hit` (OnEvent), `round1_observe_enemy` (ContinueButton), `round1_press_stand` (OnEvent), `round1_summary` (ContinueButton), `round2_setup`, `round2_press_stand` (OnEvent), `round2_enemy_busts` (ContinueButton), `round2_summary` (ContinueButton), `round3_setup`, `round3_press_stand` (OnEvent), `round3_enemy_busts` (ContinueButton), `round3_summary` (ContinueButton), `sandbox_intro` (ContinueButton, apresenta o botão ENCERRAR).
+- **Validação da cadeia.** Reconfirmado: `DefaultBlackjackGuidedUi.GoToMap` → `GameFlowScenes.CurrentMap` (=`MapTutorial` em contexto Tutorial) → `NodeInteraction.SelectNode` no nó (0,0) → `GameFlowScenes.CurrentCore` (=`CoreTutorial` em contexto Tutorial) → sandbox → ENCERRAR → `Menu` (campanha, sem modal porque `main_tutorial_completed = true`).
+- **Ficheiros criados neste ajuste:** nenhum (script reaproveita `CoreTutorial*` existentes).
+- **Ficheiros tocados:** `Assets/Scripts/Tutorial/Onboarding/TutorialManager.cs` (nova `CurrentStepId`); `Assets/Scripts/Tutorial/CoreTutorial/{CoreTutorialDeck,CoreTutorialBlackjackGame,CoreTutorialBlackjackController,CoreTutorialGuidedUi}.cs`; `Assets/StreamingAssets/TUTORIAL/core/{tutorial_core_rounds,tutorial_core_steps,tutorial_core_strings}.json`; `docs/TUTORIAL_ONBOARDING.md`.
+
+### 2026-04-20 — `StreamingAssets/TUTORIAL/`: pastas por fluxo + `TutorialContentPaths`
+
+- **Organização:** todos os JSON de tutorial deixaram a raiz de `Assets/StreamingAssets/` e passaram para `TUTORIAL/blackjackguided/`, `TUTORIAL/defaultblackjack/`, `TUTORIAL/map/` e `TUTORIAL/core/` (cada uma com o respectivo `.meta` de pasta).
+- **Código:** novo `Assets/Scripts/Tutorial/TutorialContentPaths.cs` com constantes dos caminhos relativos à raiz de `StreamingAssets`; `DefaultBlackjackGuidedSession`, `DefaultBlackjackController`, `MapTutorialOnboardingSession`, `CoreTutorialGuidedSession` e `CoreTutorialBlackjackController` usam essas constantes nos defaults.
+- **Cenas:** `TutorialDefaultBlackjack.unity`, `CoreTutorial.unity` e `Assets/_Recovery/0 (4).unity` — campos serializados de ficheiros JSON atualizados para os novos caminhos.
+- **Documentação:** `docs/TUTORIAL_ONBOARDING.md` (secção de layout + tabelas do Core); entradas históricas em `context.md` que citavam `Assets/StreamingAssets/tutorial_*.json` alinhadas aos novos caminhos.
+
+### 2026-04-21 — Wiki / Ajuda (UI Toolkit) + revisão de teoria no início do duelo (Core)
+
+- **UI:** `Assets/UI/Wiki/WikiView.uxml` + `WikiStyles.uss`; controlador `Assets/Scripts/Map/MapWikiAccess.cs` (cena Map com botão Ajuda; mesma wiki na Core). Conteúdo por abas (`WikiTab_*` / `WikiPage_*`); mapeamento teoria ↔ tipo de nó em `Assets/Scripts/Map/TheoryWikiPage.cs` (`TheoryWikiPageMapping.FromMapNodeType` / `ToTabId` / `DisplayName`).
+- **Revisão automática (Core):** `BlackjackController` inicia a mesa (`ApplyNewRoundStateBody` sem parar a corrotina de arranque), espera frames para o layout, e se o jogador **não** tiver pedido para saltar aquele tipo, chama `MapWikiAccess.OpenForRevision(TheoryWikiPage)` — reutiliza o mesmo modal: **sem sidebar**, **sem botão X**, título **«Revisão»**, rodapé com **Prosseguir** e toggle **«Não mostrar novamente para &lt;tipo&gt;»** (só **Prosseguir** fecha; **Esc** desligado neste modo). `IsOpen` exposto para corrotinas que esperam o fecho.
+- **Persistência:** `SaveData.theoryRevisionSkippedTabIds` (ids de aba, ex. `math_add`); `MapWikiAccess.IsRevisionSkippedForPage` + gravação no fecho quando o toggle está marcado.
+- **Input na Core:** com a wiki aberta, o input do canvas de combate fica suprimido (`CanvasGroup` no canvas principal) até fechar.
+- **Overlay a largura total do Game View:** o `rootVisualElement` da wiki é dimensionado/posicionado com `RuntimePanelUtils.ScreenToPanel` + `GeometryChangedEvent` no `panel.visualTree` para não ficar só na faixa central quando o PanelSettings / aspect do Editor não coincidem com o ecrã.
+- **Corrotinas:** `OnNewRound` agenda `StopAllCoroutines` via `Invoke` no frame seguinte para não cortar a corrotina de arranque que ainda está a correr.
+- **Removido do projeto:** modal UXML/C# dedicado `TheoryRevisionModal` (fluxo unificado na wiki).
+
+### 2026-04-22 — Nó `Bossfight` (Fractar), balance Hard e wiki
+
+- **Mapa:** `MapNodeType.Bossfight` em `MapNode.cs`; `MapGenerator` após `AssignNodeTypesAndDifficulty` chama `InsertBossFightNode()` (omitido em `MapTutorial`): linha extra `row == rows`, coluna `bossFightColumn` (-1 = centro); todos os nós `(rows-1, *)` ligam ao boss. `Bossfight` com peso **0** no sorteio (`SyncTypeWeights` força peso 0; `PickRandomType` / `CalculateTotalWeight` ignoram o tipo).
+- **Visual:** `BossFightNodeVisual` + campo em `MapVisualizer` (cor, `Sprite` ícone, `nodeScale`); label **Fractar (Boss final)**.
+- **Combate:** `BossFightBalance` (600 HP, dano ×2); `BlackjackController.Awake` aplica para `RunState.CurrentNodeType == Bossfight`; revisão automática da wiki **não** abre no boss. `StreamingAssetsDeckPaths` devolve `Boss/config_cards_boss.json` para o boss.
+- **Dificuldade global:** `EnemyCombatBalance.GetEnemyDamageMultiplier(Hard)` = **1,75** (antes 2).
+- **Vitória no boss:** `BattleRewardResolver` com `Hard` (+500 moedas); reset de posição/seed/`currentRun` como na derrota; `SceneManager.LoadScene(GameFlowScenes.Menu)`. Constante `GameFlowScenes.Menu`.
+- **Wiki:** `WikiPage_difficulty` — linha Difícil ×1,75; nova linha Boss + secção Fractar; texto do multiplicador ajustado. (Em 2026-04-23 a tabela numérica passou para a aba Combate; ver entrada «Catálogo da loja» no mesmo dia para Economia.)
+
+### 2026-04-23 — Catálogo da loja: novos itens, ícones e acumulação attack/defense
+
+- **`item_catalog.json`:** 8 itens — poção pequena (cura 100, 120 moedas), poção grande (250, 320); ofensivos **Anel da Inequação** (×1,15, 220), **Tomos Lineares** (×1,35, 480), **Cajado Fractal** (×1,5, 820); defensivos **Amuleto Progressivo** (+100 HP, 300), **Escudo Hipotenusa** (+150, 560), **Túnica Fractal** (+250, 980). Preços subindo com o poder; recompensas de vitória em duelo: **100 / 250 / 500** moedas (Fácil / Médio / Difícil), conforme `BattleRewardResolver`.
+- **`PlayerItemStats.CalculateDamageMultiplier`:** deixa de multiplicar entrada a entrada; passa a **`1 + Σ(attackMultiplier - 1)`** por cada entrada ofensiva em `ownedItemIds` (incluindo repetições).
+- **`PlayerItemStats.CalculateMaxHealth`:** mantém **`100 + Σ bonusHealth`** por entrada defensiva (já compatível com ids repetidos).
+- **`StoreController`:** removido bloqueio «Comprado» por `Contains(id)` em attack/defense; após compra permanente chama-se `LoadStoreData()` como nos consumíveis.
+- **`ItemId.cs` + `ItemDefinition.ItemId`:** mapeamento para os novos `id` do JSON.
+- **`SaveData.ownedItemIds`:** comentário de documentação sobre repetição de `id`.
+- **Arte:** removidos placeholders antigos `potion_icon.png`, `shield_icon.png`, `sword_icon.png`, `amulet_icon.png`; ícones actuais com nomes em ficheiro sem espaços sob `Resources/Icons/`.
+- **Wiki (`WikiView.uxml` + `MapWikiAccess` + cenas Map/Core):** nova aba **Economia** (`WikiTab_economy` / `WikiPage_economy`) concentra moedas, loja, equipamento e consumíveis; removida a aba **Loja e inventário**. A aba **Combate** passa a ter a **tabela** de dificuldade (vida do oponente, mult. de dano ao jogador ao perder a rodada, moedas na vitória, incluindo boss); a aba **Dificuldade** fica narrativa + remissão à tabela da aba Combate. **Visão geral** remete à Economia em vez de detalhar a loja. Tabelas alinhadas a `EnemyCombatBalance`, `BattleRewardResolver` e `BossFightBalance`; **`MapWikiAccess.SanitizeLegacyTabIds`** + `OnValidate` convertem `shop_inventory` → `economy` em `tabIds` antigos do Inspector.
+
+### 2026-05-07 — Baralho do boss: `Boss/config_cards_boss.json`
+
+- **`StreamingAssetsDeckPaths`:** confronto `MapNodeType.Bossfight` passa a resolver `StreamingAssets/Boss/config_cards_boss.json` em vez de `Easy/config_cards_easy_multiplication.json`. O nó de boss mantém `CombatEquationDifficulty.Hard` no mapa (recompensas/`BattleRewardResolver`); apenas a fonte do JSON de cartas mudou.
+
+### 2026-05-07 — Boss Fractar: 600 HP
+
+- **`BossFightBalance.MaxHealth`:** 500 → **600**; tabelas/copy na wiki (`WikiView.uxml`, linhas Boss) alinhadas.
+
+### 2026-05-07 — Vitória no boss: wipe de save + agradecimento no menu
+
+- Após o vídeo final (ou a espera se não houver vídeo), **antes** de `LoadScene(Menu)`: `MainMenuTransitionState.RequestRunCompleteThanks()`, `RunState.ClearVolatileBattleContext()`, `SaveManager.Delete()` (apaga perfiles + campanha + tutorial + legado + `.migrated.bak`, repõe `_migrationChecked`).
+- **`MenuPrincipalManager.Start`:** se `ConsumeRunCompleteThanks()`, mostra overlay uGUI com mensagem de agradecimento e **Continuar** (`Destroy` do painel).
+- Ficheiros: `MainMenuTransitionState.cs`, `BlackjackController.BossOutroCompleteAndGoToMenu`, `SaveManager.Delete` alargado, `RunState.ClearVolatileBattleContext`.

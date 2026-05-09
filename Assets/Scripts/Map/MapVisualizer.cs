@@ -17,6 +17,15 @@ public class DifficultyBorder
     public Sprite border;
 }
 
+/// <summary>Cor, ícone e escala do nó <see cref="MapNodeType.Bossfight"/> (Inspector).</summary>
+[System.Serializable]
+public class BossFightNodeVisual
+{
+    public Color nodeColor = new(0.5f, 0.22f, 0.75f, 1f);
+    public Sprite icon;
+    [Min(0.1f)] public float nodeScale = 1.15f;
+}
+
 [ExecuteAlways]
 [RequireComponent(typeof(MapGenerator))]
 public class MapVisualizer : MonoBehaviour
@@ -39,6 +48,9 @@ public class MapVisualizer : MonoBehaviour
 
     [Header("Borders by Difficulty")]
     [SerializeField] private List<DifficultyBorder> difficultyBorders = new();
+
+    [Header("Boss (Fractar) node")]
+    [SerializeField] private BossFightNodeVisual bossFightStyle = new();
 
     private MapGenerator _generator;
     private Transform _nodesRoot;
@@ -217,6 +229,15 @@ public class MapVisualizer : MonoBehaviour
             instance.name = $"Node_{node.Row}_{node.Col}_{node.Type}_{node.Difficulty}";
             instance.transform.position = new Vector3(node.WorldPosition.x, node.WorldPosition.y, 0f);
             ApplyDifficultyVisuals(instance.transform, node.Difficulty);
+            if (node.Type == MapNodeType.Bossfight)
+            {
+                ApplyBossFightTint(instance.transform, bossFightStyle.nodeColor);
+                if (bossFightStyle.nodeScale > 0f)
+                    instance.transform.localScale *= bossFightStyle.nodeScale;
+                if (bossFightStyle.icon != null)
+                    ApplyBossFightIcon(instance.transform, bossFightStyle.icon);
+            }
+
             AttachTypeLabel(instance.transform, node.Type, node.Difficulty);
             _nodeViews[(node.Row, node.Col)] = instance.transform;
         }
@@ -287,6 +308,67 @@ public class MapVisualizer : MonoBehaviour
         }
     }
 
+    private static void ApplyBossFightTint(Transform nodeRoot, Color tint)
+    {
+        foreach (Renderer r in nodeRoot.GetComponentsInChildren<Renderer>(true))
+        {
+            if (r is LineRenderer)
+                continue;
+            if (r.GetComponent<TextMesh>() != null)
+                continue;
+
+            if (r is SpriteRenderer spriteRenderer)
+            {
+                Color c = tint;
+                c.a = spriteRenderer.color.a;
+                spriteRenderer.color = c;
+                continue;
+            }
+
+            Color col = tint;
+            Material shared = r.sharedMaterial;
+            if (shared != null)
+            {
+                if (shared.HasProperty(ShaderBaseColorId))
+                    col.a = shared.GetColor(ShaderBaseColorId).a;
+                else if (shared.HasProperty(ShaderColorId))
+                    col.a = shared.GetColor(ShaderColorId).a;
+            }
+
+            var block = new MaterialPropertyBlock();
+            r.GetPropertyBlock(block);
+            if (shared != null)
+            {
+                if (shared.HasProperty(ShaderBaseColorId))
+                    block.SetColor(ShaderBaseColorId, col);
+                if (shared.HasProperty(ShaderColorId))
+                    block.SetColor(ShaderColorId, col);
+                if (!shared.HasProperty(ShaderBaseColorId) && !shared.HasProperty(ShaderColorId))
+                {
+                    block.SetColor(ShaderColorId, col);
+                    block.SetColor(ShaderBaseColorId, col);
+                }
+            }
+            else
+            {
+                block.SetColor(ShaderColorId, col);
+            }
+
+            r.SetPropertyBlock(block);
+        }
+    }
+
+    private static void ApplyBossFightIcon(Transform nodeRoot, Sprite icon)
+    {
+        foreach (SpriteRenderer sr in nodeRoot.GetComponentsInChildren<SpriteRenderer>(true))
+        {
+            if (sr.gameObject.name.Contains("DifficultyBorderSprite", System.StringComparison.Ordinal))
+                continue;
+            sr.sprite = icon;
+            return;
+        }
+    }
+
     private void AttachTypeLabel(Transform nodeTransform, MapNodeType type, CombatEquationDifficulty difficulty)
     {
         if (!showNodeTypeLabel)
@@ -297,7 +379,9 @@ public class MapVisualizer : MonoBehaviour
         labelObject.transform.localPosition = new Vector3(0f, 1.05f, 0f);
 
         var textMesh = labelObject.AddComponent<TextMesh>();
-        textMesh.text = $"{type.ToString().Replace('_', ' ')}\n{difficulty}";
+        textMesh.text = type == MapNodeType.Bossfight
+            ? $"Fractar\n(Boss final)\n{difficulty}"
+            : $"{type.ToString().Replace('_', ' ')}\n{difficulty}";
         textMesh.characterSize = 0.08f;
         textMesh.fontSize = 40;
         textMesh.anchor = TextAnchor.MiddleCenter;
@@ -448,5 +532,35 @@ public class MapVisualizer : MonoBehaviour
             Destroy(target);
         else
             DestroyImmediate(target);
+    }
+
+    public bool TryGetNodeTransform(int row, int col, out Transform t)
+    {
+        return _nodeViews.TryGetValue((row, col), out t);
+    }
+
+    /// <summary>Nó da linha 0 com maior coluna (embaixo à direita entre os existentes).</summary>
+    public bool TryGetBottomRowRightmostNodeTransform(out Transform nodeTransform, out MapNode node)
+    {
+        node = null;
+        nodeTransform = null;
+        if (_generator == null)
+            _generator = GetComponent<MapGenerator>();
+
+        int bestCol = int.MinValue;
+        foreach (var kv in _generator.Graph)
+        {
+            if (kv.Key.row != 0)
+                continue;
+            if (kv.Key.col > bestCol)
+            {
+                bestCol = kv.Key.col;
+                node = kv.Value;
+            }
+        }
+
+        if (node == null)
+            return false;
+        return TryGetNodeTransform(node.Row, node.Col, out nodeTransform);
     }
 }

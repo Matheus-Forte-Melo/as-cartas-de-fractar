@@ -19,7 +19,7 @@ namespace Blackjack.Core
             {
                 CombatEquationDifficulty.Easy => 1f,
                 CombatEquationDifficulty.Medium => 1.5f,
-                CombatEquationDifficulty.Hard => 2f,
+                CombatEquationDifficulty.Hard => 1.75f,
                 _ => 1f
             };
     }

@@ -8,6 +8,15 @@ public static class StreamingAssetsDeckPaths
 {
     public static string BuildDeckPath(MapNodeType nodeType, CombatEquationDifficulty difficulty)
     {
+        // Boss (Fractar): deck dedicado em StreamingAssets/Boss/ (não segue pasta Easy/Medium/Hard).
+        if (nodeType == MapNodeType.Bossfight)
+        {
+            return Path.Combine(
+                Application.streamingAssetsPath,
+                "Boss",
+                "config_cards_boss.json");
+        }
+
         string folder = difficulty switch
         {
             CombatEquationDifficulty.Easy => "Easy",

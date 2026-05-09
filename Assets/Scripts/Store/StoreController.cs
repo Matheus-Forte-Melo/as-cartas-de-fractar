@@ -55,6 +55,39 @@ namespace Store
             }
         }
 
+        /// <summary>
+        /// Camadas: cabeçalho (moedas + Voltar) sempre acima dos cartões; modal acima de tudo.
+        /// USS desta versão do Unity não aceita <c>z-index</c>; em UI Toolkit a ordem de pintura
+        /// segue a posição na lista de filhos — usa-se <see cref="VisualElement.BringToFront"/>.
+        /// O cabeçalho tem <c>position: absolute</c> em USS para se manter no topo visual mesmo
+        /// estando como último filho; o ScrollView ganha <c>padding-top</c> igual à altura do header.
+        /// </summary>
+        private void ApplyStoreLayerOrder()
+        {
+            if (root == null) return;
+
+            VisualElement header = root.Q<VisualElement>("StoreHeader");
+            ScrollView scroll = root.Q<ScrollView>("StoreItemsScroll");
+
+            if (header != null)
+            {
+                header.BringToFront();
+
+                if (scroll != null)
+                {
+                    header.RegisterCallback<GeometryChangedEvent>(_ =>
+                    {
+                        float h = header.resolvedStyle.height;
+                        if (h > 0f)
+                            scroll.style.paddingTop = h + 16f;
+                    });
+                }
+            }
+
+            if (modalOverlay != null)
+                modalOverlay.BringToFront();
+        }
+
         private static void EnsureConsumableList(SaveData save)
         {
             if (save.consumableSlots == null)
@@ -64,6 +97,19 @@ namespace Store
         private void EnsureConsumableList() => EnsureConsumableList(_save);
 
         private int ConsumableSlotCount => _save.consumableSlots?.Count ?? 0;
+
+        /// <summary>
+        /// Ataque/defesa: id já em <c>ownedItemIds</c>. Consumíveis nunca são “já adquiridos” de forma
+        /// permanente — o limite é só <see cref="MaxConsumableSlots"/> (podem repetir o mesmo id em slots).
+        /// </summary>
+        private bool IsItemAlreadyOwned(ItemDefinition item)
+        {
+            if (item.ItemType == ItemType.Consumable)
+                return false;
+
+            _save.ownedItemIds ??= new List<string>();
+            return _save.ownedItemIds.Contains(item.id);
+        }
 
         private void InitializeUI()
         {
@@ -87,6 +133,8 @@ namespace Store
                 modalCancelBtn.clicked += CloseModal;
             if (modalConfirmBtn != null)
                 modalConfirmBtn.clicked += ConfirmPurchase;
+
+            ApplyStoreLayerOrder();
 
             VisualElement titleContainer = root.Q<VisualElement>("StoreTitleContainer");
             if (titleContainer != null)
@@ -186,25 +234,20 @@ namespace Store
                 itemIcon.style.backgroundImage = new StyleBackground(iconSprite);
 
             bool isConsumable = itemData.ItemType == ItemType.Consumable;
-            bool alreadyOwned = !isConsumable && _save.ownedItemIds != null && _save.ownedItemIds.Contains(itemData.id);
 
             if (buyButton != null)
             {
-                if (alreadyOwned)
-                {
-                    SetButtonPurchased(buyButton, "Comprado");
-                }
-                else if (isConsumable)
+                if (isConsumable)
                 {
                     if (ConsumableSlotCount >= MaxConsumableSlots)
                         SetButtonPurchased(buyButton, "Inventário cheio (3/3)");
                     else
                         buyButton.clicked += () => OnBuyItemClicked(itemData, buyButton);
                 }
+                else if (IsItemAlreadyOwned(itemData))
+                    SetButtonPurchased(buyButton, "Já adquirido");
                 else
-                {
                     buyButton.clicked += () => OnBuyItemClicked(itemData, buyButton);
-                }
             }
 
             if (infoButton != null && cardRoot != null)
@@ -253,6 +296,17 @@ namespace Store
                 return;
             }
 
+            if (IsItemAlreadyOwned(itemData))
+            {
+                modalTitle.text = "Já adquirido";
+                modalMessage.text = "Este item já foi adquirido na loja.";
+                modalMessage.AddToClassList("error");
+                modalCancelBtn.style.display = DisplayStyle.Flex;
+                modalConfirmBtn.style.display = DisplayStyle.None;
+                modalCancelBtn.text = "Fechar";
+                return;
+            }
+
             if (_save.coins >= itemData.price)
             {
                 modalTitle.text = "Confirmar Compra";
@@ -291,7 +345,7 @@ namespace Store
                 EnsureConsumableList();
                 if (ConsumableSlotCount >= MaxConsumableSlots)
                 {
-                    Debug.LogWarning("[Store] Tentativa de compra de consumível com inventário cheio.");
+                    Debug.LogWarning("[Store] Compra de consumível rejeitada (inventário cheio).");
                     CloseModal();
                     return;
                 }
@@ -308,6 +362,13 @@ namespace Store
                 return;
             }
 
+            if (IsItemAlreadyOwned(_pendingItem))
+            {
+                Debug.LogWarning("[Store] Compra rejeitada — item permanente já adquirido.");
+                CloseModal();
+                return;
+            }
+
             _save.coins -= _pendingItem.price;
             _save.ownedItemIds ??= new List<string>();
             _save.ownedItemIds.Add(_pendingItem.id);
@@ -320,15 +381,13 @@ namespace Store
 
             Debug.Log($"[Store] Comprou: {_pendingItem.displayName} por {_pendingItem.price}. Saldo: {_save.coins}");
 
-            if (_pendingBuyButton != null)
-                SetButtonPurchased(_pendingBuyButton, "Comprado");
-
             CloseModal();
+            LoadStoreData();
         }
 
         private void OnBackButtonClicked()
         {
-            SceneManager.LoadScene("Map");
+            SceneManager.LoadScene(GameFlowScenes.CurrentMap);
         }
     }
 }
