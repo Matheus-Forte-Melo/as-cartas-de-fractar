@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 996b9883a02133445a3841a9e295c585
+guid: 01a70fd7e857043458823a7906260414
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 8438102433265613820
-    second: poasdf_0
+      213: 8148053339018498157
+    second: certofkjdsoiergr_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: poasdf_0
+      name: certofkjdsoiergr_0
       rect:
         serializedVersion: 2
-        x: 10
-        y: 3
-        width: 1049
-        height: 641
+        x: 0
+        y: 1
+        width: 637
+        height: 388
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: cfbf721c4792a1570800000000000000
-      internalID: 8438102433265613820
+      spriteID: d6012237753b31170800000000000000
+      internalID: 8148053339018498157
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      poasdf_0: 8438102433265613820
+      certofkjdsoiergr_0: 8148053339018498157
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
