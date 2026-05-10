@@ -36,6 +36,24 @@ public class MenuPrincipalManager : MonoBehaviour
             TryBuildTutorialPrompt();
         else
             painelPerguntaTutorial.SetActive(false);
+
+        RegisterMenuButtonHoverOnPanels();
+    }
+
+    /// <summary>
+    /// Adiciona hover (escala suave) a todos os botões dos painéis principais do menu.
+    /// </summary>
+    private void RegisterMenuButtonHoverOnPanels()
+    {
+        foreach (GameObject root in new[] { painelMenuInicial, painelOpcoes, painelPerguntaTutorial })
+        {
+            if (root == null) continue;
+            foreach (Button btn in root.GetComponentsInChildren<Button>(true))
+            {
+                if (btn.GetComponent<MenuButtonHover>() != null) continue;
+                btn.gameObject.AddComponent<MenuButtonHover>();
+            }
+        }
     }
 
     /// <summary>Chamado pelo botão Jogar: retoma cadeia tutorial ou abre modal na primeira vez.</summary>
@@ -260,6 +278,7 @@ public class MenuPrincipalManager : MonoBehaviour
         img.color = new Color(0.28f, 0.32f, 0.45f, 1f);
         var btn = go.GetComponent<Button>();
         btn.onClick.AddListener(onClick);
+        go.AddComponent<MenuButtonHover>();
 
         var label = new GameObject("Text", typeof(RectTransform), typeof(Text));
         label.transform.SetParent(go.transform, false);

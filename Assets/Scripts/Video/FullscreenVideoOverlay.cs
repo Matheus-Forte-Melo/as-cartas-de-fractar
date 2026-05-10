@@ -21,6 +21,9 @@ namespace Video
             public readonly float HoldToSkipSeconds;
             public readonly string SkipHintText;
             public readonly Action OnCompleted;
+            public readonly bool DuckBackgroundMusic;
+            public readonly float DuckFadeOutSeconds;
+            public readonly float RestoreFadeInSeconds;
 
             public PlayRequest(
                 VideoClip clip,
@@ -28,7 +31,10 @@ namespace Video
                 int canvasSortingOrder,
                 float holdToSkipSeconds,
                 string skipHintText,
-                Action onCompleted)
+                Action onCompleted,
+                bool duckBackgroundMusic = false,
+                float duckFadeOutSeconds = 0.5f,
+                float restoreFadeInSeconds = 0.5f)
             {
                 Clip = clip;
                 StreamingRelativePath = streamingRelativePath;
@@ -36,6 +42,9 @@ namespace Video
                 HoldToSkipSeconds = holdToSkipSeconds;
                 SkipHintText = skipHintText;
                 OnCompleted = onCompleted;
+                DuckBackgroundMusic = duckBackgroundMusic;
+                DuckFadeOutSeconds = duckFadeOutSeconds;
+                RestoreFadeInSeconds = restoreFadeInSeconds;
             }
         }
 
@@ -63,6 +72,9 @@ namespace Video
                 request.OnCompleted?.Invoke();
                 return null;
             }
+
+            if (request.DuckBackgroundMusic && MusicManager.Instance != null)
+                MusicManager.Instance.BeginExclusiveAudio(request.DuckFadeOutSeconds);
 
             var go = new GameObject(nameof(FullscreenVideoOverlay));
             var comp = go.AddComponent<FullscreenVideoOverlay>();
@@ -336,6 +348,9 @@ namespace Video
                 _videoPlayer.loopPointReached -= OnVideoFinished;
                 try { _videoPlayer.Stop(); } catch { /* ignore */ }
             }
+
+            if (_request.DuckBackgroundMusic && MusicManager.Instance != null)
+                MusicManager.Instance.EndExclusiveAudio(_request.RestoreFadeInSeconds);
 
             Action cb = _request.OnCompleted;
             Destroy(gameObject);

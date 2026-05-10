@@ -24,7 +24,8 @@ namespace Menus
                 canvasSortingOrder: OverlaySortingOrder,
                 holdToSkipSeconds: HoldToSkipSeconds,
                 skipHintText: null,
-                onCompleted: () => SceneManager.LoadScene(destinationScene)));
+                onCompleted: () => SceneManager.LoadScene(destinationScene),
+                duckBackgroundMusic: true));
         }
 
         public static FullscreenVideoOverlay Spawn(string destinationScene, string videoFileName = DefaultVideoFileName)
@@ -36,7 +37,8 @@ namespace Menus
                 canvasSortingOrder: OverlaySortingOrder,
                 holdToSkipSeconds: HoldToSkipSeconds,
                 skipHintText: null,
-                onCompleted: () => SceneManager.LoadScene(destinationScene)));
+                onCompleted: () => SceneManager.LoadScene(destinationScene),
+                duckBackgroundMusic: true));
         }
     }
 }

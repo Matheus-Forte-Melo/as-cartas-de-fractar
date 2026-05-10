@@ -97,8 +97,59 @@ public class BlackjackController : MonoBehaviour
         btnHit.onClick.AddListener(OnHit);
         btnStand.onClick.AddListener(OnStand);
 
-        btnHit.GetComponentInChildren<Text>().text = "Compre";
-        btnStand.GetComponentInChildren<Text>().text = "Passe";
+        ApplyActionButtonStyle(btnHit, "CoreUI/Compre");
+        ApplyActionButtonStyle(btnStand, "CoreUI/Passe");
+    }
+
+    /// <summary>
+    /// Botões "Compre" / "Passe" usam imagens com o texto já desenhado
+    /// (Assets/Resources/CoreUI/*.png). Carrega o sprite por <see cref="Resources.Load"/>,
+    /// esconde qualquer label legado dentro do botão, configura cores para escurecer
+    /// quando o botão estiver desativado e instala hover (escala) suave.
+    /// </summary>
+    private static void ApplyActionButtonStyle(Button btn, string spriteResourcePath)
+    {
+        if (btn == null) return;
+
+        foreach (Text legacyText in btn.GetComponentsInChildren<Text>(true))
+        {
+            legacyText.gameObject.SetActive(false);
+        }
+        foreach (TMP_Text tmpText in btn.GetComponentsInChildren<TMP_Text>(true))
+        {
+            tmpText.gameObject.SetActive(false);
+        }
+
+        Image image = btn.GetComponent<Image>();
+        if (image != null && !string.IsNullOrEmpty(spriteResourcePath))
+        {
+            Sprite loaded = Resources.Load<Sprite>(spriteResourcePath);
+            if (loaded != null)
+            {
+                image.sprite = loaded;
+                image.type = Image.Type.Simple;
+                image.preserveAspect = true;
+                image.color = Color.white;
+            }
+            else
+            {
+                Debug.LogWarning($"[BlackjackController] Sprite não encontrado em Resources/{spriteResourcePath}.");
+            }
+        }
+
+        ColorBlock colors = btn.colors;
+        colors.normalColor = Color.white;
+        colors.highlightedColor = new Color(1f, 1f, 1f, 1f);
+        colors.pressedColor = new Color(0.78f, 0.78f, 0.78f, 1f);
+        colors.selectedColor = Color.white;
+        colors.disabledColor = new Color(0.35f, 0.35f, 0.35f, 0.85f);
+        colors.fadeDuration = 0.1f;
+        btn.colors = colors;
+
+        if (btn.GetComponent<MenuButtonHover>() == null)
+        {
+            btn.gameObject.AddComponent<MenuButtonHover>();
+        }
     }
 
     private void OnDisable()

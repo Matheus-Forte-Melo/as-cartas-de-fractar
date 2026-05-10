@@ -501,7 +501,9 @@ MonoBehaviour:
   createRuntimeOpenButton: 1
   openButtonLabel: Ajuda
   openButtonAnchoredPosition: {x: -18, y: -18}
-  openButtonSize: {x: 180, y: 54}
+  openButtonSize: {x: 180, y: 60}
+  openButtonSprite: {fileID: 5500000000000000003, guid: c0a1b2c3d4e5f60718293a4b5c6d7e91, type: 3}
+  openButtonFont: {fileID: 0}
   tabIds:
   - math_add
   - math_sub
@@ -512,7 +514,7 @@ MonoBehaviour:
   - combat
   - difficulty
   - enemies
-  - shop_inventory
+  - economy
   - controls
   defaultTabId: overview
 --- !u!114 &527100003
@@ -748,8 +750,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.1}
   m_AnchorMax: {x: 0.5, y: 0.1}
-  m_AnchoredPosition: {x: 58, y: 12}
-  m_SizeDelta: {x: 110, y: 44}
+  m_AnchoredPosition: {x: 110, y: -20}
+  m_SizeDelta: {x: 200, y: 72}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &746605599
 MonoBehaviour:
@@ -771,9 +773,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
-  m_PreserveAspect: 0
+  m_Sprite: {fileID: 5500000000000000002, guid: c0a1b2c3d4e5f60718293a4b5c6d7e90, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -850,7 +852,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &791301931
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1125,7 +1127,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1256330672
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1758,8 +1760,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.1}
   m_AnchorMax: {x: 0.5, y: 0.1}
-  m_AnchoredPosition: {x: -58, y: 12}
-  m_SizeDelta: {x: 110, y: 44}
+  m_AnchoredPosition: {x: -110, y: -20}
+  m_SizeDelta: {x: 200, y: 72}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1683415211
 MonoBehaviour:
@@ -1781,9 +1783,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
-  m_PreserveAspect: 0
+  m_Sprite: {fileID: 5500000000000000001, guid: c0a1b2c3d4e5f60718293a4b5c6d7e8f, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -1961,6 +1963,8 @@ MonoBehaviour:
   txtEnemyHandValue: {fileID: 4012345023}
   btnHit: {fileID: 1683415213}
   btnStand: {fileID: 746605601}
+  bossVictoryVideoStreamingPath: Cutscenes/fim.mp4
+  bossVictoryVideoHoldSkipSeconds: 1
 --- !u!4 &2126711036
 Transform:
   m_ObjectHideFlags: 0

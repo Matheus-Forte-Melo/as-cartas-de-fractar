@@ -682,10 +682,17 @@ namespace Map.Wiki
 
             // Fundo principal + contorno claro para destacar do mapa (que é escuro).
             var image = root.AddComponent<UnityEngine.UI.Image>();
-            if (openButtonSprite != null)
+            Sprite spriteForButton = openButtonSprite;
+            if (spriteForButton == null && IsCoreScene())
             {
-                image.sprite = openButtonSprite;
+                spriteForButton = Resources.Load<Sprite>("CoreUI/Ajuda");
+            }
+            bool hasSprite = spriteForButton != null;
+            if (hasSprite)
+            {
+                image.sprite = spriteForButton;
                 image.color = Color.white;
+                image.preserveAspect = true;
             }
             else
             {
@@ -698,38 +705,51 @@ namespace Map.Wiki
             var button = root.AddComponent<UnityEngine.UI.Button>();
             var colors = button.colors;
             colors.normalColor = Color.white;
-            colors.highlightedColor = new Color(0.85f, 0.9f, 1f, 1f);
-            colors.pressedColor = new Color(0.7f, 0.75f, 0.9f, 1f);
+            colors.highlightedColor = hasSprite ? Color.white : new Color(0.85f, 0.9f, 1f, 1f);
+            colors.pressedColor = hasSprite ? new Color(0.78f, 0.78f, 0.78f, 1f) : new Color(0.7f, 0.75f, 0.9f, 1f);
+            colors.selectedColor = Color.white;
+            colors.disabledColor = new Color(0.35f, 0.35f, 0.35f, 0.85f);
+            colors.fadeDuration = 0.1f;
             button.colors = colors;
             button.targetGraphic = image;
             button.onClick.AddListener(Toggle);
 
-            var textGo = new GameObject("Caption", typeof(RectTransform));
-            textGo.transform.SetParent(root.transform, false);
-            var textRt = textGo.GetComponent<RectTransform>();
-            textRt.anchorMin = Vector2.zero;
-            textRt.anchorMax = Vector2.one;
-            textRt.offsetMin = Vector2.zero;
-            textRt.offsetMax = Vector2.zero;
-
-            var text = textGo.AddComponent<Text>();
-            text.text = openButtonLabel;
-            text.fontSize = 18;
-            text.fontStyle = FontStyle.Bold;
-            text.alignment = TextAnchor.MiddleCenter;
-            text.color = Color.black;
-            if (openButtonFont != null)
+            if (hasSprite)
             {
-                text.font = openButtonFont;
-                text.fontSize = 24; // Aumentar um pouco a fonte Pix Romana
+                root.AddComponent<MenuButtonHover>();
             }
-            else
+
+            // Quando há sprite com a palavra "Ajuda" desenhada, omite o caption
+            // (caso contrario o texto fica sobreposto a imagem).
+            if (!hasSprite)
             {
-                text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-                text.color = Color.white;
-                var textOutline = textGo.AddComponent<UnityEngine.UI.Outline>();
-                textOutline.effectColor = new Color(0f, 0f, 0f, 0.9f);
-                textOutline.effectDistance = new Vector2(1f, -1f);
+                var textGo = new GameObject("Caption", typeof(RectTransform));
+                textGo.transform.SetParent(root.transform, false);
+                var textRt = textGo.GetComponent<RectTransform>();
+                textRt.anchorMin = Vector2.zero;
+                textRt.anchorMax = Vector2.one;
+                textRt.offsetMin = Vector2.zero;
+                textRt.offsetMax = Vector2.zero;
+
+                var text = textGo.AddComponent<Text>();
+                text.text = openButtonLabel;
+                text.fontSize = 18;
+                text.fontStyle = FontStyle.Bold;
+                text.alignment = TextAnchor.MiddleCenter;
+                text.color = Color.black;
+                if (openButtonFont != null)
+                {
+                    text.font = openButtonFont;
+                    text.fontSize = 24; // Aumentar um pouco a fonte Pix Romana
+                }
+                else
+                {
+                    text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                    text.color = Color.white;
+                    var textOutline = textGo.AddComponent<UnityEngine.UI.Outline>();
+                    textOutline.effectColor = new Color(0f, 0f, 0f, 0.9f);
+                    textOutline.effectDistance = new Vector2(1f, -1f);
+                }
             }
 
             _wikiOpenButtonRect = rt;

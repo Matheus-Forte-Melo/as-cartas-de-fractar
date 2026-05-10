@@ -188,6 +188,12 @@ Tema escuro e místico, runas e símbolos matemáticos, luzes azuis/cianas. Mesa
 
 **Hub / Tela de Itens:** estética de mesa de matemático arcanista. Exibe moedas atemporais, catálogo de melhorias permanentes e botão "Adentrar Torre".
 
+### 8.3 Música (BGM por cena)
+
+- **Configuração:** `StreamingAssets/Music/scene_music_config.json` mapeia **nome de cena** → faixa em **`Resources/`** (caminho sem extensão, ex. `Music/nome_do_ficheiro`). Faixa por omissão: `defaultTrackResourcePath` quando a cena não tem entrada.
+- **Comportamento:** `SceneMusicDirector` (no mesmo objeto persistente que `MusicManager` na cena Menu) reage a `SceneManager.sceneLoaded` e chama `MusicManager.PlayTrackResource`. Em cada entrada de cena, a faixa pode começar num **instante aleatório** no clip (salvo `disableRandomStart` na entrada). `MusicManager` mantém **volume do utilizador** (slider) × **factor de fade** (vídeos/cutscenes).
+- **Vídeo fullscreen:** `FullscreenVideoOverlay.PlayRequest` pode pedir *duck* da música (`duckBackgroundMusic`); intro do menu e *outro* do boss usam fade-out antes do vídeo e fade-in ao terminar (a cena seguinte ou o mesmo `PlayTrackResource` repõe o factor de fade ao trocar faixa).
+
 ---
 
 ## 9. Progressão e Hub
@@ -579,3 +585,12 @@ Revisão do fluxo Default → Map → Core após feedback. O tutorial do combate
 - Após o vídeo final (ou a espera se não houver vídeo), **antes** de `LoadScene(Menu)`: `MainMenuTransitionState.RequestRunCompleteThanks()`, `RunState.ClearVolatileBattleContext()`, `SaveManager.Delete()` (apaga perfiles + campanha + tutorial + legado + `.migrated.bak`, repõe `_migrationChecked`).
 - **`MenuPrincipalManager.Start`:** se `ConsumeRunCompleteThanks()`, mostra overlay uGUI com mensagem de agradecimento e **Continuar** (`Destroy` do painel).
 - Ficheiros: `MainMenuTransitionState.cs`, `BlackjackController.BossOutroCompleteAndGoToMenu`, `SaveManager.Delete` alargado, `RunState.ClearVolatileBattleContext`.
+
+### 2026-05-10 — BGM por cena, fades e *duck* em vídeo fullscreen
+
+- **Config:** `Assets/StreamingAssets/Music/scene_music_config.json` (mapeamento `sceneName` → `trackResourcePath` em Resources; `defaultTrackResourcePath`; por entrada `disableRandomStart`). Loader e DTOs em `Assets/Scripts/Songs/SceneMusicConfig.cs` (`SceneMusicConfigLoader`, `JsonUtility`).
+- **Faixa:** `Assets/Resources/Music/watermelon_beats-medieval-folk-music-505203.mp3` (mesmo GUID que antes em `Assets/Songs/`; ficheiro retirado de `Songs/`). `Resources.Load<AudioClip>` sem extensão.
+- **`MusicManager`:** volume = utilizador × fade; `PlayTrackResource`, `BeginExclusiveAudio` / `EndExclusiveAudio` (coroutines com `unscaledDeltaTime`); `PlayTrackResource` cancela fades e repõe factor 1. Singleton `DontDestroyOnLoad` inalterado na raiz do Menu.
+- **`SceneMusicDirector`:** `Assets/Scripts/Songs/SceneMusicDirector.cs` na cena `Menu.unity` (GameObject `MusicManager`); subscreve `sceneLoaded` (ignora `Additive`); resolve config e aplica faixa.
+- **Vídeo:** `FullscreenVideoOverlay.PlayRequest` com `duckBackgroundMusic`, `duckFadeOutSeconds`, `restoreFadeInSeconds` (opcionais); `IntroVideoPlayer` e `BossOutroFlow` activam *duck* nos fluxos com overlay. `BlackjackController` continua a usar apenas `BossOutroFlow` para o *outro*.
+- **Documentação produto:** secção **8.3 Música (BGM por cena)** neste ficheiro.

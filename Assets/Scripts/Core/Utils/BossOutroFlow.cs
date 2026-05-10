@@ -19,7 +19,8 @@ public static class BossOutroFlow
                 canvasSortingOrder: OutroCanvasSortingOrder,
                 holdToSkipSeconds: Mathf.Max(0f, holdToSkipSeconds),
                 skipHintText: null,
-                onCompleted: ExecutePostOutroTransition));
+                onCompleted: ExecutePostOutroTransition,
+                duckBackgroundMusic: true));
         }
         else
             ExecutePostOutroTransition();
