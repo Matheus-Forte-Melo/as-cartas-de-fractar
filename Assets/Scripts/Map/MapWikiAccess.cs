@@ -48,6 +48,12 @@ namespace Map.Wiki
         [Tooltip("Tamanho do botão de abrir.")]
         [SerializeField] private Vector2 openButtonSize = new(180f, 54f);
 
+        [Tooltip("Imagem de fundo do botão (opcional). Se não houver, usa retângulo azul.")]
+        [SerializeField] private Sprite openButtonSprite;
+
+        [Tooltip("Fonte do texto do botão (opcional). Se não houver, usa fonte padrão do Unity.")]
+        [SerializeField] private Font openButtonFont;
+
         [Header("Comportamento")]
         [Tooltip("IDs das abas (devem existir como WikiTab_<id> + WikiPage_<id> no UXML).")]
         [SerializeField]
@@ -676,11 +682,18 @@ namespace Map.Wiki
 
             // Fundo principal + contorno claro para destacar do mapa (que é escuro).
             var image = root.AddComponent<UnityEngine.UI.Image>();
-            image.color = new Color(0.32f, 0.44f, 0.78f, 0.97f);
-
-            var outline = root.AddComponent<UnityEngine.UI.Outline>();
-            outline.effectColor = new Color(0.85f, 0.88f, 1f, 0.9f);
-            outline.effectDistance = new Vector2(1.5f, -1.5f);
+            if (openButtonSprite != null)
+            {
+                image.sprite = openButtonSprite;
+                image.color = Color.white;
+            }
+            else
+            {
+                image.color = new Color(0.32f, 0.44f, 0.78f, 0.97f);
+                var outline = root.AddComponent<UnityEngine.UI.Outline>();
+                outline.effectColor = new Color(0.85f, 0.88f, 1f, 0.9f);
+                outline.effectDistance = new Vector2(1.5f, -1.5f);
+            }
 
             var button = root.AddComponent<UnityEngine.UI.Button>();
             var colors = button.colors;
@@ -704,12 +717,20 @@ namespace Map.Wiki
             text.fontSize = 18;
             text.fontStyle = FontStyle.Bold;
             text.alignment = TextAnchor.MiddleCenter;
-            text.color = Color.white;
-            text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-
-            var textOutline = textGo.AddComponent<UnityEngine.UI.Outline>();
-            textOutline.effectColor = new Color(0f, 0f, 0f, 0.9f);
-            textOutline.effectDistance = new Vector2(1f, -1f);
+            text.color = Color.black;
+            if (openButtonFont != null)
+            {
+                text.font = openButtonFont;
+                text.fontSize = 24; // Aumentar um pouco a fonte Pix Romana
+            }
+            else
+            {
+                text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                text.color = Color.white;
+                var textOutline = textGo.AddComponent<UnityEngine.UI.Outline>();
+                textOutline.effectColor = new Color(0f, 0f, 0f, 0.9f);
+                textOutline.effectDistance = new Vector2(1f, -1f);
+            }
 
             _wikiOpenButtonRect = rt;
         }

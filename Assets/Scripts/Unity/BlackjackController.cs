@@ -24,18 +24,18 @@ public class BlackjackController : MonoBehaviour
     public CardHandDisplay enemyHand;
 
     [Header("UI - Vida")]
-    public TMP_Text txtPlayerHealth;
-    public TMP_Text txtEnemyHealth;
+    public Text txtPlayerHealth;
+    public Text txtEnemyHealth;
 
     [Header("UI - Topo: rodada + fase (Turno jogador/inimigo, Resolução, Fim da rodada)")]
-    [SerializeField] private TMP_Text txtRoundLabel;
+    [SerializeField] private Text txtRoundLabel;
 
     [Header("UI - Texto central (turno, feed, resumo)")]
-    [SerializeField] private TMP_Text txtBattleCenter;
+    [SerializeField] private Text txtBattleCenter;
 
     [Header("UI - Valor da mão (limite 21 no jogo)")]
-    [SerializeField] private TMP_Text txtPlayerHandValue;
-    [SerializeField] private TMP_Text txtEnemyHandValue;
+    [SerializeField] private Text txtPlayerHandValue;
+    [SerializeField] private Text txtEnemyHandValue;
 
     [Header("UI - Botões")]
     public Button btnHit;
@@ -97,8 +97,8 @@ public class BlackjackController : MonoBehaviour
         btnHit.onClick.AddListener(OnHit);
         btnStand.onClick.AddListener(OnStand);
 
-        btnHit.GetComponentInChildren<TMP_Text>().text = "Hit";
-        btnStand.GetComponentInChildren<TMP_Text>().text = "Stand";
+        btnHit.GetComponentInChildren<Text>().text = "Compre";
+        btnStand.GetComponentInChildren<Text>().text = "Passe";
     }
 
     private void OnDisable()
@@ -117,14 +117,14 @@ public class BlackjackController : MonoBehaviour
         {
             var t = root.Find("txtPlayerHandValue");
             if (t != null)
-                txtPlayerHandValue = t.GetComponent<TMP_Text>();
+                txtPlayerHandValue = t.GetComponent<Text>();
         }
 
         if (txtEnemyHandValue == null)
         {
             var t = root.Find("txtEnemyHandValue");
             if (t != null)
-                txtEnemyHandValue = t.GetComponent<TMP_Text>();
+                txtEnemyHandValue = t.GetComponent<Text>();
         }
     }
 

@@ -57,18 +57,18 @@ namespace Tutorial.CoreTutorial
         public CardHandDisplay enemyHand;
 
         [Header("UI - Vida")]
-        public TMP_Text txtPlayerHealth;
-        public TMP_Text txtEnemyHealth;
+        public Text txtPlayerHealth;
+        public Text txtEnemyHealth;
 
         [Header("UI - Topo: rodada + fase")]
-        [SerializeField] private TMP_Text txtRoundLabel;
+        [SerializeField] private Text txtRoundLabel;
 
         [Header("UI - Texto central")]
-        [SerializeField] private TMP_Text txtBattleCenter;
+        [SerializeField] private Text txtBattleCenter;
 
         [Header("UI - Valor da mão")]
-        [SerializeField] private TMP_Text txtPlayerHandValue;
-        [SerializeField] private TMP_Text txtEnemyHandValue;
+        [SerializeField] private Text txtPlayerHandValue;
+        [SerializeField] private Text txtEnemyHandValue;
 
         [Header("UI - Botões")]
         public Button btnHit;
@@ -136,14 +136,14 @@ namespace Tutorial.CoreTutorial
             if (btnHit != null)
             {
                 btnHit.onClick.AddListener(OnHit);
-                var t = btnHit.GetComponentInChildren<TMP_Text>();
-                if (t != null) t.text = "Pedir";
+                var t = btnHit.GetComponentInChildren<Text>();
+                if (t != null) t.text = "Compre";
             }
             if (btnStand != null)
             {
                 btnStand.onClick.AddListener(OnStand);
-                var t = btnStand.GetComponentInChildren<TMP_Text>();
-                if (t != null) t.text = "Parar";
+                var t = btnStand.GetComponentInChildren<Text>();
+                if (t != null) t.text = "Passe";
             }
         }
 
