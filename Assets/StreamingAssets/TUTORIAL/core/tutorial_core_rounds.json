@@ -24,7 +24,7 @@
     },
     {
       "label": "round2_enemy_busts_by_5",
-      "_comment": "Player abre em 19 (forte) e para. Enemy abre em 14, e a regra obriga pedir. Puxa 12 -> 26, estoura por 5. Dano no inimigo: 50.",
+      "_comment": "Player abre em 19 (forte) e para. Enemy abre em 14, e a regra obriga comprar. Puxa 12 -> 26, estoura por 5. Dano no inimigo: 50.",
       "playerOpening": [
         { "equation": "5 * 2", "ace": false },
         { "equation": "3 * 3", "ace": false }
@@ -41,7 +41,7 @@
     },
     {
       "label": "round3_enemy_busts_by_6",
-      "_comment": "Player abre em 20 (muito forte) e para. Enemy abre em 15, e a regra obriga pedir. Puxa 12 -> 27, estoura por 6. Dano no inimigo: 60.",
+      "_comment": "Player abre em 20 (muito forte) e para. Enemy abre em 15, e a regra obriga comprar. Puxa 12 -> 27, estoura por 6. Dano no inimigo: 60.",
       "playerOpening": [
         { "equation": "5 * 2", "ace": false },
         { "equation": "2 * 5", "ace": false }

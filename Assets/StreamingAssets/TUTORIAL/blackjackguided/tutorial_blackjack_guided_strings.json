@@ -2,31 +2,31 @@
   "strings": [
     {
       "key": "bj_guided_00",
-      "text": "Bem-vindo ao 21 (Blackjack). O objetivo é chegar o mais perto possível de 21 sem estourar."
+      "text": "Bem-vindo ao 21 (Blackjack). Objetivo: chegar o mais perto possível de 21 sem estourar."
     },
     {
       "key": "bj_guided_01",
-      "text": "As cartas valem o número da face; valete, dama e rei valem 10. O ás vale 11 ou 1 — o que for melhor pra sua mão."
+      "text": "As cartas valem o número da face; O naipe não importa neste jogo."
     },
     {
       "key": "bj_guided_02",
-      "text": "A mesa recebe uma carta virada pra baixo e outra pra cima. Você só vê a segunda depois da sua jogada."
+      "text": "A mesa recebe uma carta virada para baixo e outra para cima. Você só vê a segunda ao final da rodada."
     },
     {
       "key": "bj_guided_03",
-      "text": "Você tem 9 + 2 = 11. Com 11 é bem seguro pedir mais uma carta (Pedir) — a chance de estourar é baixa."
+      "text": "Você tem 9 + 2 = 11. Com 11, comprar outra carta (<b>Comprar</b>) costuma ser seguro; pouca chance de estourar."
     },
     {
       "key": "bj_guided_04",
-      "text": "Toque em <b>Pedir</b> pra receber a próxima carta do baralho."
+      "text": "Toque em <b>Comprar</b> para receber a próxima carta do baralho."
     },
     {
       "key": "bj_guided_04b",
-      "text": "Você acabou de usar <b>Pedir</b>: comprou uma carta e sua mão mudou. Agora você vai usar <b>Parar</b> — outra ação importante — para encerrar a sua vez e deixar a mesa jogar."
+      "text": "Você usou <b>Comprar</b>: comprou uma carta e a mão mudou. Agora use <b>Parar</b>, encerre a vez e deixe a mesa jogar."
     },
     {
       "key": "bj_guided_05",
-      "text": "Toque em <b>Parar</b> para encerrar sua vez. A mesa só revela a carta fechada e faz a jogada dela depois disso."
+      "text": "Toque em <b>Parar</b> para encerrar sua vez. A mesa revela a carta virada e joga depois disso."
     },
     {
       "key": "bj_guided_05b",
@@ -34,11 +34,11 @@
     },
     {
       "key": "bj_guided_06",
-      "text": "A mesa mostrou a mão completa e não superou a sua — com a sua mão mais forte, <b>você vence esta rodada</b>. Quem passa de 21 estoura; entre quem não estoura, ganha quem estiver mais perto de 21."
+      "text": "A mesa mostrou a mão completa e não passou da sua: com a mão mais forte, <b>você vence esta rodada</b>. Quem passa de 21 estoura; entre quem não estoura, ganha quem estiver mais perto de 21."
     },
     {
       "key": "bj_guided_07",
-      "text": "Treino concluído! Pode jogar à vontade com <b>Nova mão</b>. Quando tiver pronto, clique em terminar, vamos lhe introduzir ao verdadeiro desafio.."
+      "text": "Treino concluído. Jogue à vontade com <b>Nova mão</b>. Quando quiser, clique em terminar e siga para o desafio principal."
     }
   ]
 }

@@ -1,6 +1,5 @@
 using System.Collections;
 using System.IO;
-using TMPro;
 using Tutorial;
 using Tutorial.Onboarding;
 using UnityEngine;
@@ -28,10 +27,10 @@ namespace Tutorial.DefaultBlackjack
         [SerializeField] private Button _btnHit;
         [SerializeField] private Button _btnStand;
         [SerializeField] private Button _btnNewRound;
-        [SerializeField] private TMP_Text _txtCenter;
-        [SerializeField] private TMP_Text _txtPlayerValue;
-        [SerializeField] private TMP_Text _txtDealerValue;
-        [SerializeField] private TMP_Text _txtRoundLabel;
+        [SerializeField] private Text _txtCenter;
+        [SerializeField] private Text _txtPlayerValue;
+        [SerializeField] private Text _txtDealerValue;
+        [SerializeField] private Text _txtRoundLabel;
 
         [Header("Tempos — mesa (ritmo parecido com o Core)")]
         [SerializeField] private float _dealerRevealPause = 0.55f;
@@ -121,23 +120,25 @@ namespace Tutorial.DefaultBlackjack
 
             if (_txtCenter == null)
             {
-                var t = transform.Find("UI/TxtCenter") ?? transform.Find("Canvas/TxtCenter");
+                var t = transform.Find("UI/TxtCenter")
+                        ?? transform.Find("Canvas/TxtCenter")
+                        ?? transform.Find("Canvas/txtCenter");
                 if (t != null)
-                    _txtCenter = t.GetComponent<TMP_Text>();
+                    _txtCenter = t.GetComponent<Text>();
             }
 
             if (_txtPlayerValue == null)
             {
                 var t = transform.Find("UI/TxtPlayerValue") ?? transform.Find("Canvas/txtPlayerValue");
                 if (t != null)
-                    _txtPlayerValue = t.GetComponent<TMP_Text>();
+                    _txtPlayerValue = t.GetComponent<Text>();
             }
 
             if (_txtDealerValue == null)
             {
                 var t = transform.Find("UI/TxtDealerValue") ?? transform.Find("Canvas/txtDealerValue");
                 if (t != null)
-                    _txtDealerValue = t.GetComponent<TMP_Text>();
+                    _txtDealerValue = t.GetComponent<Text>();
             }
 
             if (_txtRoundLabel == null)
@@ -146,7 +147,7 @@ namespace Tutorial.DefaultBlackjack
                         ?? transform.Find("UI/txtRoundLabel")
                         ?? transform.Find("Canvas/txtRoundLabel");
                 if (t != null)
-                    _txtRoundLabel = t.GetComponent<TMP_Text>();
+                    _txtRoundLabel = t.GetComponent<Text>();
             }
         }
 
@@ -304,7 +305,7 @@ namespace Tutorial.DefaultBlackjack
                 if (hideHole && _game.Dealer.Cards.Count > 0)
                 {
                     int up = VisibleDealerUpcardValue();
-                    _txtDealerValue.text = $"Mesa: {up} (+ carta fechada)";
+                    _txtDealerValue.text = $"Mesa: {up} (+ carta virada)";
                 }
                 else
                     _txtDealerValue.text = $"Mesa: {_game.Dealer.Value}";

@@ -2,27 +2,27 @@
   "strings": [
     {
       "key": "map_00",
-      "text": "Este é o <b>mapa da sua jornada</b>. Você avança de fase em fase subindo pelos caminhos — fases bloqueadas ficam apagadas e só os círculos ligados ao seu nó atual ficam clicáveis."
+      "text": "O <b>mapa da jornada</b>: você abre fase em fase subindo os caminhos. Fases bloqueadas ficam apagadas; só os círculos ligados ao nó em que você está permitem clique."
     },
     {
       "key": "map_01",
-      "text": "Cada <b>círculo</b> é uma fase. Só dá para seguir pelas <b>ligações</b> (linhas) entre elas; fases bloqueadas ficam mais apagadas até você chegar perto."
+      "text": "Cada <b>círculo</b> é uma fase. Só dá para avançar pelas <b>ligações</b> (linhas). Fases longe do seu nó ficam mais apagadas até você chegar perto."
     },
     {
       "key": "map_02",
-      "text": "A <b>cor</b> do círculo indica a dificuldade daquela fase: tons mais <b>verdes</b> são mais fáceis, <b>laranja</b> médios, e <b>vermelhos</b> mais difíceis."
+      "text": "A <b>cor</b> do círculo marca a dificuldade: <b>verde</b> mais fácil, <b>laranja</b> médio, <b>vermelho</b> mais difícil."
     },
     {
       "key": "map_03",
-      "text": "O <b>rótulo</b> mostra o <b>tipo de equação</b> que você enfrenta ali — por exemplo adição, subtração, multiplicação ou divisão."
+      "text": "O <b>rótulo</b> diz o <b>tipo de equação</b> da fase: adição, subtração, multiplicação, divisão."
     },
     {
       "key": "map_04",
-      "text": "Quanto mais você <b>sobe</b>, mais desafiador fica: equações mais pesadas e inimigos mais fortes. Vale observar bem antes de avançar."
+      "text": "Quanto mais você <b>sobe</b>, mais pesado fica: equações mais duras, inimigos mais fortes. Olhe o mapa antes de entrar na próxima fase."
     },
     {
       "key": "map_05",
-      "text": "Você vai <b>cair</b> muitas vezes antes de chegar ao topo e enfrentar o <b>Fractar</b>. A cada tentativa você aprende e melhora — no futuro, <b>itens</b> na loja ajudam a enfrentar o que antes parecia impossível. (Por agora, foque no mapa.)"
+      "text": "Você vai <b>cair</b> muitas vezes antes do topo e do <b>Fractar</b>. Cada tentativa ensina. Mais tarde, <b>itens</b> na loja ajudam no que hoje trava. Por ora, foque no mapa."
     },
     {
       "key": "map_spotlight_placeholder",

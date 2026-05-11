@@ -1,4 +1,3 @@
-using TMPro;
 using Tutorial.Onboarding;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -137,27 +136,40 @@ namespace Tutorial.DefaultBlackjack
             var btn = go.GetComponent<Button>();
             btn.targetGraphic = img;
 
-            var labelGo = new GameObject("Text (TMP)", typeof(RectTransform), typeof(TextMeshProUGUI));
+            var labelGo = new GameObject("Text (TMP)", typeof(RectTransform), typeof(CanvasRenderer), typeof(Text));
             labelGo.transform.SetParent(go.transform, false);
             var lrt = labelGo.GetComponent<RectTransform>();
             lrt.anchorMin = Vector2.zero;
             lrt.anchorMax = Vector2.one;
             lrt.offsetMin = Vector2.zero;
             lrt.offsetMax = Vector2.zero;
-            var tmp = labelGo.GetComponent<TextMeshProUGUI>();
-            tmp.text = "Terminar";
-            tmp.color = Color.white;
-            tmp.fontSize = 22;
-            tmp.alignment = TextAlignmentOptions.Center;
-            tmp.raycastTarget = false;
-            var templateLabel = canvas.Find("BtnNewRound/Text (TMP)")?.GetComponent<TextMeshProUGUI>();
-            if (templateLabel != null)
-            {
-                tmp.font = templateLabel.font;
-                tmp.fontSharedMaterial = templateLabel.fontSharedMaterial;
-            }
+            var label = labelGo.GetComponent<Text>();
+            label.text = "Terminar";
+            label.color = Color.white;
+            label.fontSize = 22;
+            label.alignment = TextAnchor.MiddleCenter;
+            label.raycastTarget = false;
+            var templateLabel = canvas.Find("BtnNewRound/Text (TMP)")?.GetComponent<Text>();
+            if (templateLabel != null && templateLabel.font != null)
+                label.font = templateLabel.font;
+            else
+                CopyHudFontFromNamedText(label, "txtCenter");
 
             return btn;
+        }
+
+        private static void CopyHudFontFromNamedText(Text target, string sourceObjectName)
+        {
+            if (target == null || string.IsNullOrEmpty(sourceObjectName)) return;
+            var texts = Object.FindObjectsByType<Text>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            for (int i = 0; i < texts.Length; i++)
+            {
+                Text src = texts[i];
+                if (src == null || src == target || src.font == null) continue;
+                if (src.gameObject.name != sourceObjectName) continue;
+                target.font = src.font;
+                return;
+            }
         }
     }
 }

@@ -1,4 +1,3 @@
-using TMPro;
 using Tutorial.Onboarding;
 using UnityEngine;
 using UnityEngine.UI;
@@ -22,6 +21,44 @@ namespace Tutorial.CoreTutorial
 
         /// <summary>Acima do overlay do tutorial (default 5000) para o ENCERRAR continuar clicável.</summary>
         private const int EncerrarCanvasSortOrder = 5500;
+
+        private static Sprite LoadEncerrarSprite()
+        {
+            var sp = Resources.Load<Sprite>("CoreUI/Terminar");
+            if (sp != null)
+                return sp;
+            var all = Resources.LoadAll<Sprite>("CoreUI/Terminar");
+            return all != null && all.Length > 0 ? all[0] : null;
+        }
+
+        private static void ApplyEncerrarLayout(RectTransform rt, Image img)
+        {
+            if (rt == null) return;
+            if (img != null && img.sprite != null)
+            {
+                img.preserveAspect = true;
+                const float h = 48f;
+                float ratio = img.sprite.rect.width / Mathf.Max(1f, img.sprite.rect.height);
+                rt.sizeDelta = new Vector2(h * ratio, h);
+            }
+            else
+                rt.sizeDelta = new Vector2(160f, 46f);
+        }
+
+        private static void ApplyCoreBattleButtonTint(Button btn)
+        {
+            if (btn == null) return;
+            var colors = btn.colors;
+            colors.colorMultiplier = 1f;
+            colors.fadeDuration = 0.1f;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = new Color(0.9607843f, 0.9607843f, 0.9607843f, 1f);
+            colors.pressedColor = new Color(0.78431374f, 0.78431374f, 0.78431374f, 1f);
+            colors.selectedColor = colors.highlightedColor;
+            colors.disabledColor = new Color(0.78431374f, 0.78431374f, 0.78431374f, 0.5019608f);
+            btn.colors = colors;
+            btn.transition = Selectable.Transition.ColorTint;
+        }
 
         [SerializeField] private TutorialManager _tutorialManager;
         [SerializeField] private CoreTutorialBlackjackController _controller;
@@ -121,8 +158,8 @@ namespace Tutorial.CoreTutorial
                     rt.anchorMin = rt.anchorMax = new Vector2(1f, 1f);
                     rt.pivot = new Vector2(1f, 1f);
                     rt.anchoredPosition = new Vector2(-24f, -24f);
-                    rt.sizeDelta = new Vector2(160f, 46f);
                     rt.localScale = Vector3.one;
+                    ApplyEncerrarLayout(rt, _btnEncerrar.GetComponent<Image>());
                 }
 
                 _btnEncerrar.transform.SetAsLastSibling();
@@ -195,33 +232,63 @@ namespace Tutorial.CoreTutorial
             rt.anchorMin = rt.anchorMax = new Vector2(1f, 1f);
             rt.pivot = new Vector2(1f, 1f);
             rt.anchoredPosition = new Vector2(-24f, -24f);
-            rt.sizeDelta = new Vector2(160f, 46f);
             rt.localScale = Vector3.one;
 
             var img = go.GetComponent<Image>();
-            img.color = new Color(0.55f, 0.18f, 0.22f, 1f);
             img.raycastTarget = true;
+            Sprite encerrarSprite = LoadEncerrarSprite();
+            if (encerrarSprite != null)
+            {
+                img.sprite = encerrarSprite;
+                img.type = Image.Type.Simple;
+                img.color = Color.white;
+            }
+            else
+                img.color = new Color(0.55f, 0.18f, 0.22f, 1f);
+
+            ApplyEncerrarLayout(rt, img);
 
             var btn = go.GetComponent<Button>();
             btn.targetGraphic = img;
+            ApplyCoreBattleButtonTint(btn);
 
-            var labelGo = new GameObject("Label", typeof(RectTransform), typeof(TextMeshProUGUI));
-            labelGo.transform.SetParent(go.transform, false);
-            var lrt = labelGo.GetComponent<RectTransform>();
-            lrt.anchorMin = Vector2.zero;
-            lrt.anchorMax = Vector2.one;
-            lrt.offsetMin = Vector2.zero;
-            lrt.offsetMax = Vector2.zero;
+            go.AddComponent<MenuButtonHover>();
 
-            var tmp = labelGo.GetComponent<TextMeshProUGUI>();
-            tmp.text = "ENCERRAR";
-            tmp.color = Color.white;
-            tmp.fontSize = 22;
-            tmp.alignment = TextAlignmentOptions.Center;
-            tmp.fontStyle = FontStyles.Bold;
-            tmp.raycastTarget = false;
+            if (encerrarSprite == null)
+            {
+                var labelGo = new GameObject("Label", typeof(RectTransform), typeof(CanvasRenderer), typeof(Text));
+                labelGo.transform.SetParent(go.transform, false);
+                var lrt = labelGo.GetComponent<RectTransform>();
+                lrt.anchorMin = Vector2.zero;
+                lrt.anchorMax = Vector2.one;
+                lrt.offsetMin = Vector2.zero;
+                lrt.offsetMax = Vector2.zero;
+
+                var label = labelGo.GetComponent<Text>();
+                label.text = "ENCERRAR";
+                label.color = Color.white;
+                label.fontSize = 22;
+                label.fontStyle = FontStyle.Bold;
+                label.alignment = TextAnchor.MiddleCenter;
+                label.raycastTarget = false;
+                CopyHudFontFromNamedText(label, "txtBattleCenter");
+            }
 
             return btn;
+        }
+
+        private static void CopyHudFontFromNamedText(Text target, string sourceObjectName)
+        {
+            if (target == null || string.IsNullOrEmpty(sourceObjectName)) return;
+            var texts = Object.FindObjectsByType<Text>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            for (int i = 0; i < texts.Length; i++)
+            {
+                Text src = texts[i];
+                if (src == null || src == target || src.font == null) continue;
+                if (src.gameObject.name != sourceObjectName) continue;
+                target.font = src.font;
+                return;
+            }
         }
     }
 }
