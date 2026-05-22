@@ -1,4 +1,5 @@
 using System.IO;
+using Menus;
 using Tutorial;
 using Tutorial.Onboarding;
 using UnityEngine;
@@ -52,8 +53,13 @@ namespace Tutorial.CoreTutorial
             var t = transform.parent != null ? transform.parent.Find("Canvas") : null;
             if (t == null)
             {
-                var canvas = FindFirstObjectByType<Canvas>();
-                if (canvas != null) t = canvas.transform;
+                foreach (Canvas canvas in FindObjectsByType<Canvas>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+                {
+                    if (canvas == null || SoftwareCustomCursor.IsPersistentCursorOverlay(canvas))
+                        continue;
+                    t = canvas.transform;
+                    break;
+                }
             }
             return t as RectTransform;
         }

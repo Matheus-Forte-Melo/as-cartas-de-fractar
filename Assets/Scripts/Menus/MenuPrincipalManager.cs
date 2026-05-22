@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.Video;
+using Video;
 
 public class MenuPrincipalManager : MonoBehaviour
 {
@@ -28,6 +29,10 @@ public class MenuPrincipalManager : MonoBehaviour
     {
         SaveManager.ApplySceneNameContextHint();
         SaveManager.EnsureMainTutorialCompletedKeyInSaveFile();
+
+        MainProfileData profileForIntroWarmup = SaveManager.LoadProfile();
+        if (!profileForIntroWarmup.intro_video_seen)
+            VideoWarmupService.EnsureWarmMenuIntro(introVideoClip, introVideoStreamingPath);
 
         if (MainMenuTransitionState.ConsumeRunCompleteThanks())
             ShowRunCompleteThanksOverlay();
@@ -142,12 +147,27 @@ public class MenuPrincipalManager : MonoBehaviour
         SceneManager.LoadScene(destinationScene);
     }
 
+    /// <summary>Evita apanhar <see cref="SoftwareCustomCursor"/> (DDOL): modais ficariam sobre o próprio sprite na hierarquia.</summary>
+    private static Canvas FindHudCanvasPreferringNonCursorOverlay()
+    {
+        foreach (Canvas canvas in FindObjectsByType<Canvas>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+        {
+            if (canvas == null)
+                continue;
+            if (SoftwareCustomCursor.IsPersistentCursorOverlay(canvas))
+                continue;
+            return canvas;
+        }
+
+        return null;
+    }
+
     private void TryBuildTutorialPrompt()
     {
         if (painelPerguntaTutorial != null)
             return;
 
-        Canvas canvas = FindFirstObjectByType<Canvas>();
+        Canvas canvas = FindHudCanvasPreferringNonCursorOverlay();
         if (canvas == null)
         {
             Debug.LogWarning("[MenuPrincipalManager] Nenhum Canvas — modal de tutorial não criado.");
@@ -196,7 +216,7 @@ public class MenuPrincipalManager : MonoBehaviour
 
     private void ShowRunCompleteThanksOverlay()
     {
-        Canvas canvas = FindFirstObjectByType<Canvas>();
+        Canvas canvas = FindHudCanvasPreferringNonCursorOverlay();
         if (canvas == null)
         {
             Debug.LogWarning("[MenuPrincipalManager] Canvas ausente — agradecimento pós-run omitido.");

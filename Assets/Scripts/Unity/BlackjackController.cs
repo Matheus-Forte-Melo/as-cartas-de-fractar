@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Video;
 using Blackjack.Core;
 using Map.Wiki;
 using Blackjack.Decks;
@@ -97,6 +98,13 @@ public class BlackjackController : MonoBehaviour
         btnHit.onClick.AddListener(OnHit);
         btnStand.onClick.AddListener(OnStand);
 
+        if (RunState.CurrentNodeType == MapNodeType.Bossfight &&
+            !string.IsNullOrWhiteSpace(bossVictoryVideoStreamingPath))
+        {
+            VideoWarmupService.Ensure()
+                .WarmStreamingRelativePath(bossVictoryVideoStreamingPath.Trim());
+        }
+
         ApplyActionButtonStyle(btnHit, "CoreUI/Compre");
         ApplyActionButtonStyle(btnStand, "CoreUI/Passe");
     }
@@ -159,7 +167,15 @@ public class BlackjackController : MonoBehaviour
 
     private void ResolveHandValueTextsIfMissing()
     {
-        Canvas canvas = FindFirstObjectByType<Canvas>();
+        Canvas canvas = null;
+        foreach (Canvas c in FindObjectsByType<Canvas>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+        {
+            if (c == null || Menus.SoftwareCustomCursor.IsPersistentCursorOverlay(c))
+                continue;
+            canvas = c;
+            break;
+        }
+
         if (canvas == null)
             return;
 
@@ -788,6 +804,9 @@ public class BlackjackController : MonoBehaviour
         }
         else
         {
+            if (RunState.CurrentNodeType == MapNodeType.Bossfight)
+                VideoWarmupService.Instance?.CancelWarmup();
+
             ClearHandValueLabels();
             if (txtBattleCenter != null)
             {

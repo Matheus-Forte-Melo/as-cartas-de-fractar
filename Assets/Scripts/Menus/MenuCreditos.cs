@@ -8,7 +8,15 @@ public class MenuCreditos : MonoBehaviour
 
     private void Start()
     {
-        Canvas canvas = FindFirstObjectByType<Canvas>();
+        Canvas canvas = null;
+        foreach (Canvas c in FindObjectsByType<Canvas>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+        {
+            if (c == null || Menus.SoftwareCustomCursor.IsPersistentCursorOverlay(c))
+                continue;
+            canvas = c;
+            break;
+        }
+
         if (canvas == null) return;
         foreach (Button btn in canvas.GetComponentsInChildren<Button>(true))
         {

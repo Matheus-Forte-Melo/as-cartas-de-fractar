@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -13,6 +12,22 @@ namespace Video
     /// </summary>
     public sealed class FullscreenVideoOverlay : MonoBehaviour
     {
+        /// <summary>Número de instâncias activas (suporta sobreposição hipotética).</summary>
+        public static int ActiveOverlayCount { get; private set; }
+
+        public static event Action ActiveOverlayCountChanged;
+
+        private static void NotifyOverlayBegan()
+        {
+            ActiveOverlayCount++;
+            ActiveOverlayCountChanged?.Invoke();
+        }
+
+        private static void NotifyOverlayEnded()
+        {
+            ActiveOverlayCount = Mathf.Max(0, ActiveOverlayCount - 1);
+            ActiveOverlayCountChanged?.Invoke();
+        }
         public readonly struct PlayRequest
         {
             public readonly VideoClip Clip;
@@ -80,15 +95,34 @@ namespace Video
             var comp = go.AddComponent<FullscreenVideoOverlay>();
             comp._request = request;
             comp.Build();
+            NotifyOverlayBegan();
             return comp;
         }
 
         private void Build()
         {
             BuildCanvasAndVideoHost();
-            BuildVideoPlayer();
+            if (!TryAttachWarmPreparedVideoPlayer())
+                BuildVideoPlayer();
             if (_request.HoldToSkipSeconds > 0f)
                 BuildLoaderUi();
+        }
+
+        /// <summary>Se <see cref="VideoWarmupService"/> tiver o mesmo clip/URL já preparado, reutiliza e evita novo <c>Prepare()</c>.</summary>
+        private bool TryAttachWarmPreparedVideoPlayer()
+        {
+            if (VideoWarmupService.Instance == null)
+                return false;
+            if (!VideoWarmupService.Instance.TryTakePreparedMatching(_request, out GameObject host, out VideoPlayer vp, out _))
+                return false;
+
+            host.transform.SetParent(transform, false);
+            host.name = "VideoHost";
+            _videoPlayer = vp;
+            _videoPlayer.errorReceived += OnVideoError;
+            _videoPlayer.loopPointReached += OnVideoFinished;
+            ApplyPresentationFromPreparedPlayer(_videoPlayer);
+            return true;
         }
 
         private void BuildCanvasAndVideoHost()
@@ -153,7 +187,7 @@ namespace Video
             else
             {
                 _videoPlayer.source = VideoSource.Url;
-                _videoPlayer.url = BuildStreamingAssetsUrl(_request.StreamingRelativePath);
+                _videoPlayer.url = StreamingAssetsVideoUrl.BuildAbsolute(_request.StreamingRelativePath);
             }
 
             _videoPlayer.renderMode = VideoRenderMode.RenderTexture;
@@ -166,16 +200,6 @@ namespace Video
             _videoPlayer.Prepare();
         }
 
-        private static string BuildStreamingAssetsUrl(string relativePath)
-        {
-            string root = Application.streamingAssetsPath;
-            if (string.IsNullOrEmpty(root))
-                return relativePath;
-            relativePath = relativePath.Replace('\\', '/');
-            bool rootSlash = root.EndsWith("/") || root.EndsWith("\\");
-            return rootSlash ? root + relativePath : root + "/" + relativePath;
-        }
-
         private void OnVideoError(VideoPlayer source, string message)
         {
             string desc = source.source == VideoSource.VideoClip
@@ -185,7 +209,10 @@ namespace Video
             Complete();
         }
 
-        private void OnVideoPrepared(VideoPlayer source)
+        private void OnVideoPrepared(VideoPlayer source) => ApplyPresentationFromPreparedPlayer(source);
+
+        /// <summary>Após <c>prepareCompleted</c> (caminho frio ou reutilização do warmup).</summary>
+        private void ApplyPresentationFromPreparedPlayer(VideoPlayer source)
         {
             int w = (int)source.width;
             int h = (int)source.height;
@@ -340,6 +367,7 @@ namespace Video
         {
             if (_completed) return;
             _completed = true;
+            NotifyOverlayEnded();
 
             if (_videoPlayer != null)
             {

@@ -3,17 +3,17 @@
     {
       "label": "HardMultiplication3",
       "cards": [
-        { "equation": "4 * 0.25" },
-        { "equation": "8 * 0.25" },
-        { "equation": "4 * 0.75" },
-        { "equation": "8 * 0.5" },
-        { "equation": "4 * 1.25" },
-        { "equation": "8 * 0.75" },
-        { "equation": "4 * 1.75" },
-        { "equation": "16 * 0.5" },
-        { "equation": "12 * 0.75" },
-        { "equation": "8 * 1.25" },
-        { "equation": "4 * 2.75", "ace": false }
+        { "equation": "4 x 0.25" },
+        { "equation": "8 x 0.25" },
+        { "equation": "4 x 0.75" },
+        { "equation": "8 x 0.5" },
+        { "equation": "4 x 1.25" },
+        { "equation": "8 x 0.75" },
+        { "equation": "4 x 1.75" },
+        { "equation": "16 x 0.5" },
+        { "equation": "12 x 0.75" },
+        { "equation": "8 x 1.25" },
+        { "equation": "4 x 2.75", "ace": false }
       ]
     },
     {

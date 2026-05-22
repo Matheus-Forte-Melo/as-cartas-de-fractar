@@ -5,7 +5,7 @@ namespace Blackjack.Decks
 {
     /// <summary>
     /// Avalia expressões matemáticas simples usadas nas cartas.
-    /// Suporta: +, -, *, /, ×, ÷, √, ², ³, parênteses e "?" (Ás = 11).
+    /// Suporta: +, -, *, x (multiplicação como *), /, ×, ÷, √, ², ³, parênteses e "?" (Ás = 11).
     /// Preparado para expressões compostas dos inimigos avançados (ex: "(10 + 5 - 7)").
     /// </summary>
     public static class ExpressionEvaluator
@@ -38,7 +38,7 @@ namespace Blackjack.Decks
             return left;
         }
 
-        // term = unary (('*' | '/' | '×' | '÷') unary)*
+        // term = unary (('*'|'x'|'X'|'×'|'/'|'÷') unary)*
         private static double ParseTerm(string s, ref int pos)
         {
             double left = ParseUnary(s, ref pos);
@@ -134,7 +134,7 @@ namespace Blackjack.Decks
             c == '+' || c == '-' || c == '\u2212';
 
         private static bool IsMulOrDiv(char c) =>
-            c == '*' || c == '/' || c == '\u00D7' || c == '\u00F7';
+            c == '*' || c == 'x' || c == 'X' || c == '/' || c == '\u00D7' || c == '\u00F7';
 
         private static void SkipSpaces(string s, ref int pos)
         {

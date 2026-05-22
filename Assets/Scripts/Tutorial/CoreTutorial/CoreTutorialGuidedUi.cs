@@ -1,3 +1,4 @@
+using Menus;
 using Tutorial.Onboarding;
 using UnityEngine;
 using UnityEngine.UI;
@@ -220,7 +221,15 @@ namespace Tutorial.CoreTutorial
             RectTransform parent = FindBattleHudCanvasRoot();
             if (parent == null)
             {
-                Canvas any = FindFirstObjectByType<Canvas>();
+                Canvas any = null;
+                foreach (Canvas c in FindObjectsByType<Canvas>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+                {
+                    if (c == null || SoftwareCustomCursor.IsPersistentCursorOverlay(c))
+                        continue;
+                    any = c;
+                    break;
+                }
+
                 if (any == null || any.gameObject.name == RuntimeTutorialCanvasName)
                     return null;
                 parent = any.transform as RectTransform;

@@ -3,65 +3,65 @@
     {
       "label": "HardMultiplication1",
       "cards": [
-        { "equation": "4 * 0.25" },
-        { "equation": "8 * 0.25" },
-        { "equation": "6 * 0.5" },
-        { "equation": "16 * 0.25" },
-        { "equation": "10 * 0.5" },
-        { "equation": "24 * 0.25" },
-        { "equation": "14 * 0.5" },
-        { "equation": "32 * 0.25" },
-        { "equation": "18 * 0.5" },
-        { "equation": "40 * 0.25" },
-        { "equation": "44 * 0.25", "ace": false }
+        { "equation": "4 x 0.25" },
+        { "equation": "8 x 0.25" },
+        { "equation": "6 x 0.5" },
+        { "equation": "16 x 0.25" },
+        { "equation": "10 x 0.5" },
+        { "equation": "24 x 0.25" },
+        { "equation": "14 x 0.5" },
+        { "equation": "32 x 0.25" },
+        { "equation": "18 x 0.5" },
+        { "equation": "40 x 0.25" },
+        { "equation": "44 x 0.25", "ace": false }
       ]
     },
     {
       "label": "HardMultiplication2",
       "cards": [
-        { "equation": "5 * 0.2" },
-        { "equation": "5 * 0.4" },
-        { "equation": "15 * 0.2" },
-        { "equation": "10 * 0.4" },
-        { "equation": "25 * 0.2" },
-        { "equation": "15 * 0.4" },
-        { "equation": "35 * 0.2" },
-        { "equation": "20 * 0.4" },
-        { "equation": "45 * 0.2" },
-        { "equation": "25 * 0.4" },
-        { "equation": "55 * 0.2", "ace": false }
+        { "equation": "5 x 0.2" },
+        { "equation": "5 x 0.4" },
+        { "equation": "15 x 0.2" },
+        { "equation": "10 x 0.4" },
+        { "equation": "25 x 0.2" },
+        { "equation": "15 x 0.4" },
+        { "equation": "35 x 0.2" },
+        { "equation": "20 x 0.4" },
+        { "equation": "45 x 0.2" },
+        { "equation": "25 x 0.4" },
+        { "equation": "55 x 0.2", "ace": false }
       ]
     },
     {
       "label": "HardMultiplication3",
       "cards": [
-        { "equation": "4 * 0.25" },
-        { "equation": "8 * 0.25" },
-        { "equation": "4 * 0.75" },
-        { "equation": "8 * 0.5" },
-        { "equation": "4 * 1.25" },
-        { "equation": "8 * 0.75" },
-        { "equation": "4 * 1.75" },
-        { "equation": "16 * 0.5" },
-        { "equation": "12 * 0.75" },
-        { "equation": "8 * 1.25" },
-        { "equation": "4 * 2.75", "ace": false }
+        { "equation": "4 x 0.25" },
+        { "equation": "8 x 0.25" },
+        { "equation": "4 x 0.75" },
+        { "equation": "8 x 0.5" },
+        { "equation": "4 x 1.25" },
+        { "equation": "8 x 0.75" },
+        { "equation": "4 x 1.75" },
+        { "equation": "16 x 0.5" },
+        { "equation": "12 x 0.75" },
+        { "equation": "8 x 1.25" },
+        { "equation": "4 x 2.75", "ace": false }
       ]
     },
     {
       "label": "HardMultiplication4",
       "cards": [
-        { "equation": "2 * 0.5" },
-        { "equation": "4 * 0.5" },
-        { "equation": "4 * 0.75" },
-        { "equation": "5 * 0.8" },
-        { "equation": "4 * 1.25" },
-        { "equation": "5 * 1.2" },
-        { "equation": "5 * 1.4" },
-        { "equation": "5 * 1.6" },
-        { "equation": "5 * 1.8" },
-        { "equation": "4 * 2.5" },
-        { "equation": "5 * 2.2", "ace": false }
+        { "equation": "2 x 0.5" },
+        { "equation": "4 x 0.5" },
+        { "equation": "4 x 0.75" },
+        { "equation": "5 x 0.8" },
+        { "equation": "4 x 1.25" },
+        { "equation": "5 x 1.2" },
+        { "equation": "5 x 1.4" },
+        { "equation": "5 x 1.6" },
+        { "equation": "5 x 1.8" },
+        { "equation": "4 x 2.5" },
+        { "equation": "5 x 2.2", "ace": false }
       ]
     }
   ]

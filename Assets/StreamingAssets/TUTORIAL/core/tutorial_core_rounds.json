@@ -9,51 +9,51 @@
       "label": "round1_player_loses",
       "_comment": "Player abre em 10 (fraca) e pede 1 carta -> 16. Enemy abre em 19 e fica. Enemy ganha; dano no player: (21-16)*10 = 50.",
       "playerOpening": [
-        { "equation": "2 * 3", "ace": false },
-        { "equation": "1 * 4", "ace": false }
+        { "equation": "2 x 3", "ace": false },
+        { "equation": "1 x 4", "ace": false }
       ],
       "enemyOpening": [
-        { "equation": "3 * 3", "ace": false },
-        { "equation": "5 * 2", "ace": false }
+        { "equation": "3 x 3", "ace": false },
+        { "equation": "5 x 2", "ace": false }
       ],
       "drawStack": [
-        { "equation": "3 * 2", "ace": false },
-        { "equation": "2 * 2", "ace": false },
-        { "equation": "1 * 4", "ace": false }
+        { "equation": "3 x 2", "ace": false },
+        { "equation": "2 x 2", "ace": false },
+        { "equation": "1 x 4", "ace": false }
       ]
     },
     {
       "label": "round2_enemy_busts_by_5",
       "_comment": "Player abre em 19 (forte) e para. Enemy abre em 14, e a regra obriga comprar. Puxa 12 -> 26, estoura por 5. Dano no inimigo: 50.",
       "playerOpening": [
-        { "equation": "5 * 2", "ace": false },
-        { "equation": "3 * 3", "ace": false }
+        { "equation": "5 x 2", "ace": false },
+        { "equation": "3 x 3", "ace": false }
       ],
       "enemyOpening": [
-        { "equation": "2 * 4", "ace": false },
-        { "equation": "2 * 3", "ace": false }
+        { "equation": "2 x 4", "ace": false },
+        { "equation": "2 x 3", "ace": false }
       ],
       "drawStack": [
-        { "equation": "2 * 6", "ace": false },
-        { "equation": "1 * 4", "ace": false },
-        { "equation": "2 * 2", "ace": false }
+        { "equation": "2 x 6", "ace": false },
+        { "equation": "1 x 4", "ace": false },
+        { "equation": "2 x 2", "ace": false }
       ]
     },
     {
       "label": "round3_enemy_busts_by_6",
       "_comment": "Player abre em 20 (muito forte) e para. Enemy abre em 15, e a regra obriga comprar. Puxa 12 -> 27, estoura por 6. Dano no inimigo: 60.",
       "playerOpening": [
-        { "equation": "5 * 2", "ace": false },
-        { "equation": "2 * 5", "ace": false }
+        { "equation": "5 x 2", "ace": false },
+        { "equation": "2 x 5", "ace": false }
       ],
       "enemyOpening": [
-        { "equation": "1 * 7", "ace": false },
-        { "equation": "2 * 4", "ace": false }
+        { "equation": "1 x 7", "ace": false },
+        { "equation": "2 x 4", "ace": false }
       ],
       "drawStack": [
-        { "equation": "4 * 3", "ace": false },
-        { "equation": "2 * 3", "ace": false },
-        { "equation": "1 * 3", "ace": false }
+        { "equation": "4 x 3", "ace": false },
+        { "equation": "2 x 3", "ace": false },
+        { "equation": "1 x 3", "ace": false }
       ]
     }
   ]
