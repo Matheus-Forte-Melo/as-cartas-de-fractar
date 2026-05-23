@@ -29,8 +29,19 @@ namespace Map.Wiki
         public bool IsOpen => _isOpen;
 
         private static RectTransform _wikiOpenButtonRect;
+        /// <summary>Botão Ajuda do chrome DDOL topo-esquerdo (quando existe).</summary>
+        private static RectTransform _persistenteDdOlAjudaRect;
 
         private const string OpenButtonObjectName = "WIKI_OpenButtonRoot";
+
+        /// <summary>Evita segundo botão runtime à direita no host DontDestroy persistente.</summary>
+        public void ApplyPersistentDdOlConfiguration() => createRuntimeOpenButton = false;
+
+        /// <remarks>Cobre o clique no ícone Ajuda do chrome persistente quando não há botão runtime mapa/Core.</remarks>
+        public static void RegisterDdOlAjudaHotspot(RectTransform rect) =>
+            _persistenteDdOlAjudaRect = rect;
+
+        public static void ClearDdOlAjudaHotspot() => _persistenteDdOlAjudaRect = null;
         private const string ActiveTabClass = "wiki-tab--active";
         private const string TabButtonPrefix = "WikiTab_";
         private const string PagePrefix = "WikiPage_";
@@ -780,14 +791,21 @@ namespace Map.Wiki
         /// </summary>
         public static bool IsPointerPressOnWikiOpenButton()
         {
-            if (_wikiOpenButtonRect == null)
-                return false;
             if (Mouse.current == null || !Mouse.current.leftButton.wasPressedThisFrame)
+                return false;
+
+            Vector2 pos = Mouse.current.position.ReadValue();
+
+            if (_persistenteDdOlAjudaRect != null &&
+                RectTransformUtility.RectangleContainsScreenPoint(_persistenteDdOlAjudaRect, pos, null))
+                return true;
+
+            if (_wikiOpenButtonRect == null)
                 return false;
 
             return RectTransformUtility.RectangleContainsScreenPoint(
                 _wikiOpenButtonRect,
-                Mouse.current.position.ReadValue(),
+                pos,
                 null);
         }
     }

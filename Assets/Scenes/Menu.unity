@@ -2425,11 +2425,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecac224a48cc0c3499093bf81dd6bd2f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MenuPrincipalManager
-  nomeDoLevelDeJogo: Map
+  nomeDoLevelDeJogo: HubInicial
   cenaTutorialInicial: TutorialDefaultBlackjack
   IrParaCreditos: Creditos
   painelMenuInicial: {fileID: 1314851331}
   painelOpcoes: {fileID: 1608042631}
+  optionsModal: {fileID: 872001001}
   painelPerguntaTutorial: {fileID: 0}
   introVideoStreamingPath: Cutscenes/inicio.mp4
   introVideoClip: {fileID: 0}
@@ -2532,6 +2533,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1608042632}
+  - component: {fileID: 872001001}
   m_Layer: 5
   m_Name: "Op\xE7\xF5es"
   m_TagString: Untagged
@@ -2565,6 +2567,20 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -50}
   m_SizeDelta: {x: 870, y: 500}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &872001001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1608042631}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c4d2a1e9f0b4c6d8e7f1a2b3c4d5e6f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MainMenuOptionsModal
+  masterMixer: {fileID: 24100000, guid: af11112233445566778899aabbcdef01, type: 2}
+  spawnedAsDdOlDuplicate: 0
 --- !u!1 &1663815789
 GameObject:
   m_ObjectHideFlags: 0

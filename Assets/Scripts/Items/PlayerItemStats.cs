@@ -1,3 +1,4 @@
+using System.Globalization;
 using UnityEngine;
 
 namespace Items
@@ -8,6 +9,14 @@ namespace Items
     public static class PlayerItemStats
     {
         public const int BaseHealth = 100;
+
+        /// <summary>Formato exibido no Hub e no resumo de combate (ex.: ×1,5).</summary>
+        public static string FormatDamageMultiplier(float multiplier)
+        {
+            if (multiplier <= 0f)
+                return "×0";
+            return "×" + multiplier.ToString("0.##", CultureInfo.InvariantCulture);
+        }
 
         /// <summary>
         /// Vida máxima = base + soma de <c>bonusHealth</c> de cada entrada defensiva em <c>ownedItemIds</c>

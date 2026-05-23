@@ -830,7 +830,12 @@ public class BlackjackController : MonoBehaviour
         }
 
         yield return new WaitForSeconds(2f);
-        SceneManager.LoadScene(GameFlowScenes.CurrentMap);
+
+        // Campanha: derrota → hub meta. Tutorial: volta ao MapTutorial/map actual.
+        if (!playerWon && SaveManager.ActiveContext != SaveContext.Tutorial)
+            SceneManager.LoadScene(GameFlowScenes.HubInicial);
+        else
+            SceneManager.LoadScene(GameFlowScenes.CurrentMap);
     }
 
     private void SyncCards()

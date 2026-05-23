@@ -6936,7 +6936,6 @@ GameObject:
   - component: {fileID: 900000002}
   - component: {fileID: 900000003}
   - component: {fileID: 900000004}
-  - component: {fileID: 900000050}
   m_Layer: 0
   m_Name: MapGenerator
   m_TagString: Untagged
@@ -7047,19 +7046,6 @@ MonoBehaviour:
   mainCamera: {fileID: 0}
   txtTransitionMessage: {fileID: 12592348}
   messageDuration: 2.5
---- !u!114 &900000050
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 900000000}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e4d3c2b1a0964857b6e5d4c3b2a10987, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TemporaryMapStoreAccess
-  createRuntimeUi: 1
 --- !u!1 &912113785
 GameObject:
   m_ObjectHideFlags: 0

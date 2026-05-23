@@ -182,17 +182,19 @@ Tema escuro e místico, runas e símbolos matemáticos, luzes azuis/cianas. Mesa
 
 **Tela Inicial:** imagem da Torre, logo, 3 botões — Adentrar Torre / Opções / Sair.
 
-**Menu de Opções:** painel central sobre fundo desfocado. Volume e ajustes de vídeo.
+**Menu de Opções:** painel central sobre fundo desfocado (mesmo fluxo visual na cena Menu ou como overlay DontDestroy quando se usa o botão Config do chrome global). Volume e ajustes de música/UI existentes no painel Opções (`AudioMixer` em `Resources/Settings/Volume` quando aplicável).
 
 **Menu de Pause:** pausa o jogo, fundo desfocado. Botões: Resumir / Opções / Voltar à tela inicial.
 
 **Hub / Tela de Itens:** estética de mesa de matemático arcanista. Exibe moedas atemporais, catálogo de melhorias permanentes e botão "Adentrar Torre".
 
+**Cursor (global):** `SoftwareCustomCursor` num objecto DDOL próprio (**`PersistentCustomCursor`** na cena Menu); sprite em **`Resources/Cursor/cursor`**; sobrepõe o HUD com `Canvas` Overlay, **`overrideSorting`** e ordenação **dinâmica** sobre todos os outros `Canvas` Overlay / Screen Space Camera activos — para ficar acima de modais (tutorial no menu, etc.). Durante **`FullscreenVideoOverlay`**, repõe‑se o cursor nativo (`ActiveOverlayCount`).
+
 ### 8.3 Música (BGM por cena)
 
 - **Configuração:** `StreamingAssets/Music/scene_music_config.json` mapeia **nome de cena** → faixa em **`Resources/`** (caminho sem extensão, ex. `Music/nome_do_ficheiro`). Faixa por omissão: `defaultTrackResourcePath` quando a cena não tem entrada.
 - **Comportamento:** `SceneMusicDirector` (no mesmo objeto persistente que `MusicManager` na cena Menu) reage a `SceneManager.sceneLoaded` e chama `MusicManager.PlayTrackResource`. Em cada entrada de cena, a faixa pode começar num **instante aleatório** no clip (salvo `disableRandomStart` na entrada). `MusicManager` mantém **volume do utilizador** (slider) × **factor de fade** (vídeos/cutscenes).
-- **Vídeo fullscreen:** `FullscreenVideoOverlay.PlayRequest` pode pedir *duck* da música (`duckBackgroundMusic`); intro do menu e *outro* do boss usam fade-out antes do vídeo e fade-in ao terminar (a cena seguinte ou o mesmo `PlayTrackResource` repõe o factor de fade ao trocar faixa).
+- **Vídeo fullscreen:** `FullscreenVideoOverlay.PlayRequest` pode pedir *duck* da música (`duckBackgroundMusic`); intro do menu e *outro* do boss usam fade-out antes do vídeo e fade-in ao terminar (a cena seguinte ou o mesmo `PlayTrackResource` repõe o factor de fade ao trocar faixa). **`VideoWarmupService`** pré-prepara o mesmo vídeo quando o jogador está no menu (primeira vez, antes de reproduzir a intro) ou no combate final contra Fractar, para o primeiro fotograma chegar mais depressa).
 
 ---
 
@@ -229,6 +231,14 @@ Tema escuro e místico, runas e símbolos matemáticos, luzes azuis/cianas. Mesa
 ---
 
 ## 11. Registro de ações técnicas
+
+### 2026-05-23 — Chrome Ajuda + Config DDOL + wiki global + opções em overlay
+
+- **HUD persistente:** `PersistenteGlobalChrome` (`Assets/Scripts/HUD/PersistenteGlobalChrome.cs`) criado por `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]`, `DontDestroyOnLoad`: botões topo-esquerdo (**Ajuda**/**Config**) em `Canvas` Overlay com **`CanvasScaler.ConstantPixelSize`** ×1 (`sortingOrder` ~2995) e sprites em `Assets/Resources/UI/GlobalChrome/`; **`FullscreenVideoOverlay.ActiveOverlayCount > 0`** só oculta a linha do chrome (mantém `UIDocument` Wiki activo para fluxos como revisão Core).
+- **Ajuda/Wiki:** `Assets/Scripts/HUD/PersistenteGlobalChrome.cs` + **`MapWikiAccess`**/`UIDocument` usando `Assets/Resources/UI/Wiki/` (`WikiPersistentPanelSettings`, `WikiView.uxml`, `WikiStyles.uss`), `ApplyPersistentDdOlConfiguration()` (sem botão runtime à direita); `MapWikiAccess.RegisterDdOlAjudaHotspot` alinha cliques com **`IsPointerPressOnWikiOpenButton`** na Core. **Removido** o objeto `WikiOverlay` de `Assets/Scenes/Map.unity` e `Assets/Scenes/Core.unity` para evitar duplicar o host.
+- **Exclusões de chrome:** `GameFlowScenes.ShouldHidePersistentChromeButtons` (Menu + cenas tutorial blackjack/mapa/core/loja) + fecho da wiki ao entrar nelas (`MainMenuOptionsModal.TryCloseDdOlWikiIfExcluded`).
+- **Opções globais:** `MainMenuOptionsModal` (`Assets/Scripts/Menus/MainMenuOptionsModal.cs`) na raiz **Opções** do `Menu.unity` + prefab `Assets/Resources/UI/MainMenuOptionsModal.prefab` (gerado por `tools/extract_main_menu_options_prefab.py` a partir do subárvore Opções); **`MenuPrincipalManager`** delega **`AbrirOpcoes`/`FecharOpcoes`**; Hub e mapa usam `MainMenuOptionsModal.OpenGlobalDdOl()` (`HubMenus`, `HUDExploracao`). Pausa **`Time.timeScale`** via `PersistenteGlobalChrome.TryPauseForOverlay` ao abrir o overlay fora do menu.
+- **`Resources/Settings/Volume.mixer`:** cópia runtime do master para o slider de volume global do modal.
 
 ### 2026-03-17
 
@@ -362,7 +372,7 @@ Core/
 ### 2026-04-09 — Loja, sistema de itens e recompensas
 
 - **Pasta `AssetsTempLoja/`** (projeto externo) integrada como cena isolada; assets úteis migrados, lixo deletado.
-- **Cena `Assets/Scenes/Store.unity`** no Build Settings. Camera + `UIDocument` (UI Toolkit) + `StoreController`. **Atalho de dev no mapa:** `TemporaryMapStoreAccess` (ver §11 «ATENÇÃO — Loja temporária no mapa»); `StoreController` volta com `LoadScene("Map")`.
+- **Cena `Assets/Scenes/Store.unity`** no Build Settings. Camera + `UIDocument` (UI Toolkit) + `StoreController`. Entrada na campanha: **`HubInicial`** (`HubManager`). `StoreController` volta com `SceneManager.LoadScene(GameFlowScenes.ExitStoreDestination)` (hub na campanha, mapa-tutorial no modo tutorial).
 
 #### Sistema de itens (`Assets/Scripts/Items/`)
 
@@ -406,7 +416,7 @@ Core/
 - **Attack/Defense:** compra → `ownedItemIds.Add(id)` (pode repetir o mesmo id) + defesa aplica `bonusHealth` em `playerHealth` no momento da compra; grelha da loja recarrega após confirmar.
 - **Consumíveis:** compra → só `consumableSlots.Add(id)` se `Count < 3`; **não** grava em `ownedItemIds`. Cabeçalho **`Consumíveis: N/3`** (`ConsumableSlotsLabel` no UXML). Com 3/3: botões dos consumíveis **“Inventário cheio (3/3)”**; modal de confirmação bloqueado com mensagem para usar na batalha primeiro.
 - **UI:** `StoreView.uxml` + `StoreStyles.uss` (classe `.consumable-slots-label`). Fundo e ícones como antes.
-- **Botão Voltar:** `SceneManager.LoadScene("Map")`.
+- **Botão Voltar:** `SceneManager.LoadScene(GameFlowScenes.ExitStoreDestination)`.
 
 #### Batalha — consumíveis (`BlackjackController`)
 
@@ -471,16 +481,14 @@ Scenes/
 - **Loja:** contador N/3; compra não usa `ownedItemIds` para consumíveis.
 - **Combate:** atalhos numéricos 1–3; feedback em `txtBattleCenter`; item removido do save após uso.
 
-### ATENÇÃO — Loja temporária no mapa (remover ao integrar a UI real)
+### Hub da campanha (`HubInicial`)
 
-> **Provisório — não é desenho de UX final.** Quem ligar a loja a nós/hub deve **apagar** este atalho e usar só o fluxo novo.
+- **`GameFlowScenes.HubInicial`:** área-meta entre runs; **«Jogar»** no menu (campanha) carrega esta cena após vídeo-intro se aplicável; **derrota em combate** na campanha redirecciona ao hub em vez do mapa. A cadeia tutorial mantém‑se como antes (`TutorialDefaultBlackjack`, `MapTutorial`, etc.).
+- **Navegação:** `Assets/Scripts/Hub (MenusPersistentes)/HubMenus.cs` (`HubManager`): Menu, Loja (`Store`), Mapa (`Map`), painel configurações interno.
 
-- **Código:** [`Assets/Scripts/Map/TemporaryMapStoreAccess.cs`](Assets/Scripts/Map/TemporaryMapStoreAccess.cs) — componente na cena **`Map.unity`** no GameObject **`MapGenerator`**.
-- **Runtime:** com `createRuntimeUi` ativo (default), no `Start` cria **`TEMP_MapShopButtonRoot`** sob o `TransitionCanvas`, canto superior direito, rótulo **“Loja [TEMP]”** → `SceneManager.LoadScene("Store")`. Desmarcar `createRuntimeUi` no Inspector desliga sem remover o script.
-- **Input:** a cena `Map` inclui **`EventSystem`** + **`InputSystemUIInputModule`** (como em `Core`) — sem isto o `Button` não recebe clique. **`MapUiRaycasts`** + alterações em **`MapNavigation`** / **`NodeInteraction`** ignoram drag, scroll e clique em nó quando o ponteiro está sobre UI (evita o drag do mapa roubar o clique na loja).
-- **`TransitionCanvas`:** `sortingOrder` elevado (50) para a UI do mapa ficar por cima do conteúdo que competir por input.
-- **Checklist de remoção:** (1) tirar o componente da cena `Map`; (2) apagar `TemporaryMapStoreAccess.cs` + `.meta`; (3) `grep` por `LoadScene("Store")` e garantir entrada única pelo fluxo definitivo; (4) apagar **`TEMP_MapShopButtonRoot`** da hierarquia se existir após testes em Play Mode.
-- **GDD:** em **§2.1** / **§9** a loja na run segue **cortada**; isto é só **atalho de desenvolvimento**.
+### Histórico — atalho «Loja [TEMP]» no mapa (removido)
+
+- **Removido:** `TemporaryMapStoreAccess`; acesso à loja na campanha é pelo **`HubInicial`**. Mantêm‑se **`EventSystem`**, **`TransitionCanvas`** e o tratamento UI em **`MapUiRaycasts`** / **`NodeInteraction`** (úteis ao mapa, não só ao botão apagado).
 
 ### 2026-04-13 — Tutorial principal no save + doc de onboarding
 
@@ -544,7 +552,7 @@ Revisão do fluxo Default → Map → Core após feedback. O tutorial do combate
 
 ### 2026-04-21 — Wiki / Ajuda (UI Toolkit) + revisão de teoria no início do duelo (Core)
 
-- **UI:** `Assets/UI/Wiki/WikiView.uxml` + `WikiStyles.uss`; controlador `Assets/Scripts/Map/MapWikiAccess.cs` (cena Map com botão Ajuda; mesma wiki na Core). Conteúdo por abas (`WikiTab_*` / `WikiPage_*`); mapeamento teoria ↔ tipo de nó em `Assets/Scripts/Map/TheoryWikiPage.cs` (`TheoryWikiPageMapping.FromMapNodeType` / `ToTabId` / `DisplayName`).
+- **UI:** `Assets/UI/Wiki/WikiView.uxml` + `WikiStyles.uss`; controlador `Assets/Scripts/Map/MapWikiAccess.cs` (Wiki servida globalmente por `PersistenteGlobalChrome`/`Resources/UI/Wiki` desde 2026‑05‑23; anteriormente instâncias em Map/Core estavam nas respectivas cenas). Conteúdo por abas (`WikiTab_*` / `WikiPage_*`); mapeamento teoria ↔ tipo de nó em `Assets/Scripts/Map/TheoryWikiPage.cs` (`TheoryWikiPageMapping.FromMapNodeType` / `ToTabId` / `DisplayName`).
 - **Revisão automática (Core):** `BlackjackController` inicia a mesa (`ApplyNewRoundStateBody` sem parar a corrotina de arranque), espera frames para o layout, e se o jogador **não** tiver pedido para saltar aquele tipo, chama `MapWikiAccess.OpenForRevision(TheoryWikiPage)` — reutiliza o mesmo modal: **sem sidebar**, **sem botão X**, título **«Revisão»**, rodapé com **Prosseguir** e toggle **«Não mostrar novamente para &lt;tipo&gt;»** (só **Prosseguir** fecha; **Esc** desligado neste modo). `IsOpen` exposto para corrotinas que esperam o fecho.
 - **Persistência:** `SaveData.theoryRevisionSkippedTabIds` (ids de aba, ex. `math_add`); `MapWikiAccess.IsRevisionSkippedForPage` + gravação no fecho quando o toggle está marcado.
 - **Input na Core:** com a wiki aberta, o input do canvas de combate fica suprimido (`CanvasGroup` no canvas principal) até fechar.
@@ -594,3 +602,21 @@ Revisão do fluxo Default → Map → Core após feedback. O tutorial do combate
 - **`SceneMusicDirector`:** `Assets/Scripts/Songs/SceneMusicDirector.cs` na cena `Menu.unity` (GameObject `MusicManager`); subscreve `sceneLoaded` (ignora `Additive`); resolve config e aplica faixa.
 - **Vídeo:** `FullscreenVideoOverlay.PlayRequest` com `duckBackgroundMusic`, `duckFadeOutSeconds`, `restoreFadeInSeconds` (opcionais); `IntroVideoPlayer` e `BossOutroFlow` activam *duck* nos fluxos com overlay. `BlackjackController` continua a usar apenas `BossOutroFlow` para o *outro*.
 - **Documentação produto:** secção **8.3 Música (BGM por cena)** neste ficheiro.
+
+### 2026-05-10 — *Pre-warm* de vídeos fullscreen (intro + outro boss)
+
+- **`VideoWarmupService`** (`Assets/Scripts/Video/VideoWarmupService.cs`): singleton `DontDestroyOnLoad`; chama `VideoPlayer.Prepare()` antecipadamente para o mesmo clip ou path em StreamingAssets que `FullscreenVideoOverlay` vai usar depois.
+- **`StreamingAssetsVideoUrl`:** normalização de path relativo + URL sob `streamingAssetsPath`, partilhada com o overlay.
+- **`FullscreenVideoOverlay`:** antes de criar novo `VideoPlayer`, tenta **`TryTakePreparedMatching`** no serviço; se coincidir, reutiliza o host preparado e salta novo `Prepare()`.
+- **Menu:** `MenuPrincipalManager.Start` — se `intro_video_seen == false`, `EnsureWarmMenuIntro(introVideoClip, introVideoStreamingPath)`.
+- **Boss Fractar:** `BlackjackController.Awake` — com `Bossfight` e path do vídeo de vitória configurado, `WarmStreamingRelativePath`; ao **perder** o duelo contra o boss, `CancelWarmup()` liberta recursos caso o vídeo nunca reproduza.
+
+### 2026-05-10 — Cartas de multiplicação: operador ASCII `x`
+
+- **`ExpressionEvaluator`:** `x` / `X` tratados como multiplicação ao mesmo nível que `*` e `×`.
+- **`StreamingAssets`:** equações nos baralhos de multiplicação (Easy/Medium/Hard), grupo boss com multiplicações, e `TUTORIAL/core/tutorial_core_rounds.json` — ` " * " ` → ` x ` nos textos de equação.
+
+### 2026-05-10 — Cursor software global + coexistência com vídeo fullscreen
+
+- **`SoftwareCustomCursor`** ([`Assets/Scripts/Menus/SoftwareCustomCursor.cs`](Assets/Scripts/Menus/SoftwareCustomCursor.cs)): singleton `DontDestroyOnLoad` no **`GameObject` `PersistentCustomCursor`** (`Menu.unity`); `Resources.Load<Sprite>("Cursor/cursor")`; Canvas **Screen Space Overlay** sem `GraphicRaycaster` (imagem `raycastTarget` falso).
+- **`FullscreenVideoOverlay`:** **`ActiveOverlayCount`** incrementado quando `Play` instancia overlay com êxito; decremento em **`Complete()`** todas as saídas; **`ActiveOverlayCountChanged`** para o cursor esconder a UI própria e activar **`Cursor.visible`** durante o vídeo.

@@ -4857,7 +4857,6 @@ GameObject:
   - component: {fileID: 900000002}
   - component: {fileID: 900000003}
   - component: {fileID: 900000004}
-  - component: {fileID: 900000050}
   m_Layer: 0
   m_Name: MapGenerator
   m_TagString: Untagged
@@ -4976,19 +4975,6 @@ MonoBehaviour:
   mapVisualizer: {fileID: 900000003}
   mainCamera: {fileID: 519420031}
   txtTransitionMessage: {fileID: 12592348}
---- !u!114 &900000050
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 900000000}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e4d3c2b1a0964857b6e5d4c3b2a10987, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TemporaryMapStoreAccess
-  createRuntimeUi: 1
 --- !u!1 &918905767
 GameObject:
   m_ObjectHideFlags: 0
@@ -6273,91 +6259,6 @@ LineRenderer:
   m_UseWorldSpace: 1
   m_Loop: 0
   m_ApplyActiveColorSpace: 1
---- !u!1 &1075994478
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1075994481}
-  - component: {fileID: 1075994480}
-  - component: {fileID: 1075994479}
-  m_Layer: 0
-  m_Name: WikiOverlay
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1075994479
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1075994478}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f9c1e32f8bcb0499097a8f0bea6a08f6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Map.Wiki.MapWikiAccess
-  createRuntimeOpenButton: 1
-  openButtonLabel: Ajuda
-  openButtonAnchoredPosition: {x: -20, y: -90}
-  openButtonSize: {x: 180, y: 54}
-  tabIds:
-  - math_add
-  - math_sub
-  - math_mul
-  - math_div
-  - overview
-  - map
-  - combat
-  - difficulty
-  - enemies
-  - economy
-  - controls
-  defaultTabId: overview
---- !u!114 &1075994480
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1075994478}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
-  m_PanelSettings: {fileID: 11400000, guid: a485b0603dcf6214399ae7b79b26ad66, type: 2}
-  m_ParentUI: {fileID: 0}
-  sourceAsset: {fileID: 9197481963319205126, guid: e748d46fcdb2f655a91dd6e640e9bb5d, type: 3}
-  m_SortingOrder: 100
-  m_Position: 0
-  m_WorldSpaceSizeMode: 1
-  m_WorldSpaceWidth: 1920
-  m_WorldSpaceHeight: 1080
-  m_PivotReferenceSize: 0
-  m_Pivot: 0
-  m_WorldSpaceCollider: {fileID: 0}
---- !u!4 &1075994481
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1075994478}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1099890779
 GameObject:
   m_ObjectHideFlags: 0
@@ -12012,4 +11913,3 @@ SceneRoots:
   - {fileID: 900000001}
   - {fileID: 860277389}
   - {fileID: 990000002}
-  - {fileID: 1075994481}

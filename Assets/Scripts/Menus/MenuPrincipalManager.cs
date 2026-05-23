@@ -10,11 +10,12 @@ public class MenuPrincipalManager : MonoBehaviour
     private const string RuntimeTutorialPromptName = "MenuTutorialPromptRoot";
     private const string RunCompleteThanksRootName = "MenuRunCompleteThanksRoot";
 
-    [SerializeField] private string nomeDoLevelDeJogo = "Map";
+    [SerializeField] private string nomeDoLevelDeJogo = GameFlowScenes.HubInicial;
     [SerializeField] private string cenaTutorialInicial = GameFlowScenes.TutorialDefaultBlackjack;
     [SerializeField] private string IrParaCreditos;
-    [SerializeField] private GameObject painelMenuInicial;
+    [SerializeField] internal GameObject painelMenuInicial;
     [SerializeField] private GameObject painelOpcoes;
+    [SerializeField] private MainMenuOptionsModal optionsModal;
     [Tooltip("Opcional. Se vazio, o painel é criado em runtime no primeiro Canvas.")]
     [SerializeField] private GameObject painelPerguntaTutorial;
 
@@ -41,6 +42,9 @@ public class MenuPrincipalManager : MonoBehaviour
             TryBuildTutorialPrompt();
         else
             painelPerguntaTutorial.SetActive(false);
+
+        if (optionsModal == null && painelOpcoes != null)
+            optionsModal = painelOpcoes.GetComponent<MainMenuOptionsModal>();
 
         RegisterMenuButtonHoverOnPanels();
     }
@@ -318,15 +322,36 @@ public class MenuPrincipalManager : MonoBehaviour
 
     public void AbrirOpcoes()
     {
+        if (optionsModal == null && painelOpcoes != null)
+            optionsModal = painelOpcoes.GetComponent<MainMenuOptionsModal>();
+
+        if (optionsModal != null)
+        {
+            optionsModal.PresentFromMainMenu(this);
+            return;
+        }
+
         painelMenuInicial.SetActive(false);
         painelOpcoes.SetActive(true);
     }
 
     public void FecharOpcoes()
     {
+        if (optionsModal == null && painelOpcoes != null)
+            optionsModal = painelOpcoes.GetComponent<MainMenuOptionsModal>();
+
+        if (optionsModal != null)
+        {
+            optionsModal.HideEmbeddedFrom(this);
+            return;
+        }
+
         painelMenuInicial.SetActive(true);
         painelOpcoes.SetActive(false);
     }
+
+    /// <summary>Encaminhador explícito para o botão Voltar do <see cref="MainMenuOptionsModal"/>.</summary>
+    public void FecharOpcoesEmbedded() => FecharOpcoes();
 
     public void AbrirCreditos()
     {

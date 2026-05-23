@@ -265,7 +265,8 @@ public static class SaveManager
         if (string.IsNullOrEmpty(n))
             return;
 
-        if (n == GameFlowScenes.Map || n == GameFlowScenes.Core || n == GameFlowScenes.Store)
+        if (n == GameFlowScenes.Map || n == GameFlowScenes.Core || n == GameFlowScenes.Store
+            || n == GameFlowScenes.HubInicial)
             ActiveContext = SaveContext.Campaign;
         else if (n == GameFlowScenes.MapTutorial || n == GameFlowScenes.CoreTutorial || n == GameFlowScenes.StoreTutorial
                  || n.IndexOf("Tutorial", StringComparison.Ordinal) >= 0)

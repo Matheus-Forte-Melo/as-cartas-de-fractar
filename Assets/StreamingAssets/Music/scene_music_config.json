@@ -7,6 +7,7 @@
     { "sceneName": "Store", "trackResourcePath": "Music/Loja", "disableRandomStart": false },
     { "sceneName": "Opcoes", "trackResourcePath": "Music/Menu", "disableRandomStart": false },
     { "sceneName": "Creditos", "trackResourcePath": "Music/Menu", "disableRandomStart": false },
+    { "sceneName": "HubInicial", "trackResourcePath": "Music/Menu", "disableRandomStart": false },
     { "sceneName": "MapTutorial", "trackResourcePath": "Music/Map", "disableRandomStart": false },
     { "sceneName": "CoreTutorial", "trackResourcePath": "Music/Map", "disableRandomStart": false },
     { "sceneName": "StoreTutorial", "trackResourcePath": "Music/Loja", "disableRandomStart": false },
