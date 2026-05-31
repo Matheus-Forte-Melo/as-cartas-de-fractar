@@ -1,6 +1,5 @@
 using Map.Wiki;
 using UnityEngine;
-using UnityEngine.Audio;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using Video;
@@ -17,16 +16,14 @@ public class MainMenuOptionsModal : MonoBehaviour
     internal static MainMenuOptionsModal DontDestroyDuplicate => _ddDuplicate;
     private static MainMenuOptionsModal _ddDuplicate;
 
-    private const string MasterVolumeParameter = "VolumeMaster";
-
-    [SerializeField] private AudioMixer masterMixer;
-
     [Tooltip("Só marcado pelo clone DDOL. Na instância da cena Menu deixar falso.")]
     [SerializeField] private bool spawnedAsDdOlDuplicate;
 
+    internal bool IsDdOlDuplicate => spawnedAsDdOlDuplicate;
+
     private MenuPrincipalManager _menuHostLocked;
 
-    private Slider _masterSlider;
+    private Slider _sfxSlider;
     private Slider _musicSlider;
     private Button _voltar;
 
@@ -66,7 +63,6 @@ public class MainMenuOptionsModal : MonoBehaviour
     private void Awake()
     {
         CacheRefs();
-        EnsureMasterMixer();
 
         if (spawnedAsDdOlDuplicate)
         {
@@ -96,20 +92,14 @@ public class MainMenuOptionsModal : MonoBehaviour
             _sceneEmbedded = this;
     }
 
-    private void EnsureMasterMixer()
-    {
-        if (masterMixer == null)
-            masterMixer = Resources.Load<AudioMixer>("Settings/Volume");
-    }
-
     private void CacheRefs()
     {
         foreach (Slider slider in GetComponentsInChildren<Slider>(true))
         {
             if (slider == null)
                 continue;
-            if (_masterSlider == null && slider.gameObject.name.Contains("VolumeGeral"))
-                _masterSlider = slider;
+            if (_sfxSlider == null && slider.gameObject.name.Contains("VolumeGeral"))
+                _sfxSlider = slider;
             if (_musicSlider == null && slider.gameObject.name.Contains("Musica"))
                 _musicSlider = slider;
         }
@@ -206,16 +196,14 @@ public class MainMenuOptionsModal : MonoBehaviour
     {
         CacheRefs();
 
-        if (_masterSlider != null && masterMixer != null)
+        if (_sfxSlider != null && UiSoundManager.Instance != null)
         {
-            if (masterMixer.GetFloat(MasterVolumeParameter, out float db))
-            {
-                float linear = Mathf.Pow(10f, db / 20f);
-                _masterSlider.SetValueWithoutNotify(Mathf.Clamp01(linear));
-            }
+            if (force)
+                _sfxSlider.onValueChanged.RemoveAllListeners();
 
-            _masterSlider.onValueChanged.RemoveListener(OnMasterChange);
-            _masterSlider.onValueChanged.AddListener(OnMasterChange);
+            _sfxSlider.SetValueWithoutNotify(UiSoundManager.Instance.GetVolume());
+            _sfxSlider.onValueChanged.RemoveListener(UiSoundManager.Instance.SetVolume);
+            _sfxSlider.onValueChanged.AddListener(UiSoundManager.Instance.SetVolume);
         }
 
         if (_musicSlider == null)
@@ -245,16 +233,6 @@ public class MainMenuOptionsModal : MonoBehaviour
 
     private void OnMusicAdjusted(float normalized) =>
         AudioListener.volume = Mathf.Clamp01(normalized);
-
-    private void OnMasterChange(float normalized)
-    {
-        if (masterMixer == null)
-            return;
-
-        normalized = Mathf.Clamp(normalized, 0.0001f, 1f);
-        float db = Mathf.Log10(normalized) * 20f;
-        masterMixer.SetFloat(MasterVolumeParameter, db);
-    }
 
     private void RetargetButtons(MenuPrincipalManager _)
     {

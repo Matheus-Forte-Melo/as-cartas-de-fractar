@@ -1,0 +1,212 @@
+{
+  "schemaVersion": 1,
+  "defaults": {
+    "hoverResourcePath": "sounds/button_hover",
+    "clickResourcePath": "sounds/button_click"
+  },
+  "entries": [
+    {
+      "id": "menu.jogar",
+      "notes": "Menu principal — Jogar",
+      "match": { "ui": "ugui", "objectName": "jogarButton", "sceneName": "Menu" }
+    },
+    {
+      "id": "menu.opcoes",
+      "notes": "Menu principal — Opções",
+      "match": { "ui": "ugui", "objectName": "OpçõesButton", "sceneName": "Menu" }
+    },
+    {
+      "id": "menu.creditos",
+      "notes": "Menu principal — Créditos",
+      "match": { "ui": "ugui", "objectName": "CreditosButton", "sceneName": "Menu" }
+    },
+    {
+      "id": "menu.sair",
+      "notes": "Menu principal — Sair",
+      "match": { "ui": "ugui", "objectName": "SairButton", "sceneName": "Menu" }
+    },
+    {
+      "id": "menu.opcoes_voltar_embedded",
+      "notes": "Painel Opções embutido no Menu — Voltar",
+      "match": { "ui": "ugui", "objectName": "Voltar", "sceneName": "Menu" }
+    },
+    {
+      "id": "modal.opcoes_voltar_ddol",
+      "notes": "Modal Opções DDOL (MainMenuOptionsModal) — Voltar",
+      "match": { "ui": "ugui", "objectName": "Voltar", "prefabHint": "MainMenuOptionsModal" }
+    },
+    {
+      "id": "creditos.voltar",
+      "notes": "Cena Créditos — Voltar",
+      "match": { "ui": "ugui", "objectName": "VoltarButton", "sceneName": "Creditos" }
+    },
+    {
+      "id": "hub.porta_menu",
+      "notes": "Hub — porta Menu",
+      "match": { "ui": "ugui", "objectName": "Button_MenuPrincipal", "sceneName": "HubInicial" }
+    },
+    {
+      "id": "hub.porta_loja",
+      "notes": "Hub — porta Loja",
+      "match": { "ui": "ugui", "objectName": "Button_Loja", "sceneName": "HubInicial" }
+    },
+    {
+      "id": "hub.porta_torre",
+      "notes": "Hub — porta Torre / Começar run",
+      "match": { "ui": "ugui", "objectName": "Button_ComecarRun", "sceneName": "HubInicial" }
+    },
+    {
+      "id": "hub.configuracoes",
+      "notes": "Hub — Configurações (abre modal Opções DDOL)",
+      "match": { "ui": "ugui", "objectName": "Button_Configuracoes", "sceneName": "HubInicial" }
+    },
+    {
+      "id": "chrome.ajuda_ddol",
+      "notes": "Chrome persistente DDOL — ícone Ajuda (topo direito)",
+      "match": { "ui": "ugui", "objectName": "Ajuda", "parentHint": "AjudaConfigRow" }
+    },
+    {
+      "id": "chrome.config_ddol",
+      "notes": "Chrome persistente DDOL — ícone Config (topo direito)",
+      "match": { "ui": "ugui", "objectName": "Config", "parentHint": "AjudaConfigRow" }
+    },
+    {
+      "id": "wiki.open_core",
+      "notes": "Core — botão Ajuda uGUI criado em runtime (MapWikiAccess)",
+      "match": { "ui": "ugui", "objectName": "WIKI_OpenButtonRoot" }
+    },
+    {
+      "id": "core.compre",
+      "notes": "Core — Compre (Hit)",
+      "match": { "ui": "ugui", "objectName": "BtnHit", "sceneName": "Core" }
+    },
+    {
+      "id": "core.passe",
+      "notes": "Core — Passe (Stand)",
+      "match": { "ui": "ugui", "objectName": "BtnStand", "sceneName": "Core" }
+    },
+    {
+      "id": "core_tutorial.compre",
+      "notes": "CoreTutorial — Compre",
+      "match": { "ui": "ugui", "objectName": "BtnHit", "sceneName": "CoreTutorial" }
+    },
+    {
+      "id": "core_tutorial.passe",
+      "notes": "CoreTutorial — Passe",
+      "match": { "ui": "ugui", "objectName": "BtnStand", "sceneName": "CoreTutorial" }
+    },
+    {
+      "id": "core_tutorial.encerrar",
+      "notes": "CoreTutorial — Encerrar tutorial (criado em runtime)",
+      "match": { "ui": "ugui", "objectName": "BtnEncerrarTutorial" }
+    },
+    {
+      "id": "core_tutorial.nova_rodada",
+      "notes": "CoreTutorial — Nova rodada / sandbox",
+      "match": { "ui": "ugui", "objectName": "BtnNewGame", "sceneName": "CoreTutorial" }
+    },
+    {
+      "id": "map.node",
+      "notes": "Nós do mapa (Map / MapTutorial) — hover/click via NodeInteraction",
+      "match": { "ui": "mapnode" }
+    },
+    {
+      "id": "tutorial_bj.compre",
+      "notes": "TutorialDefaultBlackjack — Compre",
+      "match": { "ui": "ugui", "objectName": "BtnHit", "sceneName": "TutorialDefaultBlackjack" }
+    },
+    {
+      "id": "tutorial_bj.passe",
+      "notes": "TutorialDefaultBlackjack — Passe",
+      "match": { "ui": "ugui", "objectName": "BtnStand", "sceneName": "TutorialDefaultBlackjack" }
+    },
+    {
+      "id": "tutorial_bj.nova_rodada",
+      "notes": "TutorialDefaultBlackjack — Nova rodada",
+      "match": { "ui": "ugui", "objectName": "BtnNewRound", "sceneName": "TutorialDefaultBlackjack" }
+    },
+    {
+      "id": "tutorial_bj.ir_mapa",
+      "notes": "TutorialDefaultBlackjack — Ir para mapa (runtime opcional)",
+      "match": { "ui": "ugui", "objectName": "BtnFinishToMap" }
+    },
+    {
+      "id": "menu.tutorial_sim",
+      "notes": "Modal tutorial Menu — Sim (runtime)",
+      "match": { "ui": "ugui", "objectName": "BtnSim" }
+    },
+    {
+      "id": "menu.tutorial_nao",
+      "notes": "Modal tutorial Menu — Não (runtime)",
+      "match": { "ui": "ugui", "objectName": "BtnNao" }
+    },
+    {
+      "id": "menu.run_complete_continuar",
+      "notes": "Overlay pós-vitória boss — Continuar (runtime)",
+      "match": { "ui": "ugui", "objectName": "BtnContinuar" }
+    },
+    {
+      "id": "tutorial.continue",
+      "notes": "Tooltip onboarding — Continuar (runtime)",
+      "match": { "ui": "ugui", "objectName": "BtnContinue" }
+    },
+    {
+      "id": "store.voltar",
+      "notes": "Loja UI Toolkit — Voltar",
+      "match": { "ui": "uitoolkit", "elementName": "BackButton", "documentHint": "Store" }
+    },
+    {
+      "id": "store.modal_cancelar",
+      "notes": "Loja — modal Cancelar",
+      "match": { "ui": "uitoolkit", "elementName": "ModalCancelBtn", "documentHint": "Store" }
+    },
+    {
+      "id": "store.modal_confirmar",
+      "notes": "Loja — modal Confirmar",
+      "match": { "ui": "uitoolkit", "elementName": "ModalConfirmBtn", "documentHint": "Store" }
+    },
+    {
+      "id": "store.item_info",
+      "notes": "Loja — botão info de cada item (instâncias dinâmicas)",
+      "match": { "ui": "uitoolkit", "elementName": "InfoButton", "documentHint": "Store" }
+    },
+    {
+      "id": "store.item_comprar",
+      "notes": "Loja — botão comprar de cada item (instâncias dinâmicas)",
+      "match": { "ui": "uitoolkit", "elementName": "BuyButton", "documentHint": "Store" },
+      "clickResourcePath": "sounds/buy"
+    },
+    {
+      "id": "wiki.fechar",
+      "notes": "Wiki UI Toolkit — Fechar (X)",
+      "match": { "ui": "uitoolkit", "elementName": "WikiCloseBtn", "documentHint": "Wiki" }
+    },
+    {
+      "id": "wiki.abas_teoria",
+      "notes": "Wiki — abas de teoria (Adição, Subtração, …)",
+      "match": { "ui": "uitoolkit", "elementNamePattern": "WikiTab_math_*", "documentHint": "Wiki" }
+    },
+    {
+      "id": "wiki.abas_gerais",
+      "notes": "Wiki — abas gerais (overview, map, combat, …)",
+      "match": { "ui": "uitoolkit", "elementNamePattern": "WikiTab_overview|WikiTab_map|WikiTab_combat|WikiTab_difficulty|WikiTab_enemies|WikiTab_economy|WikiTab_controls", "documentHint": "Wiki" }
+    },
+    {
+      "id": "wiki.revisao_prosseguir",
+      "notes": "Wiki — modo revisão, Prosseguir",
+      "match": { "ui": "uitoolkit", "elementName": "WikiRevisionProceedBtn", "documentHint": "Wiki" }
+    }
+  ],
+  "gameplayEvents": [
+    {
+      "id": "combat.card_deal",
+      "notes": "Carta comprada/distribuída — Core, CoreTutorial (CardHandDisplay), TutorialDefaultBlackjack (TutorialCardHandDisplay)",
+      "match": { "eventId": "card.deal" },
+      "resourcePaths": [
+        "sounds/card_01",
+        "sounds/card_02",
+        "sounds/card_03"
+      ]
+    }
+  ]
+}

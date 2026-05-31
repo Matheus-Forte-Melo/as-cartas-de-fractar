@@ -94,6 +94,7 @@ namespace Tutorial.CoreTutorial
 
             if (_btnEncerrar != null)
             {
+                UiSoundWiring.WireButton(_btnEncerrar, "core_tutorial.encerrar");
                 _btnEncerrar.onClick.RemoveListener(OnEncerrarClicked);
                 _btnEncerrar.onClick.AddListener(OnEncerrarClicked);
                 EnsureEncerrarOnBattleHud();

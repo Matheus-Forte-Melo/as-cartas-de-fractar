@@ -3,13 +3,13 @@
   "entries": [
     { "sceneName": "Menu", "trackResourcePath": "Music/Menu", "disableRandomStart": false },
     { "sceneName": "Map", "trackResourcePath": "Music/Map", "disableRandomStart": false },
-    { "sceneName": "Core", "trackResourcePath": "Music/Map", "disableRandomStart": false },
+    { "sceneName": "Core", "trackResourcePath": "Music/Battle", "disableRandomStart": false },
     { "sceneName": "Store", "trackResourcePath": "Music/Loja", "disableRandomStart": false },
     { "sceneName": "Opcoes", "trackResourcePath": "Music/Menu", "disableRandomStart": false },
     { "sceneName": "Creditos", "trackResourcePath": "Music/Menu", "disableRandomStart": false },
-    { "sceneName": "HubInicial", "trackResourcePath": "Music/Menu", "disableRandomStart": false },
+    { "sceneName": "HubInicial", "trackResourcePath": "Music/Map", "disableRandomStart": false },
     { "sceneName": "MapTutorial", "trackResourcePath": "Music/Map", "disableRandomStart": false },
-    { "sceneName": "CoreTutorial", "trackResourcePath": "Music/Map", "disableRandomStart": false },
+    { "sceneName": "CoreTutorial", "trackResourcePath": "Music/Battle", "disableRandomStart": false },
     { "sceneName": "StoreTutorial", "trackResourcePath": "Music/Loja", "disableRandomStart": false },
     { "sceneName": "TutorialDefaultBlackjack", "trackResourcePath": "Music/Loja", "disableRandomStart": false }
   ]

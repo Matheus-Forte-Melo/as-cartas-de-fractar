@@ -256,6 +256,7 @@ namespace Map.Wiki
             RegisterWikiRootStretch(root);
 
             _uiBound = true;
+            UiSoundToolkitBinder.Bind(root, "Wiki", UiSoundConfigLoader.GetEntries());
         }
 
         private void RegisterWikiRootStretch(VisualElement root)

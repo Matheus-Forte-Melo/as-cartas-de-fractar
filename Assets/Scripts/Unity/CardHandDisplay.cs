@@ -20,6 +20,12 @@ public class CardHandDisplay : MonoBehaviour
 
     public void SyncCards(Hand hand, bool hideFirst = false)
     {
+        while (_cardViews.Count > hand.Cards.Count)
+        {
+            Destroy(_cardViews[_cardViews.Count - 1].gameObject);
+            _cardViews.RemoveAt(_cardViews.Count - 1);
+        }
+
         for (int i = _cardViews.Count; i < hand.Cards.Count; i++)
         {
             var go = Instantiate(_cardPrefab, transform);
@@ -27,6 +33,7 @@ public class CardHandDisplay : MonoBehaviour
             bool faceDown = hideFirst && i == 0;
             cv.Setup(hand.Cards[i].Equation, faceDown);
             _cardViews.Add(cv);
+            UiSoundWiring.PlayCardDeal();
         }
 
         if (_cardViews.Count > 0)

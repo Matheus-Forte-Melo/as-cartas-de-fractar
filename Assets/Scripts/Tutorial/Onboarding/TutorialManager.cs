@@ -454,6 +454,7 @@ namespace Tutorial.Onboarding
             btnTmp.alignment = TextAlignmentOptions.Center;
 
             tip.ConfigureRuntime(panelRt, tmp, btn);
+            UiSoundWiring.WireButton(btn, "tutorial.continue");
             return tip;
         }
 

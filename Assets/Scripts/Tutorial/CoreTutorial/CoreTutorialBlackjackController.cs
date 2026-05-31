@@ -164,6 +164,8 @@ namespace Tutorial.CoreTutorial
         {
             if (_battleOver) return;
 
+            UiSoundManager.EnsureExists();
+
             int idx = _game.CurrentRoundNumber;
             StopAllCoroutines();
             _roundResolutionActive = false;

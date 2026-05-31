@@ -18,7 +18,9 @@ public class NodeInteraction : MonoBehaviour
     private SaveData _save;
     private Vector2 _pressPosition;
     private bool _isPressed;
+    private (int row, int col)? _hoverSoundNode;
     private const float DragThreshold = 5f;
+    private const float NodeHitRadius = 0.5f;
 
     private void Start()
     {
@@ -111,24 +113,38 @@ public class NodeInteraction : MonoBehaviour
                 TrySelectNode(new Vector2(worldPos.x, worldPos.y));
             }
         }
+
+        UpdateMapNodeHoverSound(mouse);
+    }
+
+    private void UpdateMapNodeHoverSound(Mouse mouse)
+    {
+        Vector2 screenPos = mouse.position.ReadValue();
+        if (MapUiRaycasts.IsScreenPositionOverUi(screenPos))
+        {
+            _hoverSoundNode = null;
+            return;
+        }
+
+        Vector3 worldPos = mainCamera.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, 0f));
+        MapNode hovered = FindClosestNode(new Vector2(worldPos.x, worldPos.y), NodeHitRadius);
+        if (hovered == null || !IsAccessible(hovered))
+        {
+            _hoverSoundNode = null;
+            return;
+        }
+
+        var key = (hovered.Row, hovered.Col);
+        if (_hoverSoundNode == key)
+            return;
+
+        _hoverSoundNode = key;
+        UiSoundWiring.PlayMapNodeHover();
     }
 
     private void TrySelectNode(Vector2 worldPos)
     {
-        MapNode closest = null;
-        float closestDist = float.MaxValue;
-        const float clickRadius = 0.5f;
-
-        foreach (var node in mapGenerator.Graph.Values)
-        {
-            float dist = Vector2.Distance(worldPos, node.WorldPosition);
-            if (dist < clickRadius && dist < closestDist)
-            {
-                closest = node;
-                closestDist = dist;
-            }
-        }
-
+        MapNode closest = FindClosestNode(worldPos, NodeHitRadius);
         if (closest == null) return;
 
         if (!IsAccessible(closest))
@@ -138,6 +154,24 @@ public class NodeInteraction : MonoBehaviour
         }
 
         SelectNode(closest);
+    }
+
+    private MapNode FindClosestNode(Vector2 worldPos, float radius)
+    {
+        MapNode closest = null;
+        float closestDist = float.MaxValue;
+
+        foreach (MapNode node in mapGenerator.Graph.Values)
+        {
+            float dist = Vector2.Distance(worldPos, node.WorldPosition);
+            if (dist < radius && dist < closestDist)
+            {
+                closest = node;
+                closestDist = dist;
+            }
+        }
+
+        return closest;
     }
 
     public bool IsAccessible(MapNode node)
@@ -186,6 +220,8 @@ public class NodeInteraction : MonoBehaviour
 
     private void SelectNode(MapNode node)
     {
+        UiSoundWiring.PlayMapNodeClick();
+
         RunState.CurrentNodeType = node.Type;
         RunState.CurrentCombatDifficulty = node.Difficulty;
 

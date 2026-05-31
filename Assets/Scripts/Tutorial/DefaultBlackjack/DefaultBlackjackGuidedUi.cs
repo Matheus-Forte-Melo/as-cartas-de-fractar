@@ -31,6 +31,9 @@ namespace Tutorial.DefaultBlackjack
             if (_btnFinishToMap == null && _createFinishButtonIfMissing)
                 _btnFinishToMap = CreateFinishButtonIfMissing();
 
+            if (_btnFinishToMap != null)
+                UiSoundWiring.WireButton(_btnFinishToMap, "tutorial_bj.ir_mapa");
+
             PositionTopRightActionButton(_btnNewRound, yFromTop: 56f);
             PositionTopRightActionButton(_btnFinishToMap, yFromTop: 118f);
 

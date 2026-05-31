@@ -156,6 +156,14 @@ namespace Store
 
             RebuildCoinIconCache();
             root.schedule.Execute(AnimateLoop).Every(100);
+            BindUiSounds();
+        }
+
+        private void BindUiSounds()
+        {
+            if (root == null)
+                return;
+            UiSoundToolkitBinder.Bind(root, "Store", UiSoundConfigLoader.GetEntries());
         }
 
         private void RebuildCoinIconCache()
@@ -211,6 +219,7 @@ namespace Store
                 InstantiateItem(item);
 
             RebuildCoinIconCache();
+            BindUiSounds();
         }
 
         private void InstantiateItem(ItemDefinition itemData)

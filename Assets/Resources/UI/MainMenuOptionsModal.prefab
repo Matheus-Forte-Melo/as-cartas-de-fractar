@@ -669,7 +669,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c4d2a1e9f0b4c6d8e7f1a2b3c4d5e6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MainMenuOptionsModal
-  masterMixer: {fileID: 24100000, guid: af11112233445566778899aabbcdef01, type: 2}
   spawnedAsDdOlDuplicate: 0
 --- !u!1 &963003447
 GameObject:

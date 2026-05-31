@@ -27,11 +27,18 @@ namespace Tutorial.DefaultBlackjack
 
         public void SetCards(IReadOnlyList<TutorialPlayingCard> cards, bool hideFirstCardOfDealer)
         {
-            Clear();
             if (cards == null || _cardPrefab == null)
                 return;
 
-            for (int i = 0; i < cards.Count; i++)
+            while (_views.Count > cards.Count)
+            {
+                int last = _views.Count - 1;
+                if (_views[last] != null)
+                    Destroy(_views[last].gameObject);
+                _views.RemoveAt(last);
+            }
+
+            for (int i = _views.Count; i < cards.Count; i++)
             {
                 var go = Instantiate(_cardPrefab, transform);
                 var cv = go.GetComponent<CardView>();
@@ -39,10 +46,16 @@ namespace Tutorial.DefaultBlackjack
                 cv.Setup(cards[i].DisplayLabel, faceDown);
                 _views.Add(cv);
                 ApplyCardSize(cv.GetComponent<RectTransform>());
+                UiSoundWiring.PlayCardDeal();
             }
 
-            if (_views.Count > 0 && hideFirstCardOfDealer)
-                _views[0].IsFaceDown = true;
+            for (int i = 0; i < cards.Count && i < _views.Count; i++)
+            {
+                bool faceDown = hideFirstCardOfDealer && i == 0;
+                _views[i].Setup(cards[i].DisplayLabel, faceDown);
+                _views[i].IsFaceDown = faceDown;
+                ApplyCardSize(_views[i].GetComponent<RectTransform>());
+            }
         }
 
         public void RevealDealerHole()

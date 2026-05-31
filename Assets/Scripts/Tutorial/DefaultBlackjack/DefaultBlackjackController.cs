@@ -78,6 +78,7 @@ namespace Tutorial.DefaultBlackjack
         private IEnumerator BootRoutine()
         {
             yield return null;
+            UiSoundManager.EnsureExists();
             StartNewRound();
         }
 
@@ -160,6 +161,8 @@ namespace Tutorial.DefaultBlackjack
             }
 
             _dealerRoutineRunning = false;
+            _playerHandDisplay?.Clear();
+            _dealerHandDisplay?.Clear();
             _game.NewRound();
             RefreshUi();
 
