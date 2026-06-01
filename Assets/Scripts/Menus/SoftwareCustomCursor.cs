@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Video;
 
@@ -7,7 +8,8 @@ namespace Menus
 {
     /// <summary>
     /// Cursor por software (<see cref="Sprite"/> em <c>Resources/</c>) acima do HUD;
-    /// durante <see cref="FullscreenVideoOverlay"/> desactiva-se e repõe o cursor do SO.
+    /// durante <see cref="FullscreenVideoOverlay"/> esconde-se e trava o ponteiro no canto inferior
+    /// direito (o cursor do SO também fica oculto) para não interagir com UI por baixo.
     /// </summary>
     public sealed class SoftwareCustomCursor : MonoBehaviour
     {
@@ -148,23 +150,48 @@ namespace Menus
 
         private RectTransform _cursorGraphicTransform;
 
+        private bool _fullscreenVideoActive;
+
         private void OnEnable()
         {
             FullscreenVideoOverlay.ActiveOverlayCountChanged += OnFullscreenVideoOverlayPolicyChanged;
+            SceneManager.sceneLoaded += OnSceneLoaded;
             ApplyVideoOverlayPolicy();
         }
 
         private void OnDisable()
         {
             FullscreenVideoOverlay.ActiveOverlayCountChanged -= OnFullscreenVideoOverlayPolicyChanged;
-            Cursor.visible = true;
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+            // Só a instância DDOL viva pode mexer no estado global do cursor. Um duplicado a ser
+            // destruído (recarregar o Menu) não deve repor o cursor do SO — era a causa do cursor do
+            // sistema aparecer sobreposto ao sprite custom ao voltar do tutorial.
+            if (Instance == this)
+                Cursor.visible = true;
         }
 
         private void OnDestroy()
         {
             if (Instance == this)
+            {
                 Instance = null;
-            Cursor.visible = true;
+                Cursor.visible = true;
+            }
+        }
+
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            // Reaplica a política ao entrar em cada cena: re-esconde o cursor do SO mesmo que um
+            // duplicado recém-criado o tenha tornado visível.
+            if (Instance == this)
+                ApplyVideoOverlayPolicy();
+        }
+
+        private void OnApplicationFocus(bool hasFocus)
+        {
+            // O playmode do Editor mostra o cursor do SO ao ganhar/perder foco; reaplicar a política.
+            if (hasFocus && Instance == this)
+                ApplyVideoOverlayPolicy();
         }
 
         private void OnFullscreenVideoOverlayPolicyChanged()
@@ -175,6 +202,7 @@ namespace Menus
         private void ApplyVideoOverlayPolicy()
         {
             bool fullscreenVideo = FullscreenVideoOverlay.ActiveOverlayCount > 0;
+            _fullscreenVideoActive = fullscreenVideo;
 
             if (_canvas != null)
                 _canvas.enabled = _useCustomCursorUi && !fullscreenVideo;
@@ -185,15 +213,33 @@ namespace Menus
                 return;
             }
 
-            Cursor.visible = fullscreenVideo;
+            // Cursor do SO sempre escondido: no gameplay normal mostramos o sprite custom por cima;
+            // durante a cutscene escondemos tudo e travamos o ponteiro no canto inferior direito
+            // (LateUpdate) para que cliques acidentais não atinjam UI por baixo.
+            Cursor.visible = false;
 
-            // Ao voltar a mostrar‑se sobre o gameplay, garantir estar acima de UI criada desde então.
-            if (!fullscreenVideo && _canvas.enabled)
+            if (fullscreenVideo)
+                WarpPointerToBottomRight();
+            else if (_canvas.enabled)
                 EnsureCanvasSortAboveOtherInteractionUi(forcePass: true);
+        }
+
+        private static void WarpPointerToBottomRight()
+        {
+            if (Mouse.current != null)
+                Mouse.current.WarpCursorPosition(new Vector2(Screen.width - 1, 1));
         }
 
         private void LateUpdate()
         {
+            // Durante a cutscene o canvas do sprite está desligado; ainda assim travamos o ponteiro
+            // no canto inferior direito a cada frame.
+            if (_fullscreenVideoActive)
+            {
+                WarpPointerToBottomRight();
+                return;
+            }
+
             if (!_useCustomCursorUi || _cursorGraphicTransform == null || _canvas == null || !_canvas.enabled)
                 return;
 

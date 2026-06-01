@@ -30,16 +30,13 @@ public static class GameFlowScenes
     public static string ExitStoreDestination =>
         SaveManager.ActiveContext == SaveContext.Tutorial ? CurrentMap : HubInicial;
 
-    /// <summary>Menu principal, loja ou cenas do fluxo tutorial guiado não mostram Ajuda + Config topo-direito (chrome DDOL).</summary>
+    /// <summary>Menu principal e lojas não mostram Ajuda + Config topo-direito (chrome DDOL). As cenas do fluxo tutorial (blackjack/mapa/core) passam a exibir Config + Wiki.</summary>
     public static bool ShouldHidePersistentChromeButtons(string sceneName)
     {
         return sceneName switch
         {
             Menu => true,
             Store => true,
-            TutorialDefaultBlackjack => true,
-            MapTutorial => true,
-            CoreTutorial => true,
             StoreTutorial => true,
             _ => false,
         };

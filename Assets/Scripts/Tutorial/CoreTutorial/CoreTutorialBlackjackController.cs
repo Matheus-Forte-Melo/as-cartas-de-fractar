@@ -81,7 +81,7 @@ namespace Tutorial.CoreTutorial
         [SerializeField] private float _enemyAfterCardMax = 1.0f;
         [SerializeField] private float _compareRevealPause = 0.5f;
         [Tooltip("Pausa curta depois de preencher o resumo no centro (ritmo visual).")]
-        [SerializeField] private float _summaryHoldSeconds = 2.3f;
+        [SerializeField] private float _summaryHoldSeconds = 2.2f;
         [Tooltip("Tempo em que só o resumo fica no centro da mesa (sem modal do tutorial), para leitura antes do próximo passo.")]
         [SerializeField] private float _battleCenterSummaryReadSeconds = 3.5f;
 
@@ -145,6 +145,15 @@ namespace Tutorial.CoreTutorial
                 var t = btnStand.GetComponentInChildren<Text>();
                 if (t != null) t.text = "Passe";
             }
+
+            EnsureHover(btnHit);
+            EnsureHover(btnStand);
+        }
+
+        private static void EnsureHover(Button btn)
+        {
+            if (btn != null && btn.GetComponent<MenuButtonHover>() == null)
+                btn.gameObject.AddComponent<MenuButtonHover>();
         }
 
         private void Start()

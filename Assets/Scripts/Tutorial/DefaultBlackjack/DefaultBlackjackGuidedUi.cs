@@ -34,8 +34,18 @@ namespace Tutorial.DefaultBlackjack
             if (_btnFinishToMap != null)
                 UiSoundWiring.WireButton(_btnFinishToMap, "tutorial_bj.ir_mapa");
 
-            PositionTopRightActionButton(_btnNewRound, yFromTop: 56f);
-            PositionTopRightActionButton(_btnFinishToMap, yFromTop: 118f);
+            EnsureHover(_btnNewRound);
+            EnsureHover(_btnFinishToMap);
+
+            SetButtonLabel(_btnNewRound, "NOVA MÃO");
+            SetButtonLabel(_btnFinishToMap, "TERMINAR");
+
+            // Alarga o suficiente para "NOVA MÃO"/"TERMINAR" não cortarem.
+            SetButtonSize(_btnNewRound, 220f, 52f);
+            SetButtonSize(_btnFinishToMap, 220f, 52f);
+
+            PositionTopRightActionButton(_btnNewRound, yFromTop: 256f);
+            PositionTopRightActionButton(_btnFinishToMap, yFromTop: 318f);
 
             if (_btnNewRound != null)
                 _btnNewRound.gameObject.SetActive(false);
@@ -110,6 +120,35 @@ namespace Tutorial.DefaultBlackjack
                 SceneManager.LoadScene(scene);
         }
 
+        private static void EnsureHover(Button btn)
+        {
+            if (btn != null && btn.GetComponent<MenuButtonHover>() == null)
+                btn.gameObject.AddComponent<MenuButtonHover>();
+        }
+
+        private static void SetButtonLabel(Button btn, string text)
+        {
+            if (btn == null)
+                return;
+            var label = btn.GetComponentInChildren<Text>(true);
+            if (label != null)
+            {
+                label.text = text;
+                // Evita recorte do texto numa linha (deixa transbordar em vez de cortar).
+                label.alignment = TextAnchor.MiddleCenter;
+                label.horizontalOverflow = HorizontalWrapMode.Overflow;
+                label.verticalOverflow = VerticalWrapMode.Overflow;
+            }
+        }
+
+        private static void SetButtonSize(Button btn, float width, float height)
+        {
+            if (btn == null)
+                return;
+            var rt = (RectTransform)btn.transform;
+            rt.sizeDelta = new Vector2(width, height);
+        }
+
         private static void PositionTopRightActionButton(Button btn, float yFromTop)
         {
             if (btn == null)
@@ -147,7 +186,7 @@ namespace Tutorial.DefaultBlackjack
             lrt.offsetMin = Vector2.zero;
             lrt.offsetMax = Vector2.zero;
             var label = labelGo.GetComponent<Text>();
-            label.text = "Terminar";
+            label.text = "TERMINAR";
             label.color = Color.white;
             label.fontSize = 22;
             label.alignment = TextAnchor.MiddleCenter;

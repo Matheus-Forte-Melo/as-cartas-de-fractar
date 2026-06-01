@@ -1883,7 +1883,7 @@ MonoBehaviour:
   _enemyAfterCardMin: 0.8
   _enemyAfterCardMax: 1
   _compareRevealPause: 0.5
-  _summaryHoldSeconds: 2.7
+  _summaryHoldSeconds: 2.2
   _battleCenterSummaryReadSeconds: 2
   _postBattleScene: Menu
   _tutorialManager: {fileID: 0}

@@ -2,27 +2,23 @@
   "strings": [
     {
       "key": "map_00",
-      "text": "O <b>mapa da jornada</b>: você abre fase em fase subindo os caminhos. Fases bloqueadas ficam apagadas; só os círculos ligados ao nó em que você está permitem clique."
+      "text": "O <b>mapa da torre</b>: Você avança de fase em fase subindo os moldados pela torre. Fases bloqueadas ficam apagadas e só os círculos ligados a sua fase atual permitem acesso."
     },
     {
       "key": "map_01",
-      "text": "Cada <b>círculo</b> é uma fase. Só dá para avançar pelas <b>ligações</b> (linhas). Fases longe do seu nó ficam mais apagadas até você chegar perto."
+      "text": "A <b>cor</b> do círculo marca a dificuldade: Quanto mais forte a cor, mais difícil a fase."
     },
     {
       "key": "map_02",
-      "text": "A <b>cor</b> do círculo marca a dificuldade: <b>verde</b> mais fácil, <b>laranja</b> médio, <b>vermelho</b> mais difícil."
+      "text": "O <b>rótulo</b> dita o <b>tipo de equação</b> da fase: adição, subtração, multiplicação ou divisão."
     },
     {
       "key": "map_03",
-      "text": "O <b>rótulo</b> diz o <b>tipo de equação</b> da fase: adição, subtração, multiplicação, divisão."
+      "text": "Quanto mais você <b>sobe</b>, mais difícil fica: equações mais complicadas, inimigos mais fortes. Antes de prosseguir sua jornada, analíse o caminho que você se sente mais confortável para prosseguir."
     },
     {
       "key": "map_04",
-      "text": "Quanto mais você <b>sobe</b>, mais pesado fica: equações mais duras, inimigos mais fortes. Olhe o mapa antes de entrar na próxima fase."
-    },
-    {
-      "key": "map_05",
-      "text": "Você vai <b>cair</b> muitas vezes antes do topo e do <b>Fractar</b>. Cada tentativa ensina. Mais tarde, <b>itens</b> na loja ajudam no que hoje trava. Por ora, foque no mapa."
+      "text": "Você vai <b>cair</b> muitas vezes antes de chegal ao topo. Não se fruste! Pois além de você ficar melhor nas contas, você junta moedas e consegue adquirir <b>itens</b> que vão te ajudar nas tentativas subsequentes."
     },
     {
       "key": "map_spotlight_placeholder",

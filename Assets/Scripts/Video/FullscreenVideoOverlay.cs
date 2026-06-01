@@ -128,12 +128,18 @@ namespace Video
         private void BuildCanvasAndVideoHost()
         {
             var canvasGo = new GameObject("FullscreenVideoCanvas",
-                typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler));
+                typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster), typeof(CanvasGroup));
             canvasGo.transform.SetParent(transform, false);
 
             var canvas = canvasGo.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = _request.CanvasSortingOrder;
+
+            // Bloqueia todo o input dos canvas por baixo enquanto o vídeo corre: o GraphicRaycaster
+            // + o fundo preto (raycastTarget=true) absorvem os cliques; blocksRaycasts reforça.
+            var blockingGroup = canvasGo.GetComponent<CanvasGroup>();
+            blockingGroup.blocksRaycasts = true;
+            blockingGroup.interactable = true;
 
             var scaler = canvasGo.GetComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;

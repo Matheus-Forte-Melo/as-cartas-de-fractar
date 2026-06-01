@@ -44,9 +44,14 @@ namespace Tutorial.DefaultBlackjack
                 return;
             }
 
+            // 1ª rodada (explicação guiada) usa o baralho scriptado; "Nova" (rodadas > 1) passa a aleatória.
+            var rigForRound = (CurrentRoundNumber > 1 && _rig != null && _rig.useForcedTable)
+                ? new TutorialTableRigConfig { useForcedTable = false, shuffleRemaining = true }
+                : _rig;
+
             try
             {
-                TutorialBlackjackRoundSetup.SetupRound(_fullDeckExpansion, _rig, Player, Dealer, Stock);
+                TutorialBlackjackRoundSetup.SetupRound(_fullDeckExpansion, rigForRound, Player, Dealer, Stock);
             }
             catch (System.Exception ex)
             {

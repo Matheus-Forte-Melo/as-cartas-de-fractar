@@ -225,9 +225,11 @@ public class NodeInteraction : MonoBehaviour
         RunState.CurrentNodeType = node.Type;
         RunState.CurrentCombatDifficulty = node.Difficulty;
 
-        _save.playerRow = node.Row;
-        _save.playerCol = node.Col;
-        SaveManager.Save(_save);
+        // Não gravar a posição no save aqui: o nó fica "pendente" em memória e só é confirmado
+        // em playerRow/Col ao VENCER a batalha (ver BlackjackController.EndBattleRoutine). Assim,
+        // fechar o jogo a meio do combate não conta como progressão de fase.
+        RunState.PendingPlayerRow = node.Row;
+        RunState.PendingPlayerCol = node.Col;
 
         // Permite ao TutorialManager (em MapTutorial) marcar a etapa de spotlight como concluída
         // antes da transição de cena.

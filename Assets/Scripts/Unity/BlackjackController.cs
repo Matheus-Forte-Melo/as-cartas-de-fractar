@@ -758,6 +758,8 @@ public class BlackjackController : MonoBehaviour
             });
             save.playerRow = -1;
             save.playerCol = -1;
+            RunState.PendingPlayerRow = -1;
+            RunState.PendingPlayerCol = -1;
             save.playerHealth = PlayerItemStats.CalculateMaxHealth(save);
             SaveManager.Save(save);
 
@@ -791,6 +793,17 @@ public class BlackjackController : MonoBehaviour
 
             SaveData save = SaveManager.Load();
             save.playerHealth = _game.Player.Health;
+
+            // Progressão de fase só é confirmada AGORA (vitória): grava o nó pendente clicado no mapa.
+            // Sair a meio do combate deixa o pending volátil sem efeito, mantendo o save no nó anterior.
+            if (RunState.PendingPlayerRow >= 0 && RunState.PendingPlayerCol >= 0)
+            {
+                save.playerRow = RunState.PendingPlayerRow;
+                save.playerCol = RunState.PendingPlayerCol;
+            }
+            RunState.PendingPlayerRow = -1;
+            RunState.PendingPlayerCol = -1;
+
             int coinsEarned = BattleRewardResolver.ApplyVictoryRewards(save, RunState.CurrentCombatDifficulty);
             SaveManager.Save(save);
 
@@ -825,6 +838,8 @@ public class BlackjackController : MonoBehaviour
             });
             save.playerRow = -1;
             save.playerCol = -1;
+            RunState.PendingPlayerRow = -1;
+            RunState.PendingPlayerCol = -1;
             save.playerHealth = PlayerItemStats.CalculateMaxHealth(save);
             SaveManager.Save(save);
         }

@@ -68,6 +68,16 @@ namespace Tutorial.DefaultBlackjack
                 _btnStand.onClick.AddListener(OnStand);
             if (_btnNewRound != null)
                 _btnNewRound.onClick.AddListener(OnNewRoundClicked);
+
+            EnsureHover(_btnHit);
+            EnsureHover(_btnStand);
+            EnsureHover(_btnNewRound);
+        }
+
+        private static void EnsureHover(Button btn)
+        {
+            if (btn != null && btn.GetComponent<MenuButtonHover>() == null)
+                btn.gameObject.AddComponent<MenuButtonHover>();
         }
 
         private void Start()
