@@ -296,6 +296,7 @@ public sealed class PersistenteGlobalChrome : MonoBehaviour
         rt.pivot = new Vector2(0.5f, 0.5f);
         rt.anchoredPosition = Vector2.zero;
         rt.sizeDelta = new Vector2(870f, 500f);
-        rt.localScale = Vector3.one;
+        // Mesma escala do modal embutido no Menu (reduzido 25%); senão o clone DDOL abre full-size em Core/MapTutorial/Hub.
+        rt.localScale = new Vector3(0.75f, 0.75f, 1f);
     }
 }

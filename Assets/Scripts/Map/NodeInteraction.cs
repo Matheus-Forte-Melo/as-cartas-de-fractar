@@ -84,6 +84,13 @@ public class NodeInteraction : MonoBehaviour
     {
         if (!Application.isPlaying) return;
 
+        if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame && !ReturnByInputState.IsOverlayBlockingInput())
+        {
+            bool tutorial = SceneManager.GetActiveScene().name == GameFlowScenes.MapTutorial;
+            ReturnByInputState.ReturnToMenuByInput(tutorial);
+            return;
+        }
+
         TryDevTriggerBossOutroFlowFromMap();
 
         var mouse = Mouse.current;

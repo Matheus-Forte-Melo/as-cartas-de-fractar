@@ -200,6 +200,12 @@ public class BlackjackController : MonoBehaviour
         if (ShouldIgnoreBattleInputBecauseWikiIsOpen())
             return;
 
+        if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+        {
+            ReturnByInputState.ReturnToMenuByInput(false);
+            return;
+        }
+
         if (!_battleOver && !_roundResolutionActive && !_usingConsumable && _game != null
             && _game.State == GameState.PlayerTurn && !_game.IsRoundOver)
         {
@@ -745,6 +751,7 @@ public class BlackjackController : MonoBehaviour
         {
             ClearHandValueLabels();
             RunState.LastBattleResult = BattleResult.Won;
+            ReturnByInputState.ClearCampaign();
 
             SaveData save = SaveManager.Load();
             save.playerHealth = _game.Player.Health;
@@ -845,6 +852,9 @@ public class BlackjackController : MonoBehaviour
         }
 
         yield return new WaitForSeconds(2f);
+
+        // Última ação ao finalizar a batalha: limpar a flag de retorno por input da campanha.
+        ReturnByInputState.ClearCampaign();
 
         // Campanha: derrota → hub meta. Tutorial: volta ao MapTutorial/map actual.
         if (!playerWon && SaveManager.ActiveContext != SaveContext.Tutorial)

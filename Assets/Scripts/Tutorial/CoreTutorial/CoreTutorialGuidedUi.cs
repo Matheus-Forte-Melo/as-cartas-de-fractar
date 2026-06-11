@@ -159,7 +159,7 @@ namespace Tutorial.CoreTutorial
                 {
                     rt.anchorMin = rt.anchorMax = new Vector2(1f, 1f);
                     rt.pivot = new Vector2(1f, 1f);
-                    rt.anchoredPosition = new Vector2(-24f, -24f);
+                    rt.anchoredPosition = new Vector2(-24f, -84f);
                     rt.localScale = Vector3.one;
                     ApplyEncerrarLayout(rt, _btnEncerrar.GetComponent<Image>());
                 }
@@ -241,7 +241,7 @@ namespace Tutorial.CoreTutorial
             var rt = go.GetComponent<RectTransform>();
             rt.anchorMin = rt.anchorMax = new Vector2(1f, 1f);
             rt.pivot = new Vector2(1f, 1f);
-            rt.anchoredPosition = new Vector2(-24f, -24f);
+            rt.anchoredPosition = new Vector2(-24f, -84f);
             rt.localScale = Vector3.one;
 
             var img = go.GetComponent<Image>();

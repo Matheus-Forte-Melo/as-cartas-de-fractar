@@ -21,6 +21,10 @@
       "text": "Você vai <b>cair</b> muitas vezes antes de chegal ao topo. Não se fruste! Pois além de você ficar melhor nas contas, você junta moedas e consegue adquirir <b>itens</b> que vão te ajudar nas tentativas subsequentes."
     },
     {
+      "key": "map_05",
+      "text": "A qualquer momento você pode pressionar <b>ESC</b> para <b>voltar ao menu</b>."
+    },
+    {
       "key": "map_spotlight_placeholder",
       "text": "Exemplo de fase (texto substituído em tempo de execução)."
     }

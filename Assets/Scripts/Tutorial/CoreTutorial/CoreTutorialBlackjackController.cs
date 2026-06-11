@@ -502,6 +502,7 @@ namespace Tutorial.CoreTutorial
             yield return new WaitForSeconds(0.6f);
 
             SaveManager.ActiveContext = SaveContext.Campaign;
+            ReturnByInputState.ClearTutorial();
             string scene = string.IsNullOrEmpty(_postBattleScene) ? "Menu" : _postBattleScene;
             SceneManager.LoadScene(scene);
         }

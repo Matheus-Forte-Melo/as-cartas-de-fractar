@@ -68,6 +68,23 @@ public class MenuPrincipalManager : MonoBehaviour
     /// <summary>Chamado pelo botão Jogar: retoma cadeia tutorial ou abre modal na primeira vez.</summary>
     public void Jogar()
     {
+        // Retorno por input (ESC): salta o fluxo normal e vai direto para a cena. Limpa sempre as flags.
+        bool returnedFromTutorial = ReturnByInputState.TutorialReturnedByInput;
+        bool returnedFromCampaign = ReturnByInputState.CampaignReturnedByInput;
+        ReturnByInputState.ClearAll();
+        if (returnedFromTutorial)
+        {
+            SaveManager.ActiveContext = SaveContext.Tutorial;
+            SceneManager.LoadScene(GameFlowScenes.MapTutorial);
+            return;
+        }
+        if (returnedFromCampaign)
+        {
+            SaveManager.ActiveContext = SaveContext.Campaign;
+            SceneManager.LoadScene(GameFlowScenes.Map);
+            return;
+        }
+
         MainProfileData p = SaveManager.LoadProfile();
         if (p.main_tutorial_completed)
         {
