@@ -38,10 +38,37 @@ public class MapVisualizer : MonoBehaviour
     [SerializeField] private Material lineMaterial;
     [SerializeField] private float lineWidth = 0.08f;
     [SerializeField] private Color lineColor = Color.white;
+    [Tooltip("Conexões tracejadas (com falhas) em vez de linha contínua.")]
+    [SerializeField] private bool dashedConnections = true;
+    [Tooltip("Comprimento de cada traço (unidades de mundo).")]
+    [SerializeField] private float dashLength = 0.18f;
+    [Tooltip("Espaço vazio entre traços (unidades de mundo).")]
+    [SerializeField] private float dashGap = 0.12f;
+    [Tooltip("Folga extra além do raio do nó, para o traço sumir atrás do nó.")]
+    [SerializeField] private float connectionNodePadding = 0.04f;
 
     [Header("Accessibility")]
     [SerializeField] private float inaccessibleAlpha = 0.3f;
     [SerializeField] private Color currentNodeHighlight = new(0.4f, 1f, 0.4f, 1f);
+
+    [Header("Hover (nós acessíveis)")]
+    [Tooltip("Multiplicador de escala uniforme aplicado ao nó acessível sob o cursor.")]
+    [SerializeField] private float hoverScaleMultiplier = 1.18f;
+    [Tooltip("Quanto clarear a cor do nó no hover para realçar o contraste (0 = sem mudança, 1 = branco).")]
+    [Range(0f, 1f)] [SerializeField] private float hoverContrastBoost = 0.18f;
+    [Tooltip("Velocidade da animação ao entrar/sair do hover (0→1 por segundo).")]
+    [SerializeField] private float hoverAnimSpeed = 12f;
+
+    [Header("Borda de escolha (nós acessíveis)")]
+    [Tooltip("Mostra uma borda que pisca lentamente nos nós que são escolhas possíveis.")]
+    [SerializeField] private bool showChoiceBorder = true;
+    [SerializeField] private Color choiceBorderColor = Color.white;
+    [Tooltip("Velocidade do pisca (rad/s) — valores baixos = mais lento.")]
+    [SerializeField] private float choiceBorderPulseSpeed = 2f;
+    [Range(0f, 1f)] [SerializeField] private float choiceBorderMinAlpha = 0.15f;
+    [Range(0f, 1f)] [SerializeField] private float choiceBorderMaxAlpha = 0.85f;
+    [Tooltip("Diâmetro do anel relativo ao diâmetro do nó (1 = igual; >1 fica por fora, visível como halo).")]
+    [SerializeField] private float choiceBorderScale = 1.15f;
 
     [Header("Icons by Type")]
     [SerializeField] private List<NodeTypeVisual> nodeVisuals = new();
@@ -59,7 +86,19 @@ public class MapVisualizer : MonoBehaviour
     private Material _generatedNodeMaterial;
     private Material _dimmedNodeMaterial;
     private readonly Dictionary<(int row, int col), Transform> _nodeViews = new();
-    private readonly Dictionary<(int fromRow, int fromCol, int toRow, int toCol), LineRenderer> _connectionViews = new();
+    private readonly Dictionary<(int fromRow, int fromCol, int toRow, int toCol), List<LineRenderer>> _connectionViews = new();
+
+    // Estado do hover (um nó de cada vez). Snapshot tirado ao entrar e revertido ao sair,
+    // por isso funciona para SpriteRenderer (prefab/sprite fixo) ou para o nó fallback.
+    private (int row, int col)? _hoveredKey;
+    private (int row, int col)? _hoverAnimKey;
+    private float _hoverBlend;
+    private Transform _hoverView;
+    private Vector3 _hoverBaseScale;
+    private readonly List<SpriteRenderer> _hoverSprites = new();
+    private readonly List<Color> _hoverSpriteColors = new();
+
+    private readonly Dictionary<(int row, int col), MapNodeChoiceBorder> _choiceBorders = new();
 
     private static readonly int ShaderColorId = Shader.PropertyToID("_Color");
     private static readonly int ShaderBaseColorId = Shader.PropertyToID("_BaseColor");
@@ -79,6 +118,8 @@ public class MapVisualizer : MonoBehaviour
         EnsureRoots();
         _nodeViews.Clear();
         _connectionViews.Clear();
+        _choiceBorders.Clear();
+        ResetHoverState();
 
         SpawnNodes();
         SpawnConnections();
@@ -102,19 +143,174 @@ public class MapVisualizer : MonoBehaviour
         foreach (var kvp in _connectionViews)
         {
             var edge = kvp.Key;
-            LineRenderer lr = kvp.Value;
 
             bool isAccessible = edge.fromRow == playerRow && edge.fromCol == playerCol
                                 && accessibleKeys.Contains((edge.toRow, edge.toCol));
 
             float alpha = isAccessible ? 1f : inaccessibleAlpha;
-            Color startCol = lr.startColor;
-            Color endCol = lr.endColor;
-            startCol.a = alpha;
-            endCol.a = alpha;
-            lr.startColor = startCol;
-            lr.endColor = endCol;
+            foreach (LineRenderer lr in kvp.Value)
+            {
+                if (lr == null)
+                    continue;
+                Color startCol = lr.startColor;
+                Color endCol = lr.endColor;
+                startCol.a = alpha;
+                endCol.a = alpha;
+                lr.startColor = startCol;
+                lr.endColor = endCol;
+            }
         }
+
+        SyncChoiceBorders(accessibleKeys, playerRow, playerCol);
+    }
+
+    /// <summary>Garante uma borda pulsante nos nós que são escolhas possíveis (acessíveis e diferentes do nó atual).</summary>
+    private void SyncChoiceBorders(HashSet<(int row, int col)> accessibleKeys, int playerRow, int playerCol)
+    {
+        foreach (var kvp in _nodeViews)
+        {
+            var key = kvp.Key;
+            Transform view = kvp.Value;
+
+            bool isChoice = showChoiceBorder
+                            && accessibleKeys.Contains(key)
+                            && !(key.row == playerRow && key.col == playerCol);
+
+            bool hasBorder = _choiceBorders.TryGetValue(key, out MapNodeChoiceBorder border) && border != null;
+
+            if (isChoice && !hasBorder)
+            {
+                float radius = GetNodeRadius(view);
+                MapNodeChoiceBorder created = MapNodeChoiceBorder.Attach(
+                    view, radius, choiceBorderColor,
+                    choiceBorderPulseSpeed, choiceBorderMinAlpha, choiceBorderMaxAlpha,
+                    choiceBorderScale, sortingOrder: -1);
+                _choiceBorders[key] = created;
+            }
+            else if (!isChoice && hasBorder)
+            {
+                SafeDestroy(border.gameObject);
+                _choiceBorders.Remove(key);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Realça o nó acessível sob o cursor (escala uniforme + clareamento de contraste), com
+    /// transição animada. Passar <c>null</c> remove o realce do nó atualmente em hover.
+    /// </summary>
+    public void SetHoveredNode((int row, int col)? key)
+    {
+        if (!Application.isPlaying)
+            return;
+        if (_hoveredKey.Equals(key))
+            return;
+
+        if (_hoveredKey.HasValue
+            && _choiceBorders.TryGetValue(_hoveredKey.Value, out MapNodeChoiceBorder prevBorder) && prevBorder != null)
+            prevBorder.SetHover(false);
+
+        var previousKey = _hoveredKey;
+        _hoveredKey = key;
+
+        if (!key.HasValue)
+            return;
+
+        if (!_hoverAnimKey.Equals(key))
+        {
+            if (_hoverAnimKey.HasValue && !previousKey.Equals(key))
+                FinishHoverVisualImmediate();
+
+            BeginHoverVisual(key.Value);
+        }
+
+        if (_choiceBorders.TryGetValue(key.Value, out MapNodeChoiceBorder border) && border != null)
+            border.SetHover(true);
+    }
+
+    private void LateUpdate()
+    {
+        if (!Application.isPlaying || !_hoverAnimKey.HasValue || _hoverView == null)
+            return;
+
+        bool hoveringTarget = _hoveredKey.HasValue && _hoveredKey.Value.Equals(_hoverAnimKey.Value);
+        float targetBlend = hoveringTarget ? 1f : 0f;
+        _hoverBlend = Mathf.MoveTowards(_hoverBlend, targetBlend, hoverAnimSpeed * Time.unscaledDeltaTime);
+        ApplyHoverBlend(_hoverBlend);
+
+        if (!hoveringTarget && _hoverBlend <= 0f)
+            ResetHoverState();
+    }
+
+    private void BeginHoverVisual((int row, int col) key)
+    {
+        if (!_nodeViews.TryGetValue(key, out Transform view) || view == null)
+            return;
+
+        _hoverAnimKey = key;
+        _hoverView = view;
+        _hoverBaseScale = view.localScale;
+        _hoverBlend = 0f;
+
+        _hoverSprites.Clear();
+        _hoverSpriteColors.Clear();
+        foreach (SpriteRenderer sr in view.GetComponentsInChildren<SpriteRenderer>())
+        {
+            if (sr == null)
+                continue;
+            if (sr.GetComponent<MapNodeChoiceBorder>() != null)
+                continue;
+            _hoverSprites.Add(sr);
+            _hoverSpriteColors.Add(sr.color);
+        }
+
+        ApplyHoverBlend(0f);
+    }
+
+    private void ApplyHoverBlend(float t)
+    {
+        if (_hoverView == null)
+            return;
+
+        _hoverView.localScale = Vector3.LerpUnclamped(_hoverBaseScale, _hoverBaseScale * hoverScaleMultiplier, t);
+
+        for (int i = 0; i < _hoverSprites.Count; i++)
+        {
+            SpriteRenderer sr = _hoverSprites[i];
+            if (sr == null)
+                continue;
+            Color baseCol = _hoverSpriteColors[i];
+            sr.color = Color.Lerp(baseCol, BrightenTowardsWhite(baseCol, hoverContrastBoost), t);
+        }
+    }
+
+    private void FinishHoverVisualImmediate()
+    {
+        ApplyHoverBlend(0f);
+        _hoverAnimKey = null;
+        _hoverBlend = 0f;
+        _hoverView = null;
+        _hoverSprites.Clear();
+        _hoverSpriteColors.Clear();
+    }
+
+    private void ResetHoverState()
+    {
+        _hoveredKey = null;
+        _hoverAnimKey = null;
+        _hoverBlend = 0f;
+        _hoverView = null;
+        _hoverSprites.Clear();
+        _hoverSpriteColors.Clear();
+    }
+
+    private static Color BrightenTowardsWhite(Color c, float t)
+    {
+        return new Color(
+            Mathf.Lerp(c.r, 1f, t),
+            Mathf.Lerp(c.g, 1f, t),
+            Mathf.Lerp(c.b, 1f, t),
+            c.a);
     }
 
     private void ApplyNodeAlpha(Transform nodeView, float alpha, bool highlight)
@@ -123,6 +319,7 @@ public class MapVisualizer : MonoBehaviour
         foreach (var r in renderers)
         {
             if (r is LineRenderer) continue;
+            if (r.GetComponent<MapNodeChoiceBorder>() != null) continue; // borda gere o próprio alpha (pulso)
 
             Material mat = Application.isPlaying ? r.material : r.sharedMaterial;
             Color c = highlight ? currentNodeHighlight : mat.color;
@@ -432,26 +629,97 @@ public class MapVisualizer : MonoBehaviour
             if (!_nodeViews.TryGetValue((edge.toRow, edge.toCol), out Transform to))
                 continue;
 
-            GameObject lineObject = new($"Connection_{edge.fromRow}_{edge.fromCol}_{edge.toRow}_{edge.toCol}");
-            lineObject.transform.SetParent(_connectionsRoot, false);
+            Vector3 a = from.position; a.z = 0f;
+            Vector3 b = to.position; b.z = 0f;
+            Vector3 delta = b - a;
+            float full = delta.magnitude;
+            if (full < 1e-3f)
+                continue;
+            Vector3 dir = delta / full;
 
-            var lr = lineObject.AddComponent<LineRenderer>();
-            lr.positionCount = 2;
-            lr.useWorldSpace = true;
-            lr.SetPosition(0, from.position);
-            lr.SetPosition(1, to.position);
-            lr.startWidth = lineWidth;
-            lr.endWidth = lineWidth;
-            lr.material = drawMaterial;
-            lr.startColor = lineColor;
-            lr.endColor = lineColor;
-            lr.textureMode = LineTextureMode.Stretch;
-            lr.numCapVertices = 4;
-            lr.numCornerVertices = 2;
-            lr.sortingOrder = -1;
+            // Recorta as pontas pelo raio de cada nó (+ folga) para o traçado sumir atrás dos círculos.
+            float startTrim = GetNodeRadius(from) + connectionNodePadding;
+            float endTrim = GetNodeRadius(to) + connectionNodePadding;
+            float dist = full - startTrim - endTrim;
+            if (dist <= 0.02f)
+                continue;
+            Vector3 start = a + dir * startTrim;
 
-            _connectionViews[(edge.fromRow, edge.fromCol, edge.toRow, edge.toCol)] = lr;
+            var edgeRoot = new GameObject($"Connection_{edge.fromRow}_{edge.fromCol}_{edge.toRow}_{edge.toCol}");
+            edgeRoot.transform.SetParent(_connectionsRoot, false);
+
+            var segments = new List<LineRenderer>();
+            if (dashedConnections && dashLength > 0f)
+            {
+                float cycle = dashLength + Mathf.Max(0f, dashGap);
+                float pos = 0f;
+                int index = 0;
+                while (pos < dist - 1e-3f)
+                {
+                    float segEnd = Mathf.Min(pos + dashLength, dist);
+                    Vector3 p0 = start + dir * pos;
+                    Vector3 p1 = start + dir * segEnd;
+                    segments.Add(CreateConnectionSegment(edgeRoot.transform, drawMaterial, p0, p1, index));
+                    pos += cycle;
+                    index++;
+                }
+            }
+            else
+            {
+                Vector3 p1 = start + dir * dist;
+                segments.Add(CreateConnectionSegment(edgeRoot.transform, drawMaterial, start, p1, 0));
+            }
+
+            _connectionViews[(edge.fromRow, edge.fromCol, edge.toRow, edge.toCol)] = segments;
         }
+    }
+
+    private LineRenderer CreateConnectionSegment(Transform parent, Material mat, Vector3 p0, Vector3 p1, int index)
+    {
+        var go = new GameObject($"Dash_{index}");
+        go.transform.SetParent(parent, false);
+
+        var lr = go.AddComponent<LineRenderer>();
+        lr.positionCount = 2;
+        lr.useWorldSpace = true;
+        lr.SetPosition(0, p0);
+        lr.SetPosition(1, p1);
+        lr.startWidth = lineWidth;
+        lr.endWidth = lineWidth;
+        lr.material = mat;
+        lr.startColor = lineColor;
+        lr.endColor = lineColor;
+        lr.textureMode = LineTextureMode.Stretch;
+        lr.numCapVertices = 2;
+        lr.numCornerVertices = 0;
+        lr.alignment = LineAlignment.View;
+        lr.sortingOrder = -1;
+        return lr;
+    }
+
+    /// <summary>Raio aproximado do visual do nó (maior semieixo das bounds dos renderers, ignorando linhas/labels).</summary>
+    private static float GetNodeRadius(Transform nodeView)
+    {
+        bool has = false;
+        Bounds bounds = new(nodeView.position, Vector3.zero);
+        foreach (Renderer r in nodeView.GetComponentsInChildren<Renderer>())
+        {
+            if (r is LineRenderer)
+                continue;
+            if (r.GetComponent<TextMesh>() != null)
+                continue;
+            if (!has)
+            {
+                bounds = r.bounds;
+                has = true;
+            }
+            else
+                bounds.Encapsulate(r.bounds);
+        }
+
+        if (!has)
+            return 0.3f;
+        return Mathf.Max(bounds.extents.x, bounds.extents.y);
     }
 
     private Material GetLineMaterial()

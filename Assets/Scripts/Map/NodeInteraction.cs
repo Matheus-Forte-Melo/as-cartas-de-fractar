@@ -54,22 +54,6 @@ public class NodeInteraction : MonoBehaviour
         _save = SaveManager.Load();
         HandleTransitionMessage();
         ApplyVisualAccessibility();
-        AttachMapTutorialNodePulseIfNeeded();
-    }
-
-    /// <summary>Adiciona o pulso no nó (0,0) enquanto o jogador ainda não escolheu uma fase em <c>MapTutorial</c>.</summary>
-    private void AttachMapTutorialNodePulseIfNeeded()
-    {
-        if (SceneManager.GetActiveScene().name != GameFlowScenes.MapTutorial)
-            return;
-        if (_save.playerRow != -1 || _save.playerCol != -1)
-            return;
-        if (mapVisualizer == null)
-            return;
-        if (!mapVisualizer.TryGetNodeTransform(0, 0, out Transform nodeTf) || nodeTf == null)
-            return;
-        if (nodeTf.GetComponent<MapTutorialNodePulse>() == null)
-            nodeTf.gameObject.AddComponent<MapTutorialNodePulse>();
     }
 
     private void ApplyVisualAccessibility()
@@ -121,31 +105,35 @@ public class NodeInteraction : MonoBehaviour
             }
         }
 
-        UpdateMapNodeHoverSound(mouse);
+        UpdateMapNodeHover(mouse);
     }
 
-    private void UpdateMapNodeHoverSound(Mouse mouse)
+    private void UpdateMapNodeHover(Mouse mouse)
     {
+        (int row, int col)? accessibleKey = null;
+
         Vector2 screenPos = mouse.position.ReadValue();
-        if (MapUiRaycasts.IsScreenPositionOverUi(screenPos))
+        if (!MapUiRaycasts.IsScreenPositionOverUi(screenPos))
+        {
+            Vector3 worldPos = mainCamera.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, 0f));
+            MapNode hovered = FindClosestNode(new Vector2(worldPos.x, worldPos.y), NodeHitRadius);
+            if (hovered != null && IsAccessible(hovered))
+                accessibleKey = (hovered.Row, hovered.Col);
+        }
+
+        if (mapVisualizer != null)
+            mapVisualizer.SetHoveredNode(accessibleKey);
+
+        if (accessibleKey == null)
         {
             _hoverSoundNode = null;
             return;
         }
 
-        Vector3 worldPos = mainCamera.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, 0f));
-        MapNode hovered = FindClosestNode(new Vector2(worldPos.x, worldPos.y), NodeHitRadius);
-        if (hovered == null || !IsAccessible(hovered))
-        {
-            _hoverSoundNode = null;
-            return;
-        }
-
-        var key = (hovered.Row, hovered.Col);
-        if (_hoverSoundNode == key)
+        if (_hoverSoundNode == accessibleKey)
             return;
 
-        _hoverSoundNode = key;
+        _hoverSoundNode = accessibleKey;
         UiSoundWiring.PlayMapNodeHover();
     }
 
