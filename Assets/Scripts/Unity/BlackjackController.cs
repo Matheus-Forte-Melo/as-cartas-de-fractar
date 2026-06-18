@@ -46,6 +46,8 @@ public class BlackjackController : MonoBehaviour
     [Tooltip("Relativo à pasta StreamingAssets. Se vazio, após vitória não há vídeo — apenas breve espera e menu.")]
     [SerializeField] private string bossVictoryVideoStreamingPath = "Cutscenes/fim.mp4";
     [SerializeField] private float bossVictoryVideoHoldSkipSeconds = 1f;
+    [Tooltip("Após confirmar Compre/Passe (teclado ou fim de rodada), ignora input de 'pular' resumo por este tempo (evita Enter/Espaço do mesmo toque).")]
+    [SerializeField] private float roundContinueSkipGraceSeconds = 0.4f;
 
     private BlackjackGame _game;
     private SaveData _save;
@@ -59,6 +61,7 @@ public class BlackjackController : MonoBehaviour
     private BattleActionFocus _actionFocus = BattleActionFocus.Hit;
     private bool _actionFocusChosen;
     private const float ActionFocusScale = 1.06f;
+    private float _roundContinueInputAllowedAfterUnscaled;
 
     private const string DefaultDeckFile = "config_cards.json";
     private const int DamageMultiplierDisplay = 10;
@@ -279,7 +282,18 @@ public class BlackjackController : MonoBehaviour
             return;
         if (enter && !_actionFocusChosen)
             _actionFocus = BattleActionFocus.Hit;
+        BeginRoundContinueInputGrace();
         InvokeFocusedBattleAction();
+    }
+
+    /// <summary>
+    /// O mesmo toque que confirma Compre/Passe pode ser relido no fim da rodada por
+    /// <see cref="TryGetAnyInputDown"/> no mesmo frame — esta janela bloqueia o skip automático.
+    /// </summary>
+    private void BeginRoundContinueInputGrace()
+    {
+        float grace = Mathf.Max(0.05f, roundContinueSkipGraceSeconds);
+        _roundContinueInputAllowedAfterUnscaled = Time.unscaledTime + grace;
     }
 
     private static bool IsCoreCampaignBattleScene() =>
@@ -401,8 +415,11 @@ public class BlackjackController : MonoBehaviour
     /// Usado no fim da rodada (Update e <see cref="RoundResolutionRoutine"/>). A coroutine também
     /// consulta input — por isso o bloqueio da wiki tem de estar aqui, não só no <c>Update</c>.
     /// </summary>
-    private static bool TryGetAnyInputDown()
+    private bool TryGetAnyInputDown()
     {
+        if (Time.unscaledTime < _roundContinueInputAllowedAfterUnscaled)
+            return false;
+
         if (ShouldIgnoreBattleInputBecauseWikiIsOpen())
             return false;
 
@@ -722,6 +739,7 @@ public class BlackjackController : MonoBehaviour
     {
         try
         {
+            BeginRoundContinueInputGrace();
             SetPlayerActionsEnabled(false);
             _game.Enemy.IsFirstCardHidden = false;
             SyncCards();
