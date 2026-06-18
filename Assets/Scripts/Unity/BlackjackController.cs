@@ -267,15 +267,19 @@ public class BlackjackController : MonoBehaviour
             return;
         }
 
-        if ((kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame
-             || kb.spaceKey.wasPressedThisFrame)
-            && btnHit != null && btnStand != null
-            && (btnHit.interactable || btnStand.interactable))
-        {
-            if (!_actionFocusChosen)
-                _actionFocus = BattleActionFocus.Hit;
-            InvokeFocusedBattleAction();
-        }
+        bool enter = kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame;
+        bool space = kb.spaceKey.wasPressedThisFrame;
+        if (!enter && !space)
+            return;
+        if (btnHit == null || btnStand == null)
+            return;
+        if (!btnHit.interactable && !btnStand.interactable)
+            return;
+        if (space && !_actionFocusChosen)
+            return;
+        if (enter && !_actionFocusChosen)
+            _actionFocus = BattleActionFocus.Hit;
+        InvokeFocusedBattleAction();
     }
 
     private static bool IsCoreCampaignBattleScene() =>
