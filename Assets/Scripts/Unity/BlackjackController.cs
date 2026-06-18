@@ -55,6 +55,11 @@ public class BlackjackController : MonoBehaviour
     private bool _usingConsumable;
     private string _centerFeedLine = "";
 
+    private enum BattleActionFocus { Hit, Stand }
+    private BattleActionFocus _actionFocus = BattleActionFocus.Hit;
+    private bool _actionFocusChosen;
+    private const float ActionFocusScale = 1.06f;
+
     private const string DefaultDeckFile = "config_cards.json";
     private const int DamageMultiplierDisplay = 10;
 
@@ -209,6 +214,7 @@ public class BlackjackController : MonoBehaviour
         if (!_battleOver && !_roundResolutionActive && !_usingConsumable && _game != null
             && _game.State == GameState.PlayerTurn && !_game.IsRoundOver)
         {
+            TryBattleActionHotkeys();
             TryConsumableHotkeys();
         }
 
@@ -230,6 +236,88 @@ public class BlackjackController : MonoBehaviour
             TryStartUseConsumable(1);
         else if (Keyboard.current.digit3Key.wasPressedThisFrame)
             TryStartUseConsumable(2);
+    }
+
+    /// <summary>
+    /// Atalhos da wiki (aba Controles): WASD/setas navegam entre Compre/Passe, Enter ou Espaço
+    /// confirmam o botão focado (sem foco explícito → Compre). Só activo na cena <c>Core</c> de campanha.
+    /// </summary>
+    private void TryBattleActionHotkeys()
+    {
+        if (!IsCoreCampaignBattleScene())
+            return;
+
+        Keyboard kb = Keyboard.current;
+        if (kb == null)
+            return;
+
+        if (WasNavigateToHit(kb))
+        {
+            _actionFocus = BattleActionFocus.Hit;
+            _actionFocusChosen = true;
+            ApplyBattleActionFocusVisual();
+            return;
+        }
+
+        if (WasNavigateToStand(kb))
+        {
+            _actionFocus = BattleActionFocus.Stand;
+            _actionFocusChosen = true;
+            ApplyBattleActionFocusVisual();
+            return;
+        }
+
+        if ((kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame
+             || kb.spaceKey.wasPressedThisFrame)
+            && btnHit != null && btnStand != null
+            && (btnHit.interactable || btnStand.interactable))
+        {
+            if (!_actionFocusChosen)
+                _actionFocus = BattleActionFocus.Hit;
+            InvokeFocusedBattleAction();
+        }
+    }
+
+    private static bool IsCoreCampaignBattleScene() =>
+        string.Equals(SceneManager.GetActiveScene().name, GameFlowScenes.Core, System.StringComparison.OrdinalIgnoreCase);
+
+    private static bool WasNavigateToHit(Keyboard kb) =>
+        kb.leftArrowKey.wasPressedThisFrame || kb.aKey.wasPressedThisFrame
+        || kb.upArrowKey.wasPressedThisFrame || kb.wKey.wasPressedThisFrame;
+
+    private static bool WasNavigateToStand(Keyboard kb) =>
+        kb.rightArrowKey.wasPressedThisFrame || kb.dKey.wasPressedThisFrame
+        || kb.downArrowKey.wasPressedThisFrame || kb.sKey.wasPressedThisFrame;
+
+    private void InvokeFocusedBattleAction()
+    {
+        if (_actionFocus == BattleActionFocus.Hit && btnHit != null && btnHit.interactable)
+            OnHit();
+        else if (_actionFocus == BattleActionFocus.Stand && btnStand != null && btnStand.interactable)
+            OnStand();
+    }
+
+    private void ApplyBattleActionFocusVisual()
+    {
+        if (!_actionFocusChosen)
+        {
+            ApplyButtonFocusScale(btnHit, false);
+            ApplyButtonFocusScale(btnStand, false);
+            return;
+        }
+
+        ApplyButtonFocusScale(btnHit, _actionFocus == BattleActionFocus.Hit);
+        ApplyButtonFocusScale(btnStand, _actionFocus == BattleActionFocus.Stand);
+    }
+
+    private static void ApplyButtonFocusScale(Button btn, bool focused)
+    {
+        if (btn == null)
+            return;
+        var rt = btn.transform as RectTransform;
+        if (rt == null)
+            return;
+        rt.localScale = Vector3.one * (focused ? ActionFocusScale : 1f);
     }
 
     private void TryStartUseConsumable(int slotIndex)
@@ -873,6 +961,17 @@ public class BlackjackController : MonoBehaviour
     {
         btnHit.interactable = enabled;
         btnStand.interactable = enabled;
+        if (enabled)
+        {
+            _actionFocusChosen = false;
+            _actionFocus = BattleActionFocus.Hit;
+            ApplyBattleActionFocusVisual();
+        }
+        else
+        {
+            ApplyButtonFocusScale(btnHit, false);
+            ApplyButtonFocusScale(btnStand, false);
+        }
     }
 
     private static string EnemyOutcomeLine(GameState state)

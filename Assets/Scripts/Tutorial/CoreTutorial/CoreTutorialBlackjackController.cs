@@ -160,7 +160,58 @@ namespace Tutorial.CoreTutorial
         {
             if (_tutorialManager == null)
                 _tutorialManager = FindFirstObjectByType<TutorialManager>();
+
+            if (_tutorialManager != null)
+            {
+                _tutorialManager.StepAppliedAfterUi -= OnTutorialStepAppliedAfterUi;
+                _tutorialManager.StepAppliedAfterUi += OnTutorialStepAppliedAfterUi;
+            }
+
             StartCoroutine(BootRoutine());
+        }
+
+        private void OnDestroy()
+        {
+            if (_tutorialManager != null)
+                _tutorialManager.StepAppliedAfterUi -= OnTutorialStepAppliedAfterUi;
+        }
+
+        /// <summary>
+        /// Rede de segurança contra "softlock" em jogada rápida: ao mostrar um passo que pede para o
+        /// jogador pressionar <b>Compre</b>/<b>Passe</b>, garante que os botões refletem o estado real
+        /// do jogo. Sem isto, avançar um passo explicativo mais rápido que as corrotinas de fundo podia
+        /// deixar o botão destacado porém desabilitado.
+        /// </summary>
+        private void OnTutorialStepAppliedAfterUi(int index, TutorialStepDefinition step)
+        {
+            if (!IsPlayerActionTutorialStep(step))
+                return;
+            bool playerTurn = _game != null && _game.State == GameState.PlayerTurn && !_game.IsRoundOver;
+            if (playerTurn)
+                SetPlayerActionsEnabled(true);
+        }
+
+        private static bool IsPlayerActionTutorialStep(TutorialStepDefinition step)
+        {
+            if (step == null || step.advanceMode != TutorialAdvanceMode.OnEvent)
+                return false;
+            return step.advanceWhenEventId == TutorialBlackjackEventIds.PlayerHit
+                   || step.advanceWhenEventId == TutorialBlackjackEventIds.PlayerStand;
+        }
+
+        /// <summary>
+        /// True quando o tutorial está mostrando um passo que aguarda o jogador pressionar Compre/Passe.
+        /// Usado para encurtar o ritmo da mesa quando o jogador já está adiantado.
+        /// </summary>
+        private bool TutorialWaitingForPlayerActionInput()
+        {
+            if (_tutorialManager == null || !_tutorialManager.IsRunning)
+                return false;
+            int i = _tutorialManager.CurrentStepIndex;
+            var steps = _tutorialManager.Steps;
+            if (steps == null || i < 0 || i >= steps.Count)
+                return false;
+            return IsPlayerActionTutorialStep(steps[i]);
         }
 
         private IEnumerator BootRoutine()
@@ -249,7 +300,10 @@ namespace Tutorial.CoreTutorial
                 if (_game.State == GameState.EnemyTurn)
                 {
                     SetPlayerActionsEnabled(false);
-                    StartCoroutine(EnemyTurnRoutine());
+                    // Turno do inimigo provocado por uma compra: depois dele o jogador precisa agir de novo
+                    // (ex.: pressionar Passe). Em jogada rápida, o ritmo da mesa pode ser encurtado para o
+                    // botão de ação ficar disponível logo (evita softlock com botão destacado mas desabilitado).
+                    StartCoroutine(EnemyTurnRoutine(allowFastForward: true));
                     return;
                 }
 
@@ -302,18 +356,18 @@ namespace Tutorial.CoreTutorial
             }
         }
 
-        private IEnumerator EnemyTurnRoutine()
+        private IEnumerator EnemyTurnRoutine(bool allowFastForward = false)
         {
             while (_game.State == GameState.EnemyTurn)
             {
                 SetCenterFeedLine("O inimigo está pensando...");
-                yield return new WaitForSeconds(Random.Range(_enemyThinkMin, _enemyThinkMax));
+                yield return TableBeat(Random.Range(_enemyThinkMin, _enemyThinkMax), allowFastForward);
 
                 bool hit = _game.EnemyAct();
                 SyncCards();
 
                 SetCenterFeedLine(hit ? "O inimigo comprou uma carta." : "O inimigo passou a vez.");
-                yield return new WaitForSeconds(Random.Range(_enemyAfterCardMin, _enemyAfterCardMax));
+                yield return TableBeat(Random.Range(_enemyAfterCardMin, _enemyAfterCardMax), allowFastForward);
 
                 EventBridge.TriggerEvent(TutorialCoreEventIds.EnemyTurnTaken);
 
@@ -338,6 +392,26 @@ namespace Tutorial.CoreTutorial
             }
 
             RefreshUi();
+        }
+
+        /// <summary>
+        /// Pausa de ritmo da mesa. Quando <paramref name="allowFastForward"/> é verdadeiro e o tutorial já
+        /// está esperando o jogador pressionar Compre/Passe (jogador adiantou o passo explicativo), a pausa
+        /// é abortada para devolver o controle (e reabilitar o botão) o mais rápido possível.
+        /// </summary>
+        private IEnumerator TableBeat(float seconds, bool allowFastForward)
+        {
+            if (allowFastForward && TutorialWaitingForPlayerActionInput())
+                yield break;
+
+            float t = 0f;
+            while (t < seconds)
+            {
+                if (allowFastForward && TutorialWaitingForPlayerActionInput())
+                    yield break;
+                t += Time.deltaTime;
+                yield return null;
+            }
         }
 
         private IEnumerator CompareHandsRoutine()

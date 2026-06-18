@@ -76,6 +76,7 @@ public class NodeInteraction : MonoBehaviour
         }
 
         TryDevTriggerBossOutroFlowFromMap();
+        TryDevSkipToPreBossFight();
 
         var mouse = Mouse.current;
         if (mouse == null) return;
@@ -254,6 +255,66 @@ public class NodeInteraction : MonoBehaviour
         if (!kb.f12Key.wasPressedThisFrame) return;
 
         BossOutroFlow.BeginReturnToMenuWithOutroVideo("Cutscenes/fim.mp4", 1f);
+    }
+
+    /// <summary>
+    /// TODO(remover após testes): <b>Ctrl+Shift+F9</b> na cena Map — posiciona o jogador num nó
+    /// aleatório da última linha procedural (logo antes do boss Fractar), com essa fase já
+    /// concluída, deixando o nó de bossfight seleccionável.
+    /// </summary>
+    private void TryDevSkipToPreBossFight()
+    {
+        if (SceneManager.GetActiveScene().name != GameFlowScenes.Map)
+            return;
+
+        Keyboard kb = Keyboard.current;
+        if (kb == null)
+            return;
+        bool ctrl = kb.leftCtrlKey.isPressed || kb.rightCtrlKey.isPressed;
+        bool shift = kb.leftShiftKey.isPressed || kb.rightShiftKey.isPressed;
+        if (!ctrl || !shift || !kb.f9Key.wasPressedThisFrame)
+            return;
+
+        if (mapGenerator == null)
+            return;
+
+        int bossRow = -1;
+        foreach (MapNode node in mapGenerator.Graph.Values)
+        {
+            if (node.Type != MapNodeType.Bossfight)
+                continue;
+            if (node.Row > bossRow)
+                bossRow = node.Row;
+        }
+
+        if (bossRow < 1)
+        {
+            Debug.LogWarning("[NodeInteraction] Dev Ctrl+Shift+F9: nó Bossfight não encontrado no grafo.");
+            return;
+        }
+
+        int preBossRow = bossRow - 1;
+        var candidates = new List<MapNode>();
+        foreach (MapNode node in mapGenerator.Graph.Values)
+        {
+            if (node.Row == preBossRow && node.Type != MapNodeType.Bossfight)
+                candidates.Add(node);
+        }
+
+        if (candidates.Count == 0)
+        {
+            Debug.LogWarning($"[NodeInteraction] Dev Ctrl+Shift+F9: nenhum nó na linha {preBossRow} (pré-boss).");
+            return;
+        }
+
+        MapNode pick = candidates[Random.Range(0, candidates.Count)];
+        _save.playerRow = pick.Row;
+        _save.playerCol = pick.Col;
+        SaveManager.Save(_save);
+        ApplyVisualAccessibility();
+
+        Debug.Log($"[NodeInteraction] Dev Ctrl+Shift+F9: posicionado em ({pick.Row},{pick.Col}); "
+                  + "boss Fractar acessível para seleção.");
     }
 
 }

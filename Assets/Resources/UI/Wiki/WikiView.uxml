@@ -335,7 +335,7 @@
                                 <ui:Label class="wiki-section-title wiki-section-title--first wiki-section-title--after-title-only" text="Mapa" />
                                 <ui:Label class="wiki-page-body" text="Mouse para escolher duelos. Scroll ou arrasto vertical move a câmera. Esc fecha esta ajuda quando ela estiver aberta." />
                                 <ui:Label class="wiki-section-title" text="Combate" />
-                                <ui:Label class="wiki-page-body" text="Mouse nos botões da mesa. Espaço passa o turno (parar). B compra carta. Setas ou WASD navegam na interface. Enter confirma. Teclas 1, 2 e 3 usam consumíveis nos três espaços durante o seu turno." />
+                                <ui:Label class="wiki-page-body" text="Mouse nos botões da mesa. Setas ou WASD navegam entre Compre e Passe. Enter ou Espaço confirma o botão focado (sem foco, Compre). Teclas 1, 2 e 3 usam consumíveis nos três espaços durante o seu turno." />
                             </ui:VisualElement>
 
                             </ui:VisualElement>
