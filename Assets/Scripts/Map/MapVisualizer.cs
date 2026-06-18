@@ -426,6 +426,7 @@ public class MapVisualizer : MonoBehaviour
             instance.name = $"Node_{node.Row}_{node.Col}_{node.Type}_{node.Difficulty}";
             instance.transform.position = new Vector3(node.WorldPosition.x, node.WorldPosition.y, 0f);
             ApplyDifficultyVisuals(instance.transform, node.Difficulty);
+            ApplyNodeIcon(instance.transform, node.Type);
             if (node.Type == MapNodeType.Bossfight)
             {
                 ApplyBossFightTint(instance.transform, bossFightStyle.nodeColor);
@@ -565,6 +566,26 @@ public class MapVisualizer : MonoBehaviour
             return;
         }
     }
+
+    private void ApplyNodeIcon(Transform nodeRoot, MapNodeType type)
+{
+    // Procura na sua lista de ícones qual corresponde ao tipo desta fase
+    var visual = nodeVisuals.FirstOrDefault(v => v.type == type);
+    
+    // Se achou um ícone válido, aplica no SpriteRenderer
+    if (visual != null && visual.icon != null)
+    {
+        foreach (SpriteRenderer sr in nodeRoot.GetComponentsInChildren<SpriteRenderer>(true))
+        {
+            // Evita substituir a borda de dificuldade
+            if (sr.gameObject.name.Contains("DifficultyBorderSprite", System.StringComparison.Ordinal))
+                continue;
+                
+            sr.sprite = visual.icon;
+            return;
+        }
+    }
+}
 
     private void AttachTypeLabel(Transform nodeTransform, MapNodeType type, CombatEquationDifficulty difficulty)
     {
