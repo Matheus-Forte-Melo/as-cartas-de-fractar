@@ -106,6 +106,7 @@ namespace Tutorial.CoreTutorial
         private bool _reapplyTutorialAfterStartRound;
         private bool _sandboxMode;
         private string _centerFeedLine = "";
+        private Coroutine _tutorialPresentationRefreshRoutine;
 
         public CoreTutorialBlackjackGame Game => _game;
         public bool IsBattleOver => _battleOver;
@@ -184,11 +185,15 @@ namespace Tutorial.CoreTutorial
         /// </summary>
         private void OnTutorialStepAppliedAfterUi(int index, TutorialStepDefinition step)
         {
-            if (!IsPlayerActionTutorialStep(step))
-                return;
-            bool playerTurn = _game != null && _game.State == GameState.PlayerTurn && !_game.IsRoundOver;
-            if (playerTurn)
-                SetPlayerActionsEnabled(true);
+            if (IsPlayerActionTutorialStep(step))
+            {
+                bool playerTurn = _game != null && _game.State == GameState.PlayerTurn && !_game.IsRoundOver;
+                if (playerTurn)
+                    SetPlayerActionsEnabled(true);
+            }
+
+            if (step != null && step.target != null)
+                ScheduleTutorialPresentationRefresh();
         }
 
         private static bool IsPlayerActionTutorialStep(TutorialStepDefinition step)
@@ -217,7 +222,41 @@ namespace Tutorial.CoreTutorial
         private IEnumerator BootRoutine()
         {
             yield return null;
+            Canvas.ForceUpdateCanvases();
+            yield return null;
             StartNextRound();
+        }
+
+        /// <summary>
+        /// Reaplica tooltip/spotlight/blocker após o layout da UI da mesa estabilizar.
+        /// Evita softlock quando o jogador avança rápido até <c>round1_press_hit</c> antes do
+        /// rect do <c>BtnHit</c> estar pronto.
+        /// </summary>
+        private void ScheduleTutorialPresentationRefresh()
+        {
+            if (_tutorialManager == null || !_tutorialManager.IsRunning)
+                return;
+            if (_tutorialPresentationRefreshRoutine != null)
+                StopCoroutine(_tutorialPresentationRefreshRoutine);
+            _tutorialPresentationRefreshRoutine = StartCoroutine(CoRefreshTutorialPresentationAfterLayout());
+        }
+
+        private IEnumerator CoRefreshTutorialPresentationAfterLayout()
+        {
+            _tutorialPresentationRefreshRoutine = null;
+            for (int frame = 0; frame < 3; frame++)
+            {
+                yield return null;
+                Canvas.ForceUpdateCanvases();
+                if (_tutorialManager == null || !_tutorialManager.IsRunning)
+                    yield break;
+
+                _tutorialManager.SetSpotlightAndTooltipVisible(true);
+                _tutorialManager.ReapplyCurrentStepPresentation();
+
+                if (_game != null && _game.State == GameState.PlayerTurn && !_game.IsRoundOver)
+                    SetPlayerActionsEnabled(true);
+            }
         }
 
         private void StartNextRound()
@@ -264,14 +303,10 @@ namespace Tutorial.CoreTutorial
             EventBridge.TriggerEvent(TutorialCoreEventIds.NewRoundStarted);
 
             if (_reapplyTutorialAfterStartRound)
-            {
                 _reapplyTutorialAfterStartRound = false;
-                if (_tutorialManager != null && _tutorialManager.IsRunning)
-                {
-                    _tutorialManager.SetSpotlightAndTooltipVisible(true);
-                    _tutorialManager.ReapplyCurrentStepPresentation();
-                }
-            }
+
+            if (_tutorialManager != null && _tutorialManager.IsRunning)
+                ScheduleTutorialPresentationRefresh();
         }
 
         private void OnHit()

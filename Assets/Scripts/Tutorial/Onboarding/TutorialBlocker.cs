@@ -31,6 +31,8 @@ namespace Tutorial.Onboarding
             if (!TutorialFocusRingLayout.TryGetHoleInRootLocalSpace(
                     _trackedTarget, _root, _trackedPadding, _trackedHoleScale, out Rect hole))
                 return;
+            if (_fullBlock != null)
+                _fullBlock.gameObject.SetActive(false);
             TutorialFocusRingLayout.ApplyFourBars(_root, _bars, hole);
         }
 
@@ -101,7 +103,9 @@ namespace Tutorial.Onboarding
             if (!TutorialFocusRingLayout.TryGetHoleInRootLocalSpace(
                     target, _root, padding, _trackedHoleScale, out Rect hole))
             {
-                SetFullscreenBlock();
+                TutorialFocusRingLayout.HideBars(_bars);
+                if (_fullBlock != null)
+                    _fullBlock.gameObject.SetActive(true);
                 return;
             }
 

@@ -33,6 +33,8 @@ namespace Tutorial.Onboarding
             if (!TutorialFocusRingLayout.TryGetHoleInRootLocalSpace(
                     _trackedTarget, _root, _trackedPadding, _trackedHoleScale, out Rect hole))
                 return;
+            if (_fullDim != null)
+                _fullDim.gameObject.SetActive(false);
             TutorialFocusRingLayout.ApplyFourBars(_root, _bars, hole);
         }
 
@@ -104,7 +106,11 @@ namespace Tutorial.Onboarding
             if (!TutorialFocusRingLayout.TryGetHoleInRootLocalSpace(
                     target, _root, padding, _trackedHoleScale, out Rect hole))
             {
-                SetFullscreenDim();
+                // Alvo ainda sem layout válido (ex.: UI da mesa a montar) — mantém tracking
+                // para <see cref="LateUpdate"/> abrir o buraco assim que o rect existir.
+                TutorialFocusRingLayout.HideBars(_bars);
+                if (_fullDim != null)
+                    _fullDim.gameObject.SetActive(true);
                 return;
             }
 
