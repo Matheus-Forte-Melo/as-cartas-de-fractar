@@ -1,76 +1,54 @@
-# Como clonar o repositório e abrir o projeto Unity no Unity Hub
+# As Cartas de Fractar
 
-## Pré-requisitos
-- Git instalado
-- Unity Hub instalado
-- Unity Editor instalado (versão compatível com o projeto)
+Um jogo roguelite de matemática inspirado em blackjack. Suba a torre, supere os desafios que ficam cada vez mais complicados e enfrente o Mago Fractar no topo. 
 
----
+Desenvolvido em Unity como projeto extensionista da Católica de Santa Catarina, o jogo busca aproximar crianças e adolescentes da matemática por meio de desafios integrados à experiência de jogar.
 
-## 1) Clonar o repositório do GitHub
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/3de83c5e-4b7f-4e0b-84dc-0b826de2f78d" />
 
-1. Copie a URL do repositório no GitHub  
-   Exemplo: https://github.com/usuario/repositorio.git
 
-2. Abra o terminal (ou Prompt de Comando / PowerShell)
+## Download
 
-3. Vá até a pasta onde deseja salvar o projeto:
-   ```bash
-   cd caminho/para/sua/pasta
-   ```
+Baixe a versão apresentada ao final do projeto na seção **Releases** deste repositório ou na página do jogo no **itch.io**.
 
-4. Clone o repositório:
-   ```bash
-   git clone https://github.com/usuario/repositorio.git
-   ```
+> Para jogar, recomendamos a versão disponível para download. A branch `main` contém alterações que não passaram pela mesma validação da versão apresentada.
 
-5. Entre na pasta do projeto:
-   ```bash
-   cd repositorio
-   ```
+## Sobre o projeto
 
----
+O desenvolvimento ocorreu ao longo de um ano, com seis meses de planejamento e seis meses de execução.
 
-## 2) Adicionar o projeto no Unity Hub
+Na apresentação final, o projeto recebeu destaque dos avaliadores pela integração do objetivo educativo às mecânicas e ao universo do jogo, tal como elogios dos projetos dos nossos colegas.
 
-1. Abra o Unity Hub
-2. Vá na aba "Projects"
-3. Clique em "Add" (ou "Open")
-4. Selecione a pasta raiz do projeto clonado  
-   (a pasta que contém: Assets, Packages e ProjectSettings)
-5. Confirme para adicionar o projeto
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/70f279c7-c64a-43e0-9ada-bf9e387891ad" />
 
----
 
-## 3) Instalar a versão correta do Unity
+## Estado do desenvolvimento
 
-1. Dentro da pasta do projeto, abra o arquivo:
-   ProjectSettings/ProjectVersion.txt
+O projeto foi concluído como entrega acadêmica. No momento, a equipe não tem planos de continuar o desenvolvimento devido às demais atividades da graduação.
 
-2. Copie a versão do Unity indicada (exemplo: 2022.3.xf1)
+O jogo ainda tem bugs, comportamentos que precisam de ajustes e inconsistências visuais, especialmente no mapa roguelite. Há muita "jank" e "slop" se você destoar do caminho feliz, mas se você jogar sobre as condições esperadas, você não deve encontrar problemas.
 
-3. No Unity Hub:
-   - Vá em "Installs"
-   - Clique em "Install Editor"
-   - Instale a mesma versão encontrada no arquivo
+O único bug que nos atormentou foi uma condição de soft-lock no tutorial. Se você ficar soft-locked no tutorial de alguma forma, voltar ao menu apertando ESC ou reabrir o jogo deve te destravar.
 
----
+### Branches
 
-## 4) Abrir o projeto no Unity
+- `main-presentation`: versão do código utilizada na apresentação final.
+- `main`: contém alterações posteriores que ainda não foram completamente testadas.
 
-1. No Unity Hub, vá em "Projects"
-2. Localize o projeto na lista
-3. Selecione a versão correta do Unity (se solicitado)
-4. Clique no projeto para abrir
-5. Aguarde a primeira importação dos assets (pode demorar alguns minutos)
+Para explorar o projeto na Unity a partir da versão apresentada, utilize a branch `main-presentation`.
 
----
+## Por que disponibilizar o código?
 
-## Estrutura esperada do projeto Unity
+Queremos compartilhar o trabalho realizado e permitir que outras pessoas conheçam as soluções utilizadas no projeto.
 
-A pasta selecionada deve conter:
-- Assets/
-- Packages/
-- ProjectSettings/
+Correções de bugs, melhorias visuais e sugestões são bem-vindas. Você pode registrar problemas nas issues ou propor alterações por meio de pull requests. Como o projeto não possui manutenção ativa, a análise das contribuições pode levar tempo.
 
-Se essas pastas não existirem, você provavelmente selecionou a pasta errada.
+## Inspirações
+
+- **Skyrim:** ambientação.
+- **Resident Evil 7:** dinâmica de blackjack.
+- **Slay the Spire:** estrutura roguelite.
+
+## Licença e conteúdo de terceiros
+
+Músicas, imagens, fontes e outros recursos de terceiros estão sujeitos aos direitos e às licenças de seus respectivos titulares. A disponibilização deste repositório não concede autorização para reutilizar esses materiais.
