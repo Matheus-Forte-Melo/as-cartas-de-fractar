@@ -7,11 +7,9 @@ Desenvolvido em Unity como projeto extensionista da Católica de Santa Catarina,
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/3de83c5e-4b7f-4e0b-84dc-0b826de2f78d" />
 
 
-## Download
+## Download e Instalação
 
-Baixe a versão apresentada ao final do projeto na seção **Releases** deste repositório ou na página do jogo no **itch.io**.
-
-> Para jogar, recomendamos a versão disponível para download. A branch `main` contém alterações que não passaram pela mesma validação da versão apresentada.
+Baixe a versão apresentada ao final do projeto na seção **Releases** deste repositório ou na página do jogo no **itch.io**. Extraia o zip e execute "As Cartas de Fractar.exe".
 
 ## Sobre o projeto
 
